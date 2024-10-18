@@ -42,7 +42,7 @@ const Page = () => {
       </div>
       <div className="flex flex-col bg-clayInnBackground p-5">
         <div className="text-2xl text-clayInnPrimary font-semibold">
-          {capitalizeFirstLetter(locationId)} Venue Information
+          {capitalizeFirstLetter(locationId)} Leads Information
         </div>
       </div>
     </div>
