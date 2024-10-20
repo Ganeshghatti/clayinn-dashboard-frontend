@@ -1,4 +1,8 @@
+import CheckAuth from "@/hoc/checkAuth";
 import "./globals.css";
+import { Suspense } from "react";
+import Loading from "./loading";
+
 
 export const metadata = {
   title: "Clay Inn Dashboard",
@@ -8,7 +12,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="family-poppins">{children}</body>
+      <body className="family-poppins" >
+        <CheckAuth>
+          <Suspense fallback={<Loading />}>
+            {children}
+          </Suspense>
+        </CheckAuth>
+      </body>
     </html>
   );
 }

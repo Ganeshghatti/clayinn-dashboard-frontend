@@ -16,7 +16,7 @@ const withAdmin = (WrappedComponent) => {
       const token = localStorage.getItem("access-token");
       const user = jwt.decode(token);
 
-      const userRole = user.role;
+      const userRole = user?.role;
 
       if (userRole !== "super-admin") {
         router.push("/");

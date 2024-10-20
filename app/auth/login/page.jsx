@@ -8,12 +8,17 @@ import {
 } from "@/components/ui/card";
 
 import LoginForm from "@/components/auth/login-form";
+import Image from "next/image";
+
+import logo from "@/public/logo.png";
 
 const Page = () => {
   return (
-    <Card className="w-full max-w-sm text-clayInnPrimary border-2 border-clayInnPrimary">
-      <CardHeader>
-        <CardTitle className="text-2xl text-center">Welcome Back !!</CardTitle>
+    <Card className="w-full max-w-sm border border-slate-200 shadow-xl">
+      <CardHeader className="space-y-6">
+        <CardTitle className="flex items-center justify-center">
+          <Image src="/logo.png" alt="Clay Inn Logo" width={100} height={100} priority quality={95} />
+        </CardTitle>
         <CardDescription className="text-center">
           Enter your email and password to continue.
         </CardDescription>
