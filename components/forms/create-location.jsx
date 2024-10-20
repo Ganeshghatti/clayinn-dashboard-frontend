@@ -137,7 +137,9 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="location_admin_email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Admin's Email</FormLabel>
+                <FormLabel>
+                  Admin<span>&apos;</span>s Email
+                </FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter admin email"
