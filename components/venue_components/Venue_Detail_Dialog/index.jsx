@@ -12,8 +12,12 @@ import { VenueDeleteAlert } from "./venue_Delete_Alert";
 
 import { BsFillBuildingsFill } from "react-icons/bs";
 import { PiBuildingFill } from "react-icons/pi";
+import { FaMapLocationDot } from "react-icons/fa6";
+import { VenueNewPost } from "../Venue_New_Post";
 
-export function VenueDetailDialog() {
+
+
+export function VenueDetailDialog({ venue, location_id }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,22 +30,24 @@ export function VenueDetailDialog() {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit profile</DialogTitle>
-          <DialogDescription>
-            Make changes to your profile here. Click save when you
-            <span>&apos;</span>re done.
+          <DialogTitle>Venue Details</DialogTitle>
+          <DialogDescription className="hidden">
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-4 py-4">{/* Render Details */}</div>
-        <DialogFooter>
-          <Button className="flex items-center gap-2">
-            <span>
-              <PiBuildingFill size={20} />
-            </span>
-            <span>Update Venue</span>
-          </Button>
-          <VenueDeleteAlert />
-        </DialogFooter>
+        <div className="grid gap-4 py-4">
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-lg flex items-center gap-2"><span><BsFillBuildingsFill size={22} /></span>Name : </p>
+            <p>{venue?.name}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <p className="font-semibold text-lg flex items-center gap-2"><span><FaMapLocationDot size={22} /></span>Location : </p>
+            <p>{venue?.location}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center gap-2">
+          <VenueNewPost venue={venue} action="Update" location_id={location_id} />
+          <VenueDeleteAlert venue={venue} location_id={location_id} />
+        </div>
       </DialogContent>
     </Dialog>
   );

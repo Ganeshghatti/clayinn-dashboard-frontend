@@ -175,7 +175,7 @@ const CreateLocation = ({ location, action, setOpen }) => {
           />
 
           {/* Submit Button */}
-          <Button className="w-full py-5" variant="clayInnPrimary">
+          <Button className="w-full py-5" >
             {action || "Submit"}
           </Button>
         </form>

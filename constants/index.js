@@ -15,15 +15,15 @@ export const SidebarItems = [
     id: 0,
     title: "Dashboard",
     link: "/",
-    icon: <Home className="h-14 w-14" />,
+    icon: <Home size={20}/>,
     isAdmin: "false",
     active: true,
   },
   {
     id: 1,
-    title: "Venues",
-    link: "venues",
-    icon: <Castle className="h-14 w-14" />,
+    title: "Leads",
+    link: "leads",
+    icon: <NotebookTabs size={20}/>,
     isAdmin: "false",
     active: false,
   },
@@ -31,23 +31,15 @@ export const SidebarItems = [
     id: 2,
     title: "Bookings",
     link: "bookings",
-    icon: <Album className="h-14 w-14"  />,
+    icon: <Album size={20}/>,
     isAdmin: "false",
     active: false,
   },
   {
     id: 3,
-    title: "Leads",
-    link: "leads",
-    icon: <NotebookTabs className="h-14 w-14"  />,
-    isAdmin: "false",
-    active: false,
-  },
-  {
-    id: 4,
-    title: "Members",
-    link: "members",
-    icon: <Users className="h-14 w-14"  />,
+    title: "Venues",
+    link: "venues",
+    icon: <Castle size={20}/>,
     isAdmin: "false",
     active: false,
   },
@@ -55,10 +47,20 @@ export const SidebarItems = [
     id: 4,
     title: "Calendar",
     link: "calendar",
-    icon: <Calendar1 className="h-14 w-14"  />,
+    icon: <Calendar1 size={20}/>,
     isAdmin: "false",
     active: false,
   },
+
+  {
+    id: 5,
+    title: "Members",
+    link: "members",
+    icon: <Users size={20}/>,
+    isAdmin: "false",
+    active: false,
+  },
+
 ];
 
 export const LocationItems = [
@@ -78,3 +80,15 @@ export const LocationItems = [
     desc: " Here you can access all the information about Kolkata Location from sales to members",
   },
 ];
+
+// Create New Venue Form Action Inputs
+export const createNewVenueForm_Inputs = [
+  {
+    name: "name",
+    placeholder: "Enter Venue Venue Name",
+  },
+  {
+    name: "location",
+    placeholder: "Enter Venue Location",
+  }
+]
