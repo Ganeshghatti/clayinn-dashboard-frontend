@@ -8,18 +8,23 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
+import { useState } from "react";
 
-import { FaPlus } from "react-icons/fa6";
+import { FaPlus, FaBuilding } from "react-icons/fa6";
 
-export function VenueNewPost() {
+export function VenueNewPost({ action, location_id, venue }) {
+    const [open, setOpen] = useState(false);
+    const venueId = venue?.venue_id;
     return (
         <div>
-            <Dialog>
+            <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button className="flex items-center gap-2">
-                        <span><FaPlus size={20} /></span>
                         <span>
-                            Add New Venue
+                            {venueId ? <FaBuilding /> : <FaPlus />}
+                        </span>
+                        <span className="hidden md:block">
+                            {venue?.venue_id ? "Update Venue" : "Add New Venue"}
                         </span>
                     </Button>
                 </DialogTrigger>
@@ -27,11 +32,10 @@ export function VenueNewPost() {
                     <DialogHeader>
                         <DialogTitle>Add New Venue</DialogTitle>
                         <DialogDescription className="hidden">
-
                         </DialogDescription>
                     </DialogHeader>
                     <div>
-                        <CreateNewVenueForm />
+                        <CreateNewVenueForm action={action} location_id={location_id} setOpen={setOpen} venue={venue} />
                     </div>
                 </DialogContent>
             </Dialog>

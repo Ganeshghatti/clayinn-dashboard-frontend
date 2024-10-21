@@ -21,7 +21,7 @@ export default function Common_Dialog_Create_and_Update({ heading, description, 
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button
-                        className={`${action === "Create" ? "bg-clayInnSecondary text-clayInnPrimary border-2 border-clayInnPrimary hover:bg-clayInnPrimary hover:text-clayInnSecondary" : "bg-green-500 hover:bg-green-600"} rounded-md flex items-center justify-center px-4 py-2`}
+                        className={`${action === "Create" ? " border-2 " : "bg-green-500 hover:bg-green-600"} rounded-md flex items-center justify-center px-4 py-6 `}
                     >
                         {action === "Create" ? <Plus className="w-5 h-4" /> : <FaEdit className="w-5 h-4" />}
                         {heading}
@@ -29,7 +29,7 @@ export default function Common_Dialog_Create_and_Update({ heading, description, 
                 </DialogTrigger>
                 <DialogContent className="family-poppins">
                     <DialogHeader>
-                        <DialogTitle className="text-clayInnPrimary">
+                        <DialogTitle className="">
                             {heading}
                         </DialogTitle>
                         <DialogDescription>

@@ -15,6 +15,7 @@ import Link from "next/link";
 
 import Location_Details from "@/components/Location_Components/Location_details";
 import Common_Dialog_Create_and_Update from "@/components/common_Dialog_Create_and Update";
+import Logout from "@/components/auth/Logout";
 
 // URL From Environment Variable
 const url = process.env.NEXT_PUBLIC_URL;
@@ -60,13 +61,20 @@ const Page = () => {
     fetchData();
   }, []);
 
+
+
   return (
-    <div className="pt-10 min-h-screen p-5 space-y-8 bg-clayInnBackground flex items-center justify-center gap-3 flex-col family-poppins">
-      <h1 className="text-2xl text-center font-semibold text-clayInnPrimary">
-        Access your Hotel Locations
-      </h1>
-      {/* Common Dialog for Create and Update Form*/}
-      <Common_Dialog_Create_and_Update heading="Create a New Location" description="This form will allow you to create a new location for the hotels." action="Create" />
+    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col ">
+      <div className="w-[90vw] md:w-[85vw] flex items-center justify-between border border-slate-200 p-4 rounded-md shadow-sm mt-2 sticky top-0 ">
+        <h1 className="text-2xl text-center font-semibold">
+          Access your Hotel Locations
+        </h1>
+        {/* Common Dialog for Create and Update Form*/}
+        <div className="flex items-center justify-center gap-4">
+          <Common_Dialog_Create_and_Update heading="Create a New Location" description="This form will allow you to create a new location for the hotels." action="Create" />
+          <Logout />
+        </div>
+      </div>
       {/* Display loading, error, or location data */}
       {loading ? (
         <p>Loading locations...</p> // Display loading state
@@ -75,7 +83,7 @@ const Page = () => {
       ) : (
         <div className="flex gap-2 flex-wrap items-center justify-center">
           {locationData?.map((item) => (
-            <div key={item?.loc_id} className="bg-white px-2 py-4 flex rounded-lg shadow-md">
+            <div key={item?.loc_id} className="bg-white px-2 py-4 flex border border-slate-200 rounded-lg shadow-xl">
               <Link href={`/locations/${item?.name.toLowerCase()}`}>
                 <Card className="w-64 h-48 flex items-start justify-start flex-col shadow-none border-none">
                   <CardHeader>
