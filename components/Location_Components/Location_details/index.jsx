@@ -22,6 +22,8 @@ import { MdEmail } from "react-icons/md";
 import Common_Dialog_Create_and_Update from "@/components/common_Dialog_Create_and Update";
 import { useRouter } from "next/navigation";
 
+import { MdDelete } from "react-icons/md";
+
 export default function LocationDetails({ locationId }) {
     const [locationDetails, setLocationDetails] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -94,8 +96,8 @@ export default function LocationDetails({ locationId }) {
         <div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2" onClick={() => onHandleLocationEdit(locationId)}>
-                        <span><TbListDetails size={20} /></span>
+                    <Button className="flex items-center gap-2 bg-clayInnBackground hover:bg-clayInnBackground/80 text-clayInnPrimary rounded-full ring-2 ring-white shadow-xl" onClick={() => onHandleLocationEdit(locationId)}>
+                        <span><TbListDetails size={20} className="animate-pulse transition-all duration-700 ease-linear" /></span>
                         <span>Details</span>
                     </Button>
                 </DialogTrigger>
@@ -131,7 +133,14 @@ export default function LocationDetails({ locationId }) {
                                 <Separator />
                                 <div className="flex items-center justify-end gap-2">
                                     <Common_Dialog_Create_and_Update heading="Update" description="This form will allow you to update location for the hotels." action="Update" location={locationDetails} />
-                                    <Button className="bg-red-600 hover:bg-red-500" onClick={() => onHandleLocationDelete(locationId)}>Delete</Button>
+                                    <Button className="bg-red-600 hover:bg-red-500 rounded-full shadow-xl flex items-center gap-2" onClick={() => onHandleLocationDelete(locationId)}>
+                                        <span>
+                                            <MdDelete size={20} />
+                                        </span>
+                                        <span>
+                                            Delete
+                                        </span>
+                                    </Button>
                                 </div>
                             </div>
                         ) : (

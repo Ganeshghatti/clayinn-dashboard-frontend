@@ -87,8 +87,30 @@ export const createNewVenueForm_Inputs = [
     name: "name",
     placeholder: "Enter Venue Venue Name",
   },
-  {
-    name: "location",
-    placeholder: "Enter Venue Location",
-  }
+  // {
+  //   name: "location",
+  //   placeholder: "Enter Venue Location",
+  // }
 ]
+
+
+// Create New Member Form Action Inputs
+export const createNewMemberForm_Inputs = [
+  {
+    name: "name",
+    placeholder: "Enter Member Name",
+  },
+  {
+    name: "email",
+    placeholder: "Enter Member Email",
+  },
+  {
+    name: "password",
+    placeholder: "Enter Member Name",
+  },
+  {
+    name: "mobile",
+    placeholder: "Enter Member Name",
+  },
+] 
+

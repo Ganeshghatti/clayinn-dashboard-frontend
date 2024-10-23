@@ -21,7 +21,7 @@ export function VenueDetailDialog({ venue, location_id }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="outline" className="flex items-center gap-2">
+        <Button className="flex items-center gap-2 bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80 rounded-full">
           <span>
             <BsFillBuildingsFill />
           </span>
@@ -30,7 +30,7 @@ export function VenueDetailDialog({ venue, location_id }) {
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Venue Details</DialogTitle>
+          <DialogTitle className="uppercase text-center text-clayInnPrimary">Venue Details</DialogTitle>
           <DialogDescription className="hidden">
           </DialogDescription>
         </DialogHeader>

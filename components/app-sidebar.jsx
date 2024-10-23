@@ -30,11 +30,10 @@ export function AppSidebar() {
     const { locationId } = useParams()
     const pathname = usePathname()
     return (
-        <Sidebar variant="floating" collapsible="icon" className="h-[100]">
-            <SidebarContent className="overflow-hidden   shadow-xl">
+        <Sidebar variant="floating" collapsible="icon" className="bg-clayInnBackground ">
+            <SidebarContent className="overflow-hidden shadow-xl bg-clayInnPrimary shadow-clayInnBackground">
                 <SidebarGroup className="space-y-10">
                     <SidebarGroupLabel className="flex justify-center items-center mt-10">
-
                         <Image src="/logo.png" alt="logo" width={100} height={100} quality={100} priority style={{ width: "auto", height: "auto" }} />
 
                     </SidebarGroupLabel>
@@ -46,7 +45,7 @@ export function AppSidebar() {
                             {SidebarItems.map((item, index) => (
                                 <SidebarMenuItem key={index}>
                                     <SidebarMenuButton asChild>
-                                        <Link href={`/locations/${locationId}/${item.link}`} className={`flex items-center gap-4 py-6 transition-all duration-300 ease-linear ${pathname.includes(item.link) && !item.active ? "bg-black text-white ml-2 pl-6 rounded-l-full" : ""}`}>
+                                        <Link href={`/locations/${locationId}/${item.link}`} className={`flex items-center gap-4 py-6 text-clayInnBackground hover:bg-red-500 transition-all duration-300 ease-linear ${pathname.includes(item.link) && !item.active ? "bg-clayInnBackground text-clayInnPrimary ml-2 pl-6 rounded-l-full" : ""}`}>
                                             <span>{item?.icon}</span>
                                             <span className="text-base font-normal">{item?.title}</span>
                                         </Link>
@@ -56,8 +55,14 @@ export function AppSidebar() {
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
+                <div className="md:hidden">
+                    <Logout />
+                </div>
             </SidebarContent>
-            <Logout />
+            <div className="hidden md:block">
+
+                <Logout />
+            </div>
         </Sidebar >
     )
 }

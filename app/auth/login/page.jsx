@@ -19,7 +19,7 @@ const Page = () => {
         <CardTitle className="flex items-center justify-center">
           <Image src="/logo.png" alt="Clay Inn Logo" width={100} height={100} priority quality={95} style={{ width: "auto", height: "auto" }} />
         </CardTitle>
-        <CardDescription className="text-center">
+        <CardDescription className="text-center text-clayInnPrimary text-base">
           Enter your email and password to continue.
         </CardDescription>
       </CardHeader>

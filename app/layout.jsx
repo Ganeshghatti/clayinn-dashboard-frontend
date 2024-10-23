@@ -3,13 +3,15 @@ import "./globals.css";
 import { Suspense } from "react";
 import Loading from "./loading";
 
-import { Roboto_Condensed } from "next/font/google"
+import { Toaster } from "@/components/ui/toaster"
+
+import { Poppins } from "next/font/google"
 import StoreProvider from "./redux/store/storeProvider";
 
-const roboto = Roboto_Condensed({
+const poppins = Poppins({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
-  variable: "--font-roboto",
+  variable: "--font-poppins",
 })
 
 
@@ -22,10 +24,11 @@ export default function RootLayout({ children }) {
   return (
     <StoreProvider>
       <html lang="en">
-        <body className={`${roboto.variable} family-poppins`} >
+        <body className={`${poppins.variable} family-poppins`} >
           <CheckAuth>
             <Suspense fallback={<Loading />}>
               {children}
+              <Toaster />
             </Suspense>
           </CheckAuth>
         </body>

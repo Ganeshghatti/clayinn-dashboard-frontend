@@ -36,7 +36,7 @@ export function VenueDeleteAlert({ venue, location_id }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-red-600 text-white hover:bg-red-500">
+                <Button className="bg-red-600 text-white hover:bg-red-500 rounded-full">
                     <span>
                         <FaBuildingCircleXmark size={20} />
                     </span>
@@ -47,15 +47,15 @@ export function VenueDeleteAlert({ venue, location_id }) {
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogTitle className="text-red-600 capitalize">Are you absolutely sure?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This action cannot be undone. This will permanently delete your Venue
                         and remove your data from our servers.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onHandleDelete_Venue}>Continue</AlertDialogAction>
+                    <AlertDialogCancel className="bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80 rounded-full">Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={onHandleDelete_Venue} className="bg-red-600 text-white hover:bg-red-500 rounded-full">Continue</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>

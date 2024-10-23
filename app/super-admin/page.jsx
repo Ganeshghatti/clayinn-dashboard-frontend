@@ -17,6 +17,9 @@ import Location_Details from "@/components/Location_Components/Location_details"
 import Common_Dialog_Create_and_Update from "@/components/common_Dialog_Create_and Update";
 import Logout from "@/components/auth/Logout";
 
+import { FaHotel } from "react-icons/fa6";
+
+import background from "@/public/pattern.svg";
 // URL From Environment Variable
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -64,15 +67,20 @@ const Page = () => {
 
 
   return (
-    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col ">
-      <div className="w-[90vw] md:w-[85vw] flex items-center justify-between border border-slate-200 p-4 rounded-md shadow-sm mt-2 sticky top-0 ">
-        <h1 className="text-2xl text-center font-semibold">
-          Access your Hotel Locations
+    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative">
+      <div className="w-[90vw] md:w-[85vw] flex items-center max-md:flex-col gap-4 justify-between p-4 mt-2 absolute z-10 bg-clayInnBackground sticky top-0 border-b border-clayInnPrimary">
+        <h1 className="flex items-center justify-center gap-2 text-base md:text-2xl text-center font-semibold text-clayInnPrimary uppercase">
+          <span>
+            <FaHotel />
+          </span>
+          <span>
+            Access your Hotel all Locations
+          </span>
         </h1>
         {/* Common Dialog for Create and Update Form*/}
-        <div className="flex items-center justify-center gap-4">
+        <div className="flex items-center justify-center gap-2">
           <Common_Dialog_Create_and_Update heading="Create a New Location" description="This form will allow you to create a new location for the hotels." action="Create" />
-          <Logout />
+          <Logout className="rounded-full bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnBackground hover:text-clayInnPrimary hover:border-clayInnPrimary border-clayInnBackground border-2 transition-all duration-300 ease-linear" />
         </div>
       </div>
       {/* Display loading, error, or location data */}
@@ -83,12 +91,17 @@ const Page = () => {
       ) : (
         <div className="flex gap-2 flex-wrap items-center justify-center">
           {locationData?.map((item) => (
-            <div key={item?.loc_id} className="bg-white px-2 py-4 flex border border-slate-200 rounded-lg shadow-xl">
+
+            <div key={item?.loc_id} className="px-2 py-4 flex border border-gray-300 rounded-lg shadow-2xl scale-100 hover:scale-95 transition-all duration-300 ease-linear" style={{
+              backgroundImage: `url(${background.src})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+            }}>
               <Link href={`/locations/${item?.name.toLowerCase()}`}>
-                <Card className="w-64 h-48 flex items-start justify-start flex-col shadow-none border-none">
+                <Card className="md:w-64 md:h-40 flex items-start justify-start flex-col shadow-none border-none bg-transparent" >
                   <CardHeader>
-                    <CardTitle className="text-lg">{item?.name}</CardTitle>
-                    <CardDescription className="text-sm">{item?.address}</CardDescription>
+                    <CardTitle className="font-semibold text-lg text-clayInnPrimary">{item?.name.toUpperCase()}</CardTitle>
+                    <CardDescription className="text-sm font-semibold text-white py-10 font-normal">{item?.address}</CardDescription>
                   </CardHeader>
                 </Card>
               </Link>
@@ -99,8 +112,9 @@ const Page = () => {
             </div>
           ))}
         </div>
-      )}
-    </div>
+      )
+      }
+    </div >
   );
 };
 
