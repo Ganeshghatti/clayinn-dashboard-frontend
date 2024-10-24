@@ -67,8 +67,14 @@ const Page = () => {
 
 
   return (
-    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative">
-      <div className="w-[90vw] md:w-[85vw] flex items-center max-md:flex-col gap-4 justify-between p-4 mt-2 absolute z-10 bg-clayInnBackground sticky top-0 border-b border-clayInnPrimary">
+    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative" style={{
+      backgroundImage: `url(${background.src})`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      height: "100vh",
+      width: "100%",
+    }}>
+      <div className="w-[90vw] md:w-[85vw] flex items-center max-md:flex-col gap-4 justify-between p-4 mt-2 absolute z-10 bg-clayInnBackground sticky top-0 border rounded-3xl shadow-2xl border-clayInnPrimary">
         <h1 className="flex items-center justify-center gap-2 text-base md:text-2xl text-center font-semibold text-clayInnPrimary uppercase">
           <span>
             <FaHotel />
@@ -98,7 +104,7 @@ const Page = () => {
               backgroundPosition: 'center',
             }}>
               <Link href={`/locations/${item?.name.toLowerCase()}`}>
-                <Card className="md:w-64 md:h-40 flex items-start justify-start flex-col shadow-none border-none bg-transparent" >
+                <Card className="w-56 h-40 md:w-64 md:h-40 flex items-start justify-start flex-col shadow-none border-none bg-transparent" >
                   <CardHeader>
                     <CardTitle className="font-semibold text-lg text-clayInnPrimary">{item?.name.toUpperCase()}</CardTitle>
                     <CardDescription className="text-sm font-semibold text-white py-10 font-normal">{item?.address}</CardDescription>

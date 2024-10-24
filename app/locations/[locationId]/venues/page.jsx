@@ -77,7 +77,7 @@ export default function Page() {
 
       {/* Venue Cards */}
       <div className="">
-        <div className="flex flex-wrap gap-4 max-md:items-center max-md:justify-center">
+        <div className="flex items-center justify-center flex-wrap gap-4 max-md:items-center max-md:justify-center">
           {venues.length > 0 ? (
             venues.map((venue, index) => (
               <VenueCard key={index} venue={venue} location_id={location_id} />

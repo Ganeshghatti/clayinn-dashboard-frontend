@@ -1,11 +1,8 @@
-"use client"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
     Form,
     FormControl,
@@ -14,17 +11,16 @@ import {
     FormItem,
     FormLabel,
     FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { createNewMemberForm_Inputs } from "@/constants"
-
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { createNewMemberForm_Inputs } from "@/constants";
 
 import { FaPlus } from "react-icons/fa6";
 import { FaUserEdit } from "react-icons/fa";
-import { useDispatch } from "react-redux"
-import { useToast } from "@/hooks/use-toast"
-import { useRouter } from "next/navigation"
-import { createMember_Actions, updateMember_Actions } from "@/app/redux/memberSlice"
+import { useDispatch } from "react-redux";
+import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
+import { createMember_Actions, updateMember_Actions } from "@/app/redux/memberSlice";
 
 const formSchema = z.object({
     name: z.string().min(4).max(50),
@@ -48,20 +44,12 @@ const formSchema = z.object({
         .string()
         .regex(/^\d+$/, { message: "Mobile number must contain only digits" })
         .length(10, { message: "Mobile number must be exactly 10 digits" })
-
-
-})
-
-
-
-
+});
 
 export default function Create_New_Member({ location_id, action, setOpen, member }) {
-    const dispatch = useDispatch()
+    const dispatch = useDispatch();
     const { toast } = useToast();
     const router = useRouter();
-
-
 
     // 1. Define your form.
     const form = useForm({
@@ -69,61 +57,64 @@ export default function Create_New_Member({ location_id, action, setOpen, member
         defaultValues: {
             name: member?.name || "",
             email: member?.email || "",
-            password: "",
+            password: action === "update" ? "dummyPassword@123" : "",
             mobile: member?.mobile || "",
         },
-    })
+    });
 
     // 2. Define a submit handler.
     async function onSubmit(values) {
         try {
             if (action === "Create") {
-                await dispatch(createMember_Actions({ data: values, location_id }))
+                await dispatch(createMember_Actions({ data: values, location_id }));
             } else {
-                await dispatch(updateMember_Actions({ member_id: member.user_id, data: values, location_id }))
+                await dispatch(updateMember_Actions({ member_id: member.user_id, data: values, location_id }));
             }
             toast({
-                title: `${action === "Create" ? "New Member Created" : "Member Updated"} Successfully !`,
-            })
+                title: `${action === "Create" ? "New Member Created" : "Member Updated"} Successfully!`,
+            });
             form.reset();
             setOpen(false);
             router.refresh();
-
         } catch (error) {
             console.log("Error creating/updating member:", error);
             toast({
                 variant: "destructive",
-                title: "Some thing went wrong !",
-                description: "Please try again or contact support . . . !",
-            })
+                title: "Something went wrong!",
+                description: "Please try again or contact support.",
+            });
         }
     }
+
     return (
         <div className="w-full">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {
-                        createNewMemberForm_Inputs.map((eachInput, index) => (
-                            <FormField
-                                key={index}
-                                control={form.control}
-                                name={eachInput.name}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel className="capitalize text-clayInnPrimary">{eachInput.name}</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder={eachInput.placeholder} {...field} />
-                                        </FormControl>
-                                        <FormDescription className="hidden">
-                                            This is your public display name.
-                                        </FormDescription>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        ))
+                    {createNewMemberForm_Inputs.map((eachInput, index) => (
+                        <FormField
+                            key={index}
+                            control={form.control}
+                            name={eachInput.name}
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel className={`${action === "update" && eachInput.name === "password" ? "hidden" : "visible"} capitalize text-clayInnPrimary`}>{eachInput.name}</FormLabel>
+                                    <FormControl>
+                                        <Input
+                                            placeholder={eachInput.placeholder}
+                                            {...field}
+                                            disabled={action === "update" && eachInput.name === "email"}
+                                            className={`${action === "update" && eachInput.name === "password" ? "hidden" : "visible"} `}
+                                        />
+                                    </FormControl>
+                                    <FormDescription className="hidden">
+                                        This is your public display name.
+                                    </FormDescription>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    ))}
 
-                    }
                     <div className="flex items-end justify-end">
                         <Button type="submit" className={`${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80" : "bg-green-600  hover:bg-green-500 text-white"} rounded-full flex items-center gap-2`}>
                             <span>
@@ -136,6 +127,6 @@ export default function Create_New_Member({ location_id, action, setOpen, member
                     </div>
                 </form>
             </Form>
-        </div >
-    )
-}   
+        </div>
+    );
+}

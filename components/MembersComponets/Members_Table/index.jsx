@@ -41,32 +41,32 @@ export default function Members_Table({ location_id, members = [] }) {
     const [rowSelection, setRowSelection] = React.useState({});
 
     const columns = [
-        {
-            id: "select",
-            header: ({ table }) => (
-                <Checkbox
-                    checked={
-                        table.getIsAllPageRowsSelected() ||
-                        (table.getIsSomePageRowsSelected() && "indeterminate")
-                    }
-                    onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-                    aria-label="Select all"
-                />
-            ),
-            cell: ({ row }) => (
-                <Checkbox
-                    checked={row.getIsSelected()}
-                    onCheckedChange={(value) => row.toggleSelected(!!value)}
-                    aria-label="Select row"
-                />
-            ),
-            enableSorting: false,
-            enableHiding: false,
-        },
+        // {
+        //     id: "select",
+        //     header: ({ table }) => (
+        //         <Checkbox
+        //             checked={
+        //                 table.getIsAllPageRowsSelected() ||
+        //                 (table.getIsSomePageRowsSelected() && "indeterminate")
+        //             }
+        //             onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        //             aria-label="Select all"
+        //         />
+        //     ),
+        //     cell: ({ row }) => (
+        //         <Checkbox
+        //             checked={row.getIsSelected()}
+        //             onCheckedChange={(value) => row.toggleSelected(!!value)}
+        //             aria-label="Select row"
+        //         />
+        //     ),
+        //     enableSorting: false,
+        //     enableHiding: false,
+        // },
         {
             accessorKey: "name",
             header: "Name",
-            cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+            cell: ({ row }) => <div className="capitalize">{row?.getValue("name")}</div>,
         },
         {
             accessorKey: "email",
@@ -227,7 +227,7 @@ export default function Members_Table({ location_id, members = [] }) {
                     {table.getFilteredSelectedRowModel().rows?.length} of{" "}
                     {table.getFilteredRowModel().rows?.length} row(s) selected.
                 </div>
-                <div className="space-x-2">
+                <div className="space-x-2 hidden">
                     <Button
                         className="bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnPrimary/80"
                         size="sm"
