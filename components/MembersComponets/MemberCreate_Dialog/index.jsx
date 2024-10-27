@@ -25,9 +25,10 @@ import { useState } from "react";
 export default function MemberCreate_Dialog({ location_id, action }) {
     const [open, setOpen] = useState(false)
     return (
+
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className={`${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80" : "bg-green-500  text-white"} rounded-full flex items-center gap-2`}>
+                <Button className={`${action === "Create" ? "" : "bg-green-500  text-white"}  flex items-center gap-2`}>
                     <span>
                         {action === "Create" ? <FaPlus size={20} /> : <FaUserEdit size={20} />}
                     </span>
@@ -36,7 +37,7 @@ export default function MemberCreate_Dialog({ location_id, action }) {
                     </span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="">
                 <DialogHeader>
                     <DialogTitle className="text-center text-clayInnPrimary uppercase">
                         {action === "Create" ? "Add New Member" : "Update Member"}
@@ -45,11 +46,12 @@ export default function MemberCreate_Dialog({ location_id, action }) {
                         Anyone who has this link will be able to view this.
                     </DialogDescription>
                 </DialogHeader>
-                <div className="flex items-center space-x-2">
+                <div className="">
                     {/* Create New Member Form */}
                     <Create_New_Member location_id={location_id} action={action} setOpen={setOpen} />
                 </div>
             </DialogContent>
         </Dialog>
+
     )
 }

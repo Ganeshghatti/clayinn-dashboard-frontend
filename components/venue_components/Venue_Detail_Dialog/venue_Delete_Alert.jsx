@@ -36,7 +36,7 @@ export function VenueDeleteAlert({ venue, location_id }) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button className="bg-red-600 text-white hover:bg-red-500 rounded-full">
+                <Button className="bg-red-600 text-white hover:bg-red-500 ">
                     <span>
                         <FaBuildingCircleXmark size={20} />
                     </span>

@@ -11,8 +11,11 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
+import { BiSort } from "react-icons/bi";
+
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+// import { Checkbox } from "@/components/ui/checkbox";
+
 import {
     DropdownMenu,
     DropdownMenuCheckboxItem,
@@ -69,6 +72,11 @@ export default function Members_Table({ location_id, members = [] }) {
             cell: ({ row }) => <div className="capitalize">{row?.getValue("name")}</div>,
         },
         {
+            accessorKey: "role",
+            header: "Role",
+            cell: ({ row }) => <div className="capitalize">{row?.getValue("role")}</div>,
+        },
+        {
             accessorKey: "email",
             header: ({ column }) => (
                 <Button
@@ -88,19 +96,20 @@ export default function Members_Table({ location_id, members = [] }) {
         },
         {
             id: "actions",
+            header: "Actions",
             enableHiding: false,
             cell: ({ row }) => {
                 const member = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 hover:bg-clayInnPrimary/10 rounded-full">
+                            <Button variant="ghost" className="h-8 w-8 p-0">
                                 <span className="sr-only">Open menu</span>
                                 <MoreHorizontal className="h-4 w-4" />
                             </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="center" className="bg-clayInnPrimary text-clayInnBackground flex flex-col items-center">
-                            <DropdownMenuLabel className="bg-clayInnPrimary text-clayInnBackground text-base">Actions</DropdownMenuLabel>
+                        <DropdownMenuContent align="center" className="flex flex-col items-center">
+                            <DropdownMenuLabel className="text-base hidden">Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 className="flex items-center justify-center"
@@ -144,23 +153,23 @@ export default function Members_Table({ location_id, members = [] }) {
     });
 
     return (
-        <div className="w-[80vw] m-auto  mt-10 bg-clayInnBackground px-5 border border-clayInnPrimary/50 rounded-md text-clayInnPrimary shadow-xl">
-            <div className="flex items-center py-4">
+        <div className="w-[80vw] m-auto  mt-10">
+            <div className="flex items-center py-4 gap-4">
                 <Input
                     placeholder="Filter by email..."
                     value={(table.getColumn("email")?.getFilterValue()) ?? ""}
                     onChange={(event) =>
                         table.getColumn("email")?.setFilterValue(event.target.value)
                     }
-                    className="max-w-sm border border-clayInnPrimary text-base text-clayInnPrimary rounded-md placeholder:text-clayInnPrimary"
+                    className="max-w-sm "
                 />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button className="ml-auto bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnPrimary/80">
-                            Columns <ChevronDown className="ml-2 h-4 w-4" />
+                        <Button className="">
+                            <span><BiSort size={20} /></span>  Filter <ChevronDown className="ml-2 h-4 w-4" />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-clayInnPrimary text-clayInnBackground">
+                    <DropdownMenuContent align="end" className="">
                         {table
                             .getAllColumns()
                             .filter((column) => column.getCanHide())
@@ -179,13 +188,13 @@ export default function Members_Table({ location_id, members = [] }) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div className="rounded-md border border-clayInnPrimary/30 shadow-md">
+            <div className="">
                 <Table>
                     <TableHeader >
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id} className="text-text-clayInnPrimary border-b border-clayInnPrimary/30 hover:bg-clayInnPrimary/10 transition-all duration-300">
+                                    <TableHead key={header.id} className="">
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -201,7 +210,7 @@ export default function Members_Table({ location_id, members = [] }) {
                         {table?.getRowModel().rows?.length ? (
                             table?.getRowModel().rows.map((row) => (
                                 <TableRow
-                                    className="hover:bg-clayInnPrimary/10 border-b border-clayInnPrimary/30 transition-all duration-300"
+                                    className=""
                                     key={row.id}
                                     data-state={row.getIsSelected() && "selected"}
                                 >
@@ -227,9 +236,9 @@ export default function Members_Table({ location_id, members = [] }) {
                     {table.getFilteredSelectedRowModel().rows?.length} of{" "}
                     {table.getFilteredRowModel().rows?.length} row(s) selected.
                 </div>
-                <div className="space-x-2 hidden">
+                <div className="space-x-2">
                     <Button
-                        className="bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnPrimary/80"
+                        className=""
                         size="sm"
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
@@ -237,7 +246,7 @@ export default function Members_Table({ location_id, members = [] }) {
                         Previous
                     </Button>
                     <Button
-                        className="bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnPrimary/80"
+                        className=""
                         variant="outline"
                         size="sm"
                         onClick={() => table.nextPage()}

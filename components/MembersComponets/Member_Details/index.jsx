@@ -35,7 +35,7 @@ export default function Member_Details({ member, location_id }) {
         <div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button className="flex items-center gap-2 hover:bg-clayInnBackground/10 bg-clayInnPrimary text-clayInnBackground hover:text-clayInnBackground" variant="ghost">
+                    <Button className="flex items-center gap-2" variant="ghost">
                         <span><TbListDetails size={20} /></span>
                         <span>
                             Details

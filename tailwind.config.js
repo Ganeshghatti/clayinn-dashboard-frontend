@@ -11,6 +11,13 @@ module.exports = {
       colors: {
         clayInnPrimary: "#4f371b",
         clayInnBackground: "#d4c5a3 ",
+        sidebarBackground: "#624E2A ",
+        rightSidebarBackground: "#F0F2F1",
+        mainBackground: "#F0F2F1",
+        mainText: "#434242",
+        corn: "#B18023",
+        cardBg: "#e6d5bc",
+        cardBorder: "#c7a26b",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",

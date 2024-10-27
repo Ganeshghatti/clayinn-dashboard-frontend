@@ -1,5 +1,7 @@
 "use client";
 
+import "./styles.css";
+
 import {
   Card,
   CardDescription,
@@ -19,7 +21,11 @@ import Logout from "@/components/auth/Logout";
 
 import { FaHotel } from "react-icons/fa6";
 
-import background from "@/public/pattern.svg";
+import logo1 from "@/public/logo1.png";
+
+import Image from "next/image";
+
+
 // URL From Environment Variable
 const url = process.env.NEXT_PUBLIC_URL;
 
@@ -67,61 +73,80 @@ const Page = () => {
 
 
   return (
-    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative" style={{
-      backgroundImage: `url(${background.src})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      height: "100vh",
-      width: "100%",
-    }}>
-      <div className="w-[90vw] md:w-[85vw] flex items-center max-md:flex-col gap-4 justify-between p-4 mt-2 absolute z-10 bg-clayInnBackground sticky top-0 border rounded-3xl shadow-2xl border-clayInnPrimary">
-        <h1 className="flex items-center justify-center gap-2 text-base md:text-2xl text-center font-semibold text-clayInnPrimary uppercase">
-          <span>
-            <FaHotel />
-          </span>
-          <span>
-            Access your Hotel all Locations
-          </span>
-        </h1>
+    <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative bg-mainBackground relative z-50">
+
+      {/* ---------------------------Header Section---------------------------- */}
+      <div className="flex flex-col items-end justify-between w-full space-y-8">
+        <div className="flex items-center justify-center gap-2 w-full">
+          <h1 className="flex items-center justify-center gap-2 text-lg sm:text-xl md:text-3xl font-semibold text-mainText">
+            <span>
+              <FaHotel />
+            </span>
+            <span>
+              Access your Hotel all Locations
+            </span>
+          </h1>
+        </div>
         {/* Common Dialog for Create and Update Form*/}
         <div className="flex items-center justify-center gap-2">
           <Common_Dialog_Create_and_Update heading="Create a New Location" description="This form will allow you to create a new location for the hotels." action="Create" />
-          <Logout className="rounded-full bg-clayInnPrimary text-clayInnBackground hover:bg-clayInnBackground hover:text-clayInnPrimary hover:border-clayInnPrimary border-clayInnBackground border-2 transition-all duration-300 ease-linear" />
+          <Logout className="" />
         </div>
       </div>
+      {/* --------------------------------------------------------------------- */}
       {/* Display loading, error, or location data */}
       {loading ? (
         <p>Loading locations...</p> // Display loading state
       ) : error ? (
         <p className="text-red-500">{error}</p> // Display error message if there's an error
       ) : (
-        <div className="flex gap-2 flex-wrap items-center justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           {locationData?.map((item) => (
-
-            <div key={item?.loc_id} className="px-2 py-4 flex border border-gray-300 rounded-lg shadow-2xl scale-100 hover:scale-95 transition-all duration-300 ease-linear" style={{
-              backgroundImage: `url(${background.src})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-            }}>
+            <div key={item?.loc_id} className="space-y-8 w-[300px] h-[260px]  flex flex-col justify-between border border-clayInnBackground/50 rounded-md pb-1  pr-4 shadow-xl shadow-clayInnBackground/20 scale-95 hover:scale-100 transition-all duration-300 ease-linear hover:ring-2 hover:ring-clayInnBackground/50" >
               <Link href={`/locations/${item?.name.toLowerCase()}`}>
-                <Card className="w-56 h-40 md:w-64 md:h-40 flex items-start justify-start flex-col shadow-none border-none bg-transparent" >
-                  <CardHeader>
-                    <CardTitle className="font-semibold text-lg text-clayInnPrimary">{item?.name.toUpperCase()}</CardTitle>
-                    <CardDescription className="text-sm font-semibold text-white py-10 font-normal">{item?.address}</CardDescription>
-                  </CardHeader>
-                </Card>
+                <div className="space-y-6">
+                  <div className="bg-[#1B160D] text-clayInnBackground h-16 text-lg font-semibold flex items-center justify-center rounded-br-[40px]">
+                    <h1 className="capitalize tracking-wide">{item?.name}</h1>
+                  </div>
+                  <div className="bg-[#D4C7A3] text-[#523517] text-sm font-semibold h-24 flex items-center justify-center px-2 rounded-r-3xl">
+                    <h1>
+                      {item?.address}
+                    </h1>
+                  </div>
+                </div>
               </Link>
-              <div className="flex items-end justify-end">
-                {/* Pass locationId to Location_Details */}
-                <Location_Details locationId={item?.loc_id} />
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <Location_Details locationId={item?.loc_id} />
+                </div>
+                <div>
+                  <Image src={logo1} alt="background" width={50} height={50} quality={100} />
+                </div>
               </div>
             </div>
           ))}
         </div>
       )
       }
+      <div className="absolute w-72 h-72 bg-clayInnBackground/50 -z-50 top-0 left-0 rounded-full blur-3xl hidden lg:block"></div>
+      <div className="absolute w-72 h-72 bg-clayInnBackground -z-50 bottom-0 right-0 rounded-full blur-3xl hidden lg:block"></div>
     </div >
   );
 };
 
 export default withAdmin(Page);
+
+
+
+// <div className="">
+// {/* Pass locationId to Location_Details */}
+// 
+// </div>
+
+
+{/* <Card className="p-0" >
+<CardHeader>
+  <CardTitle className="bg-black text-white">{item?.name.toUpperCase()}</CardTitle>
+  <CardDescription className="">{item?.address}</CardDescription>
+</CardHeader>
+</Card> */}

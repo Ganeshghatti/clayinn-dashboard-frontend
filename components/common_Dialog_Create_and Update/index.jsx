@@ -22,10 +22,10 @@ export default function Common_Dialog_Create_and_Update({ heading, description, 
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
                     <Button
-                        className={`${action === "Create" ? "border-2 border-clayInnPrimary rounded-md flex items-center justify-center px-4 py-6 rounded-full bg-clayInnPrimary border-clayInnBackground hover:bg-clayInnBackground group hover:border-clayInnPrimary transition-all duration-300 ease-linear" : "bg-green-500 hover:bg-green-600 rounded-full shadow-xl"}`}
+                        className={`${action === "Create" ? " flex items-center justify-center px-4 py-6   transition-all duration-300 ease-linear" : "bg-green-500 hover:bg-green-600"}`}
                     >
-                        {action === "Create" ? <Plus className="w-5 h-4  text-clayInnBackground group-hover:text-clayInnPrimary  animate-pulse transition-all duration-1000 delay-100 ease-linear" /> : <FaEdit className="w-5 h-4 text-clayInnBackground text-white" />}
-                        <span className={`${action === "Create" ? "text-clayInnBackground group-hover:text-clayInnPrimary  font-semibold uppercase transition-all duration-300" : "text-white"}`}>
+                        {action === "Create" ? <Plus className="w-5 h-4    animate-pulse transition-all duration-1000 delay-100 ease-linear" /> : <FaEdit className="w-5 h-4 text-clayInnBackground text-white" />}
+                        <span className={`hidden md:block ${action === "Create" ? " group-hover:text-clayInnPrimary  font-semibold uppercase transition-all duration-300" : "text-white"}`}>
                             {heading}
                         </span>
                     </Button>

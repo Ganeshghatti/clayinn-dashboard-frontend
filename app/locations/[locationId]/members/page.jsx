@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { SidebarTrigger } from "@/components/ui/sidebar";
+
 
 import { useDispatch, useSelector } from "react-redux";
 import { fetchLocations_Actions } from "@/app/redux/locationsSlice";
@@ -10,6 +10,9 @@ import { fetchAll_Members_Actions } from "@/app/redux/memberSlice";
 import MemberCreate_Dialog from "@/components/MembersComponets/MemberCreate_Dialog";
 
 import Members_Table from "@/components/MembersComponets/Members_Table";
+
+import { FaChevronRight } from "react-icons/fa";
+import Footer from "@/components/Footer";
 
 export default function Page() {
 
@@ -49,25 +52,31 @@ export default function Page() {
 
 
     return (
-        <div>
+        <div className="flex flex-col gap-4 px-2 h-screen">
             {/* Header section */}
-            <div className="w-[95vw] m-auto md:w-[80vw] flex items-center justify-between p-4 rounded-lg shadow-sm mt-2 sticky top-0 bg-clayInnPrimary">
-                <div className="bg-clayInnBackground text-clayInnPrimary rounded-full py-2 px-2">
-                    <SidebarTrigger className="hover:bg-clayInnBackground hover:text-clayInnPrimary hover:animate-pulse transition-all duration-300 ease-linear" />
+            <div className="mt-4 flex items-center justify-between px-5">
+                <div>
+                    <h1 className="flex items-center justify-start text-sm sm:text-xl md:text-2xl font-bold text-mainText capitalize">
+                        <span className="text-mainText/60">Clay Inn Hotels</span>
+                        <span><FaChevronRight /></span>
+                        <span>
+                            {locationId} Team
+                        </span>
+                    </h1>
                 </div>
-                <h1 className="lg:text-xl text-base text-center uppercase font-semibold text-clayInnBackground">
-                    {locationId} Members Page
-                </h1>
-                <div className="flex items-center justify-between gap-2">
+                <div className="">
                     <MemberCreate_Dialog location_id={location_id} action="Create" />
                 </div>
             </div>
-            <div className="flex flex-wrap">
+            <div className="flex-1">
                 {/* {
                     members.length > 0 ? members.map((member, index) => (
                     )) : <p>No members found for this location.</p>
                 } */}
                 <Members_Table location_id={location_id} members={members} />
+            </div>
+            <div>
+                <Footer content={`${locationId} Team`} />
             </div>
         </div>
     );

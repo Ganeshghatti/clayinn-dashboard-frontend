@@ -11,9 +11,9 @@ import {
 import { VenueDeleteAlert } from "./venue_Delete_Alert";
 
 import { BsFillBuildingsFill } from "react-icons/bs";
-import { PiBuildingFill } from "react-icons/pi";
 import { FaMapLocationDot } from "react-icons/fa6";
 import { VenueNewPost } from "../Venue_New_Post";
+import { CiMenuKebab } from "react-icons/ci";
 
 
 
@@ -21,11 +21,8 @@ export function VenueDetailDialog({ venue, location_id }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2 bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80 rounded-full">
-          <span>
-            <BsFillBuildingsFill />
-          </span>
-          <span>Venue Details</span>
+        <Button className="hover:bg-transparent" variant="ghost" >
+          <CiMenuKebab size={22} />
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

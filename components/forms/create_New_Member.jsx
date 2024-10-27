@@ -97,7 +97,7 @@ export default function Create_New_Member({ location_id, action, setOpen, member
                             name={eachInput.name}
                             render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel className={`${action === "update" && eachInput.name === "password" ? "hidden" : "visible"} capitalize text-clayInnPrimary`}>{eachInput.name}</FormLabel>
+                                    <FormLabel className={`${action === "update" && eachInput.name === "password" ? "hidden" : "visible"} capitalize`}>{eachInput.name}</FormLabel>
                                     <FormControl>
                                         <Input
                                             placeholder={eachInput.placeholder}
@@ -116,7 +116,7 @@ export default function Create_New_Member({ location_id, action, setOpen, member
                     ))}
 
                     <div className="flex items-end justify-end">
-                        <Button type="submit" className={`${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80" : "bg-green-600  hover:bg-green-500 text-white"} rounded-full flex items-center gap-2`}>
+                        <Button type="submit" className={`${action === "Create" ? "" : "bg-green-600  hover:bg-green-500 text-white"} flex items-center gap-2`}>
                             <span>
                                 {action === "Create" ? <FaPlus size={20} /> : <FaUserEdit size={20} />}
                             </span>

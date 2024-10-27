@@ -19,7 +19,7 @@ export function VenueNewPost({ action, location_id, venue }) {
         <div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button className={`flex items-center gap-2 ${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80" : "bg-green-500 hover:bg-green-500/80 "} rounded-full`}>
+                    <Button className={`flex items-center gap-2 ${action === "Create" ? "" : "bg-green-500 hover:bg-green-500/80 "}`}>
                         <span>
                             {venueId ? <FaBuilding size={20} /> : <FaPlus size={20} className="animate-pulse" />}
                         </span>
