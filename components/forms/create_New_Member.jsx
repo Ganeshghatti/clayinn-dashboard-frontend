@@ -116,9 +116,9 @@ export default function Create_New_Member({ location_id, action, setOpen, member
                     ))}
 
                     <div className="flex items-end justify-end">
-                        <Button type="submit" className={`${action === "Create" ? "" : "bg-green-600  hover:bg-green-500 text-white"} flex items-center gap-2`}>
+                        <Button type="submit" className={`${action === "Create" ? "" : "bg-green-600  hover:bg-green-500 text-white"} hover:ring-2 hover:ring-clayInnBackground/50 transition-all duration-300 ease-linear flex items-center gap-2`}>
                             <span>
-                                {action === "Create" ? <FaPlus size={20} /> : <FaUserEdit size={20} />}
+                                {action === "Create" ? <FaPlus size={20} className="text-clayInnPrimary" /> : <FaUserEdit size={20} />}
                             </span>
                             <span>
                                 {action === "Create" ? "Create" : "Update"}

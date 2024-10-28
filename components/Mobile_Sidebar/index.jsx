@@ -61,21 +61,18 @@ export default function Mobile_Sidebar() {
               <Link
                 key={index}
                 href={`/locations/${locationId}/${item.link}`}
-                className={`text-lg text-mainBackground flex items-center gap-4 text-base transition-all duration-300 ease-linear ${
-                  pathname.includes(item.link) && !item.active ? "" : ""
-                }`}
+                className={` text-mainBackground flex items-center gap-4 text-base transition-all duration-300 ease-linear ${pathname.includes(item.link) && !item.active ? "" : ""
+                  }`}
               >
                 <span
-                  className={`${
-                    pathname.includes(item.link) && !item.active ? "" : ""
-                  }`}
+                  className={`${pathname.includes(item.link) && !item.active ? "" : ""
+                    }`}
                 >
                   {item?.icon}
                 </span>
                 <span
-                  className={`${
-                    pathname.includes(item.link) && !item.active ? "" : ""
-                  }`}
+                  className={`${pathname.includes(item.link) && !item.active ? "" : ""
+                    }`}
                 >
                   {item?.title}
                 </span>
@@ -83,7 +80,7 @@ export default function Mobile_Sidebar() {
             ))}
           </div>
           <SheetFooter>
-            <Logout className="w-full bg-clayInnPrimary hover:bg-clayInnPrimary/80" />
+            <Logout className="w-full bg-clayInnPrimary hover:bg-clayInnPrimary/80 text-white" />
           </SheetFooter>
         </SheetContent>
       </Sheet>

@@ -21,11 +21,11 @@ export function VenueDetailDialog({ venue, location_id }) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="hover:bg-transparent" variant="ghost" >
-          <CiMenuKebab size={22} />
+        <Button className="hover:bg-transparent text-black" variant="ghost" >
+          <CiMenuKebab size={30} />
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="max-md:w-[350px] w-[425px]">
         <DialogHeader>
           <DialogTitle className="uppercase text-center text-clayInnPrimary">Venue Details</DialogTitle>
           <DialogDescription className="hidden">
@@ -41,7 +41,7 @@ export function VenueDetailDialog({ venue, location_id }) {
             <p>{venue?.location}</p>
           </div>
         </div>
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex  flex-row items-center justify-center gap-2">
           <VenueNewPost venue={venue} action="Update" location_id={location_id} />
           <VenueDeleteAlert venue={venue} location_id={location_id} />
         </div>

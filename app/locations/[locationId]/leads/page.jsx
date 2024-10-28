@@ -1,14 +1,49 @@
 "use client";
 
-
 import Footer from "@/components/Footer";
 import { useParams } from "next/navigation";
-
-
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { FaChevronRight } from "react-icons/fa";
+import { fetchLocations_Actions } from "@/app/redux/locationsSlice";
+import { fetchLeads_Action } from "@/app/redux/leadsSlice";
+import LeadsTable from "@/components/LeadsComponents/LeadsTable";
 
 export default function Page() {
+  const [filteredLocationId, setFilteredLocationId] = useState([]);
   const { locationId } = useParams();
+  const dispatch = useDispatch();
+
+  const { locations } = useSelector((state) => state.locations);
+  const { leads } = useSelector((state) => state.leads);
+
+  useEffect(() => {
+    dispatch(fetchLocations_Actions());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (locationId && locations.length > 0) {
+      const filtered = locations.filter((location) =>
+        location.loc_id.toLowerCase().startsWith(locationId.toLowerCase())
+      );
+      setFilteredLocationId(filtered);
+    }
+  }, [locations, locationId]);
+
+  const [location_of_Venue] = filteredLocationId;
+  const location_id = location_of_Venue?.loc_id;
+
+  useEffect(() => {
+    if (location_id) {
+      dispatch(fetchLeads_Action(location_id));
+    }
+  }, [dispatch, location_id]);
+
+
+  console.log(location_id, "-----leads-----Page");
+
+
+
   return (
     <div className="flex flex-col gap-4 px-2 h-screen">
       {/* Header section */}
@@ -17,9 +52,7 @@ export default function Page() {
           <h1 className="flex items-center justify-start text-sm sm:text-xl md:text-2xl font-bold text-mainText capitalize">
             <span className="text-mainText/60">Clay Inn Hotels</span>
             <span><FaChevronRight /></span>
-            <span>
-              {locationId} Team
-            </span>
+            <span>{locationId} Team</span>
           </h1>
         </div>
         <div className="">
@@ -27,13 +60,11 @@ export default function Page() {
         </div>
       </div>
       <div className="flex-1">
-        <h1>Content</h1>
+        <LeadsTable />
       </div>
       <div>
         <Footer content={`${locationId} Leads`} />
       </div>
     </div>
-
-
-  )
+  );
 }

@@ -28,7 +28,7 @@ export default function MemberCreate_Dialog({ location_id, action }) {
 
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button className={`${action === "Create" ? "" : "bg-green-500  text-white"}  flex items-center gap-2`}>
+                <Button className={`${action === "Create" ? "" : "bg-green-500  text-white"}  flex items-center gap-2 hover:ring-2 hover:ring-clayInnBackground/50 transition-all duration-300 ease-linear`}>
                     <span>
                         {action === "Create" ? <FaPlus size={20} /> : <FaUserEdit size={20} />}
                     </span>
@@ -37,7 +37,7 @@ export default function MemberCreate_Dialog({ location_id, action }) {
                     </span>
                 </Button>
             </DialogTrigger>
-            <DialogContent className="">
+            <DialogContent className="max-md:w-[350px] ">
                 <DialogHeader>
                     <DialogTitle className="text-center text-clayInnPrimary uppercase">
                         {action === "Create" ? "Add New Member" : "Update Member"}

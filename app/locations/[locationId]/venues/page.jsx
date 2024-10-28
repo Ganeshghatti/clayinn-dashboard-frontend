@@ -49,9 +49,9 @@ export default function Page() {
 
 
   return (
-    <div className="flex flex-col gap-4 px-2 h-screen">
+    <div className="flex flex-col gap-4 px-2 h-full">
       {/* Header section */}
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
         <h1 className="flex items-center justify-start text-sm sm:text-xl md:text-2xl font-bold text-mainText capitalize">
           <span className="text-mainText/60">Clay Inn Hotels</span>
           <span><FaChevronRight /></span>
@@ -60,26 +60,13 @@ export default function Page() {
           </span>
         </h1>
 
-
         <div>
           <VenueNewPost action="Create" location_id={location_id} />
-
         </div>
       </div>
 
 
-      {/* <div className="mt-4 flex items-center">
-        <div className="w-[15vw] h-[15vh] bg-clayInnBackground text-clayInnPrimary  rounded-sm py-[0.4rem] px-2">
-          <h1 className="flex items-center justify-center gap-1 font-semibold">
-            Total Venue :
-            <span>
-              {
-                venues.length
-              }
-            </span>
-          </h1>
-        </div>
-      </div> */}
+
 
       {/* Handle loading and error states */}
       {isLoading && <p>Loading...</p>}
@@ -87,8 +74,8 @@ export default function Page() {
 
 
       {/* Venue Cards */}
-      <div className="mt-4 flex-1">
-        <div className="flex lg:items-start lg:justify-start justify-center flex-wrap gap-4 max-md:items-center max-md:justify-center">
+      <div className="flex-1 flex items-center justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-4">
           {venues.length > 0 ? (
             venues.map((venue, index) => (
               <VenueCard key={index} venue={venue} location_id={location_id} />

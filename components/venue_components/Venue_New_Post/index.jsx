@@ -19,16 +19,16 @@ export function VenueNewPost({ action, location_id, venue }) {
         <div>
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogTrigger asChild>
-                    <Button className={`flex items-center gap-2 ${action === "Create" ? "" : "bg-green-500 hover:bg-green-500/80 "}`}>
+                    <Button className={`flex items-center gap-2 transition-all duration-300 ease-linear ${action === "Create" ? "bg-cardBg hover:ring-2 hover:ring-cardBorder" : "bg-green-500 hover:bg-green-500/80 "}`}>
                         <span>
                             {venueId ? <FaBuilding size={20} /> : <FaPlus size={20} className="animate-pulse" />}
                         </span>
-                        <span className="hidden md:block">
+                        <span className="">
                             {venue?.venue_id ? "Update Venue" : "Add New Venue"}
                         </span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-md:w-[350px] md:w-[425px]">
                     <DialogHeader>
                         <DialogTitle className="uppercase text-center text-clayInnPrimary"> {venue?.venue_id ? "Update Venue" : "Add New Venue"} </DialogTitle>
                         <DialogDescription className="hidden">

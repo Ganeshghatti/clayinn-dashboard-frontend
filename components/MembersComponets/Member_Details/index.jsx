@@ -42,7 +42,7 @@ export default function Member_Details({ member, location_id }) {
                         </span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
+                <DialogContent className="sm:max-w-md max-md:w-[350px]">
                     <DialogHeader>
                         <DialogTitle className="text-center text-clayInnPrimary">Member Details</DialogTitle>
                         <DialogDescription className="hidden">

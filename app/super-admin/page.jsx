@@ -74,11 +74,10 @@ const Page = () => {
 
   return (
     <div className="pt-10 min-h-screen p-5 space-y-8  flex items-center  gap-3 flex-col bg-clayInnBackground relative bg-mainBackground relative z-50">
-
       {/* ---------------------------Header Section---------------------------- */}
       <div className="flex flex-col items-end justify-between w-full space-y-8">
         <div className="flex items-center justify-center gap-2 w-full">
-          <h1 className="flex items-center justify-center gap-2 text-lg sm:text-xl md:text-3xl font-semibold text-mainText">
+          <h1 className="flex items-center justify-center gap-2 text-xl md:text-3xl font-semibold text-mainText">
             <span>
               <FaHotel />
             </span>
@@ -90,7 +89,7 @@ const Page = () => {
         {/* Common Dialog for Create and Update Form*/}
         <div className="flex items-center justify-center gap-2">
           <Common_Dialog_Create_and_Update heading="Create a New Location" description="This form will allow you to create a new location for the hotels." action="Create" />
-          <Logout className="" />
+          <Logout className="text-clayInnPrimary bg-card border border-cardBorder hover:ring-2 hover:ring-clayInnBackground/50 transition-all duration-300 ease-linear" />
         </div>
       </div>
       {/* --------------------------------------------------------------------- */}
@@ -102,10 +101,10 @@ const Page = () => {
       ) : (
         <div className="flex flex-wrap items-center justify-center gap-4">
           {locationData?.map((item) => (
-            <div key={item?.loc_id} className="space-y-8 w-[300px] h-[260px]  flex flex-col justify-between border border-clayInnBackground/50 rounded-md pb-1  pr-4 shadow-xl shadow-clayInnBackground/20 scale-95 hover:scale-100 transition-all duration-300 ease-linear hover:ring-2 hover:ring-clayInnBackground/50" >
+            <div key={item?.loc_id} className="space-y-8 md:w-[450px] w-[360px] h-[260px]  flex flex-col justify-between border border-clayInnBackground/50 rounded-md pb-1  pr-4 shadow-xl shadow-clayInnBackground/20 scale-95 hover:scale-100 transition-all duration-300 ease-linear hover:ring-2 hover:ring-clayInnBackground/50" >
               <Link href={`/locations/${item?.name.toLowerCase()}`}>
                 <div className="space-y-6">
-                  <div className="bg-[#1B160D] text-clayInnBackground h-16 text-lg font-semibold flex items-center justify-center rounded-br-[40px]">
+                  <div className="bg-[#1B160D] text-clayInnBackground h-16 text-lg font-semibold flex items-center justify-center rounded-br-[40px] rounded-tl-md">
                     <h1 className="capitalize tracking-wide">{item?.name}</h1>
                   </div>
                   <div className="bg-[#D4C7A3] text-[#523517] text-sm font-semibold h-24 flex items-center justify-center px-2 rounded-r-3xl">
@@ -136,17 +135,3 @@ const Page = () => {
 
 export default withAdmin(Page);
 
-
-
-// <div className="">
-// {/* Pass locationId to Location_Details */}
-// 
-// </div>
-
-
-{/* <Card className="p-0" >
-<CardHeader>
-  <CardTitle className="bg-black text-white">{item?.name.toUpperCase()}</CardTitle>
-  <CardDescription className="">{item?.address}</CardDescription>
-</CardHeader>
-</Card> */}

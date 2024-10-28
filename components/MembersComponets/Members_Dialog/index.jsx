@@ -27,12 +27,12 @@ export default function Members_Dialog({ member, location_id }) {
 
             <Dialog open={open} onOpenChange={setOpen} className="">
                 <DialogTrigger asChild>
-                    <Button className="bg-green-600 text-white hover:bg-green-500 rounded-full flex items-center gap-2">
+                    <Button className="bg-green-600 text-white hover:bg-green-500 flex items-center gap-2">
                         <span><FaUserEdit size={20} /></span>
                         <span>Update</span>
                     </Button>
                 </DialogTrigger>
-                <DialogContent className="">
+                <DialogContent className="max-md:w-[350px]">
                     <DialogHeader className="hidden">
                         <DialogTitle>Share link</DialogTitle>
                         <DialogDescription>

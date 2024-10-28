@@ -98,7 +98,7 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-clayInnPrimary uppercase text-xs">Location Name</FormLabel>
+                <FormLabel className="text-clayInnPrimary capitalize text-sm">Location Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter location name"
@@ -117,7 +117,7 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="address"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-clayInnPrimary  uppercase text-xs">Address</FormLabel>
+                <FormLabel className="text-clayInnPrimary  capitalize text-sm">Address</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter the address"
@@ -136,7 +136,7 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="location_admin_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-clayInnPrimary  uppercase text-xs">Admin Name</FormLabel>
+                <FormLabel className="text-clayInnPrimary  capitalize text-sm">Admin<span>&apos;</span><span className="lowercase">s</span> Name</FormLabel>
                 <FormControl>
                   <Input
                     placeholder="Enter admin name"
@@ -155,8 +155,8 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="location_admin_email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-clayInnPrimary uppercase text-xs">
-                  Admin<span>&apos;</span>s Email
+                <FormLabel className="text-clayInnPrimary capitalize text-sm">
+                  Admin<span>&apos;</span><span className="lowercase">s</span>  Email
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -176,8 +176,8 @@ const CreateLocation = ({ location, action, setOpen }) => {
             name="location_admin_password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-clayInnPrimary uppercase text-xs">
-                  Admin<span>&apos;</span> Password
+                <FormLabel className="text-clayInnPrimary capitalize text-sm">
+                  Admin<span>&apos;</span><span className="lowercase">s</span> Password
                 </FormLabel>
                 <FormControl>
                   <Input
@@ -194,7 +194,7 @@ const CreateLocation = ({ location, action, setOpen }) => {
 
           {/* Submit Button */}
           <div className="flex items-end justify-end">
-            <Button className={`${action === "Update" ? "bg-green-500 hover:bg-green-600 rounded-full shadow-xl" : "bg-clayInnBackground hover:bg-clayInnPrimary text-clayInnPrimary hover:text-clayInnBackground rounded-full shadow-xl"}`} >
+            <Button className={`${action === "Update" ? "bg-green-500 hover:bg-green-600  shadow-xl" : "bg-card border border-cardBorder hover:ring-2 hover:ring-clayInnBackground/50 transition-all duration-300 ease-linear shadow-xl"}`} >
               <span>
                 {action}
               </span>

@@ -97,7 +97,7 @@ export function CreateNewVenueForm({ action, location_id, setOpen, venue }) {
                         />
                     ))}
                     <div className="flex items-end justify-end">
-                        <Button type="submit" className={`${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80 rounded-full" : "bg-green-500 hover:bg-green-500/80 rounded-full"} flex items-center gap-2`}>
+                        <Button type="submit" className={`${action === "Create" ? "bg-clayInnBackground text-clayInnPrimary hover:bg-clayInnBackground/80 hover:ring-2 hover:ring-cardBorder " : "bg-green-500 hover:bg-green-500/80 "} flex items-center gap-2 transition-all duration-300 ease-linear`}>
                             <span>
                                 {action}
                             </span>
