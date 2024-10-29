@@ -8,6 +8,7 @@ import { FaChevronRight } from "react-icons/fa";
 import { fetchLocations_Actions } from "@/app/redux/locationsSlice";
 import { fetchLeads_Action } from "@/app/redux/leadsSlice";
 import LeadsTable from "@/components/LeadsComponents/LeadsTable";
+import LeadDialog from "@/components/LeadsComponents/LeadDialog";
 
 export default function Page() {
   const [filteredLocationId, setFilteredLocationId] = useState([]);
@@ -40,7 +41,7 @@ export default function Page() {
   }, [dispatch, location_id]);
 
 
-  console.log(location_id, "-----leads-----Page");
+  const total_Leads = leads?.results;
 
 
 
@@ -56,11 +57,11 @@ export default function Page() {
           </h1>
         </div>
         <div className="">
-          {/* Create Lead Button */}
+          <LeadDialog />
         </div>
       </div>
-      <div className="flex-1">
-        <LeadsTable />
+      <div className="flex-1 mt-10">
+        <LeadsTable leads={total_Leads} />
       </div>
       <div>
         <Footer content={`${locationId} Leads`} />

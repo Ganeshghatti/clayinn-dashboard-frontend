@@ -32,14 +32,6 @@ import {
     TableRow,
 } from "@/components/ui/table";
 
-const data = [
-    { id: "m5gr84i9", amount: 316, status: "success", email: "ken99@yahoo.com" },
-    { id: "3u1reuv4", amount: 242, status: "success", email: "Abe45@gmail.com" },
-    { id: "derv1ws0", amount: 837, status: "processing", email: "Monserrat44@gmail.com" },
-    { id: "5kma53ae", amount: 874, status: "success", email: "Silas22@gmail.com" },
-    { id: "bhqecj4p", amount: 721, status: "failed", email: "carmella@hotmail.com" },
-];
-
 const columns = [
     {
         id: "select",
@@ -64,40 +56,41 @@ const columns = [
         enableHiding: false,
     },
     {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("status")}</div>,
+        accessorKey: "hostname",
+        header: "Host Name",
+        cell: ({ row }) => <div>{row.getValue("hostname")}</div>,
     },
     {
-        accessorKey: "email",
-        header: ({ column }) => (
-            <Button
-                variant="ghost"
-                onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
-                Email
-                <ArrowUpDown className="ml-2 h-4 w-4" />
-            </Button>
-        ),
-        cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+        accessorKey: "mobile",
+        header: "Mobile",
+        cell: ({ row }) => <div>{row.getValue("mobile")}</div>,
     },
     {
-        accessorKey: "amount",
-        header: () => <div className="text-right">Amount</div>,
-        cell: ({ row }) => {
-            const amount = parseFloat(row.getValue("amount"));
-            const formatted = new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-            }).format(amount);
-            return <div className="text-right font-medium">{formatted}</div>;
-        },
+        accessorKey: "call_status",
+        header: "Call Status",
+        cell: ({ row }) => <div>{row.getValue("call_status")}</div>,
+    },
+    {
+        accessorKey: "followup",
+        header: "Follow-up Date",
+        cell: ({ row }) => <div>{row.getValue("followup")}</div>,
+    },
+    {
+        accessorKey: "lead_status",
+        header: "Lead Status",
+        cell: ({ row }) => <div>{row.getValue("lead_status")}</div>,
+    },
+    {
+        accessorKey: "lead_number",
+        header: "Lead Number",
+        cell: ({ row }) => <div>{row.getValue("lead_number")}</div>,
     },
     {
         id: "actions",
+        header: "Actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original;
+            const lead = row.original;
             return (
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -107,13 +100,12 @@ const columns = [
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(payment.id)}>
-                            Copy payment ID
+                        <DropdownMenuLabel className="hidden">Actions</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => navigator.clipboard.writeText(lead.lead_number)}>
+                            Copy Lead Number
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        <DropdownMenuItem>View Lead Details</DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>
             );
@@ -121,14 +113,15 @@ const columns = [
     },
 ];
 
-export default function LeadsTable() {
+export default function LeadsTable({ leads = [] }) {
     const [sorting, setSorting] = useState([]);
     const [columnFilters, setColumnFilters] = useState([]);
     const [columnVisibility, setColumnVisibility] = useState({});
     const [rowSelection, setRowSelection] = useState({});
+    const [filterValue, setFilterValue] = useState("");
 
     const table = useReactTable({
-        data,
+        data: leads,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
@@ -139,17 +132,26 @@ export default function LeadsTable() {
         onColumnVisibilityChange: setColumnVisibility,
         onRowSelectionChange: setRowSelection,
         state: { sorting, columnFilters, columnVisibility, rowSelection },
+        globalFilterFn: (row, columnId, filterValue) => {
+            const hostname = row.getValue("hostname")?.toString().toLowerCase() || "";
+            const leadNumber = row.getValue("lead_number")?.toString() || "";
+            return (
+                hostname.includes(filterValue.toLowerCase()) ||
+                leadNumber.includes(filterValue)
+            );
+        },
     });
 
     return (
         <div className="w-full">
             <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue()) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
-                    }
+                    placeholder="Filter by host name or lead number..."
+                    value={filterValue}
+                    onChange={(event) => {
+                        setFilterValue(event.target.value);
+                        table.setGlobalFilter(event.target.value);
+                    }}
                     className="max-w-sm"
                 />
                 <DropdownMenu>
@@ -191,7 +193,7 @@ export default function LeadsTable() {
                         ))}
                     </TableHeader>
                     <TableBody>
-                        {table.getRowModel().rows?.length ? (
+                        {table?.getRowModel()?.rows?.length ? (
                             table.getRowModel().rows.map((row) => (
                                 <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                                     {row.getVisibleCells().map((cell) => (
@@ -213,8 +215,8 @@ export default function LeadsTable() {
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                    {table.getFilteredSelectedRowModel().rows?.length || 0} of{" "}
+                    {table.getFilteredRowModel().rows?.length || 0} row(s) selected.
                 </div>
                 <div className="space-x-2">
                     <Button
