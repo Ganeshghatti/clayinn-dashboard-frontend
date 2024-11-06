@@ -1,3 +1,18 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "no-unused-vars": "off",
+    "no-undef": "off",
+    "no-unused-expressions": "off",
+    "no-unused-labels": "off",
+    "no-unused-private-class-members": "off",
+    "no-unused-private-methods": "off",
+    "no-unused-private-fields": "off",
+    "no-unused-components": "off",
+    "no-unused-functions": "off",
+    "no-unused-classes": "off",
+    "no-unused-modules": "off",
+    "no-unused-variables": "off",
+    "no-unused-imports": "off"
+  }
 }

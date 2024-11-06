@@ -1,0 +1,162 @@
+{
+    "lead_number": 1,
+    "engagements": [
+        {
+            "date_of_function": "2024-11-10",
+            "day": "Saturday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 50,
+            "hi_tea_min_pax_type": "no",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "yes",
+            "dinner_min_pax_value": 30,
+            "dj_type": "yes",
+            "dj_value": 1,
+            "decor_type": "number",
+            "decor_value": 1000,
+            "liquor_type": "no",
+            "liquor_value": null,
+            "total": "5000.00"
+        }
+    ],
+    "weddings": [
+        {
+            "date_of_function": "2024-11-15",
+            "day": "Friday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 100,
+            "hi_tea_min_pax_type": "yes",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "number",
+            "dinner_min_pax_value": 150,
+            "dj_type": "yes",
+            "dj_value": 1,
+            "decor_type": "number",
+            "decor_value": 2000,
+            "liquor_type": "yes",
+            "liquor_value": 500,
+            "total": "15000.00",
+            "vedi_type": "yes",
+            "vedi_value": 300
+        }
+    ],
+    "corporates": [
+        {
+            "date_of_function": "2024-12-05",
+            "day": "Thursday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 50,
+            "hi_tea_min_pax_type": "yes",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "no",
+            "dinner_min_pax_value": null,
+            "dj_type": "no",
+            "dj_value": null,
+            "decor_type": "yes",
+            "decor_value": null,
+            "liquor_type": "no",
+            "liquor_value": null,
+            "total": "8000.00"
+        }
+    ],
+    "sagans": [
+        {
+            "date_of_function": "2024-12-25",
+            "day": "Wednesday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 60,
+            "hi_tea_min_pax_type": "yes",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "no",
+            "dinner_min_pax_value": null,
+            "dj_type": "yes",
+            "dj_value": 1,
+            "decor_type": "number",
+            "decor_value": 800,
+            "liquor_type": "yes",
+            "liquor_value": 200,
+            "total": "6000.00"
+        }
+    ],
+    "haldis": [
+        {
+            "date_of_function": "2024-12-10",
+            "day": "Tuesday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 30,
+            "hi_tea_min_pax_type": "no",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "yes",
+            "dinner_min_pax_value": 20,
+            "dj_type": "no",
+            "dj_value": null,
+            "decor_type": "yes",
+            "decor_value": 500,
+            "liquor_type": "no",
+            "liquor_value": null,
+            "total": "3000.00"
+        }
+    ],
+    "mehndis": [
+        {
+            "date_of_function": "2024-12-15",
+            "day": "Sunday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 40,
+            "hi_tea_min_pax_type": "yes",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "no",
+            "dinner_min_pax_value": null,
+            "dj_type": "no",
+            "dj_value": null,
+            "decor_type": "yes",
+            "decor_value": 600,
+            "liquor_type": "no",
+            "liquor_value": null,
+            "total": "4000.00"
+        }
+    ],
+    "receptions": [
+        {
+            "date_of_function": "2024-12-30",
+            "day": "Monday",
+            "lunch_min_pax_type": "number",
+            "lunch_min_pax_value": 100,
+            "hi_tea_min_pax_type": "yes",
+            "hi_tea_min_pax_value": null,
+            "dinner_min_pax_type": "yes",
+            "dinner_min_pax_value": 80,
+            "dj_type": "yes",
+            "dj_value": 1,
+            "decor_type": "number",
+            "decor_value": 1500,
+            "liquor_type": "yes",
+            "liquor_value": 300,
+            "total": "20000.00"
+        }
+    ],
+    "rooms": [
+        {
+            "number_of_pax": 10,
+            "number_of_rooms": 5,
+            "plan": "Deluxe"
+        }
+    ],
+    "sales_person": {
+        "user_id": "super-admin-88673",
+        "email": "admin@clayinn.in",
+        "name": "Super Admin",
+        "role": "super-admin",
+        "mobile": null
+    },
+    "venue_id": "orchid (venue-f4869) - Paschim Vihar",
+    "location_id": "Paschim Vihar (Delhi-ef56b)",
+    "lead_entry_date": "2024-11-04T05:33:51.701429Z",
+    "hostname": "John Doe",
+    "mobile": "1234567890",
+    "lead_status": "untouched",
+    "call_status": "not_yet_call",
+    "followup": "2024-11-01",
+    "remark": "Interested in wedding venue",
+    "email": "johndoe@example.com"
+}
