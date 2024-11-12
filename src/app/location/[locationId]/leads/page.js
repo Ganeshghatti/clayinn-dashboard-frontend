@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchLeads_Action } from "@/app/redux/lead_Slice";
+import { fetchLeads_Action } from "@/app/redux/lead_Slice/index";
 import Footer_Component from "@/components/Footer";
 import Header from "@/components/Header";
 import LeadTable from "@/components/Lead_Components/Lead_Table";

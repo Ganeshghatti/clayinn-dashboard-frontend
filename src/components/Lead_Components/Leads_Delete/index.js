@@ -1,6 +1,6 @@
 "use client";
 
-import { delete_Lead_By_SuperAdmin } from "@/app/redux/lead_Slice";
+import { delete_Lead_By_SuperAdmin } from "@/app/redux/lead_Slice/index";
 import {
   AlertDialog,
   AlertDialogAction,
