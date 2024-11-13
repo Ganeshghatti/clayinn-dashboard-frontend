@@ -46,7 +46,7 @@ const weddingSchema = standardOccasionSchema.extend({
 });
 
 const roomSchema = z.object({
-  occasion_type: z.literal('room'),
+  occasion_type: z.literal("room"),
   number_of_pax: z.number(),
   number_of_rooms: z.number(),
   plan: z.string(),
@@ -60,26 +60,28 @@ const formSchema = z.object({
   lead_status: z.string().default("untouched"),
   call_status: z.string().default("not_yet_call"),
   followup: z.string(),
-  occasions: z.array(z.discriminatedUnion("occasion_type", [
-    weddingSchema.extend({ occasion_type: z.literal("wedding") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("reception") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("engagement") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("haldi") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("mehndi") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("roka") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("sagan") }),
-    standardOccasionSchema.extend({ occasion_type: z.literal("corporate") }),
-    roomSchema,
-  ])),
+  occasions: z.array(
+    z.discriminatedUnion("occasion_type", [
+      weddingSchema.extend({ occasion_type: z.literal("wedding") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("reception") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("engagement") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("haldi") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("mehndi") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("roka") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("sagan") }),
+      standardOccasionSchema.extend({ occasion_type: z.literal("corporate") }),
+      roomSchema,
+    ])
+  ),
 });
 
-export default function Lead_Create_Form({ setOpen }) {
+export default function Lead_Create_Form({ setOpen, action }) {
   const dispatch = useDispatch();
   const { toast } = useToast();
   const auth = useSelector((state) => state.auth);
   const user = auth?.user;
   const { locationId } = useParams();
-  
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -113,7 +115,7 @@ export default function Lead_Create_Form({ setOpen }) {
   // Function to get day name from date
   const getDayName = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { weekday: 'long' });
+    return date.toLocaleDateString("en-US", { weekday: "long" });
   };
 
   // Handle date change to automatically update day
@@ -129,7 +131,7 @@ export default function Lead_Create_Form({ setOpen }) {
 
     if (occasionType === "room") {
       return (
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4 mt-4 ">
           <FormField
             control={form.control}
             name={`occasions.${index}.number_of_pax`}
@@ -137,7 +139,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Number of Pax</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,7 +156,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Number of Rooms</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -176,7 +186,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Total</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -195,9 +209,9 @@ export default function Lead_Create_Form({ setOpen }) {
             <FormItem>
               <FormLabel>Date of Function</FormLabel>
               <FormControl>
-                <Input 
-                  type="date" 
-                  {...field} 
+                <Input
+                  type="date"
+                  {...field}
                   onChange={(e) => handleDateChange(index, e.target.value)}
                 />
               </FormControl>
@@ -213,7 +227,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Lunch Pax</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -226,7 +244,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Hi Tea Pax</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -239,7 +261,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Dinner Pax</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -254,7 +280,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>DJ Value</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -267,7 +297,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Decor Value</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -280,7 +314,11 @@ export default function Lead_Create_Form({ setOpen }) {
               <FormItem>
                 <FormLabel>Liquor Value</FormLabel>
                 <FormControl>
-                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    {...field}
+                    onChange={(e) => field.onChange(Number(e.target.value))}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -294,7 +332,11 @@ export default function Lead_Create_Form({ setOpen }) {
                 <FormItem>
                   <FormLabel>Vedi Value</FormLabel>
                   <FormControl>
-                    <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                    <Input
+                      type="number"
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -309,7 +351,11 @@ export default function Lead_Create_Form({ setOpen }) {
             <FormItem>
               <FormLabel>Total</FormLabel>
               <FormControl>
-                <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                <Input
+                  type="number"
+                  {...field}
+                  onChange={(e) => field.onChange(Number(e.target.value))}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -332,17 +378,18 @@ export default function Lead_Create_Form({ setOpen }) {
 
       const formData = {
         ...values,
-        sales_person:"sales-person-4d712",
+        sales_person: "sales-person-4d712",
       };
 
       await dispatch(create_Lead_Action({ formData, locationId })).unwrap();
-      
+
       toast({
         title: "Success",
         description: "Lead created successfully",
       });
-      
+
       setOpen(false);
+      form.reset();
     } catch (error) {
       toast({
         variant: "destructive",
@@ -354,8 +401,11 @@ export default function Lead_Create_Form({ setOpen }) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <Tabs defaultValue="general" className="w-full">
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-4 h-[60vh] overflow-y-auto flex flex-col items-center justify-between"
+      >
+        <Tabs defaultValue="general" className="w-full space-y-14">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="general">General Information</TabsTrigger>
             <TabsTrigger value="occasions">Occasions</TabsTrigger>
@@ -409,7 +459,11 @@ export default function Lead_Create_Form({ setOpen }) {
                   <FormItem>
                     <FormLabel>Follow Up Date</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input
+                        type="date"
+                        {...field}
+                        className="flex items-center justify-between"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -441,7 +495,10 @@ export default function Lead_Create_Form({ setOpen }) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Occasion Type</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value}>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select occasion type" />
@@ -474,7 +531,12 @@ export default function Lead_Create_Form({ setOpen }) {
           </TabsContent>
         </Tabs>
 
-        <Button type="submit">Create Lead</Button>
+        <Button
+          type="submit"
+          className="w-full capitalize bg-buttonBg hover:bg-buttonBg/80 transition-all ease-linear duration-300"
+        >
+          {action} Lead
+        </Button>
       </form>
     </Form>
   );

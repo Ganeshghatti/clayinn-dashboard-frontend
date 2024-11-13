@@ -53,10 +53,9 @@ export const fetchLeads_Action = createAsyncThunk(
           },
         }
       );
-      console.log(response.data)
       return response.data?.results;
     } catch (error) {
-      console.log(error)
+      console.log(error);
       return rejectWithValue(error.response?.data || "Failed to fetch leads");
     }
   }
@@ -76,6 +75,7 @@ export const fetch_Lead_By_ID = createAsyncThunk(
           },
         }
       );
+
       return response.data;
     } catch (error) {
       return rejectWithValue(
@@ -84,6 +84,8 @@ export const fetch_Lead_By_ID = createAsyncThunk(
     }
   }
 );
+
+// UPDATE LEAD
 
 // Delete Lead
 export const delete_Lead_By_SuperAdmin = createAsyncThunk(

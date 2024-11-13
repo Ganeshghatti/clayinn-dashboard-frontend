@@ -13,11 +13,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { FiCalendar, FiPhone, FiMail, FiMapPin } from "react-icons/fi"; // Add icons
 
 export default function LeadsDetails({ lead }) {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { lead_By_Id } = useSelector((state) => state.leads);
+
+  console.log(lead, "----------");
 
   useEffect(() => {
     if (lead?.lead_number) {
@@ -25,204 +28,187 @@ export default function LeadsDetails({ lead }) {
     }
   }, [dispatch, lead?.lead_number]);
 
+  const date = lead_By_Id?.lead_entry_date
+    ? new Date(lead_By_Id.lead_entry_date).toLocaleDateString()
+    : "N/A";
+
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button variant="ghost" className="text-blue-600">
-            Lead Details
+          <Button
+            variant="ghost"
+            className="text-blue-700 font-medium hover:text-blue-900"
+          >
+            View Lead Details
           </Button>
         </DialogTrigger>
-        <DialogContent className="max-md:max-w-[90%] md:max-w-[95%] h-[90vh] mx-auto p-6 bg-white rounded-md shadow-md overflow-auto">
+        <DialogContent className="max-md:max-w-[90%] md:max-w-[85%] h-[90vh] mx-auto p-6 bg-white rounded-lg shadow-lg overflow-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-semibold text-gray-800 mb-4">
+            <DialogTitle className="text-3xl font-bold text-blue-700 text-center mb-6">
               Lead Information
             </DialogTitle>
-            <DialogDescription className="text-sm text-gray-500"></DialogDescription>
+            <DialogDescription className="hidden"></DialogDescription>
           </DialogHeader>
-          <div className="space-y-6">
-            {/* Lead Information */}
-            <section>
-              <div className="space-y-2">
-                <p>
-                  <strong>Lead Number:</strong> {lead_By_Id?.lead_number}
-                </p>
-                <p>
-                  <strong>Lead Status:</strong> {lead_By_Id?.lead_status}
-                </p>
-                <p>
-                  <strong>Call Status:</strong> {lead_By_Id?.call_status}
-                </p>
-                <p>
-                  <strong>Follow-up Date:</strong> {lead_By_Id?.followup}
-                </p>
-                <p>
-                  <strong>Remark:</strong> {lead_By_Id?.remark}
-                </p>
-                <p>
-                  <strong>Lead Entry Date:</strong>{" "}
-                  {lead_By_Id?.lead_entry_date}
-                </p>
-              </div>
-            </section>
 
-            <Separator />
+          <div className="space-y-8">
+            {/* Basic Lead Information */}
+            <section className="p-5 bg-blue-50 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold text-blue-700">
+                Basic Details
+              </h2>
+              <Separator className="my-3" />
+              <table className="w-full text-gray-700 text-sm">
+                <tbody>
+                  <tr>
+                    <td className="font-semibold">Lead Number:</td>
+                    <td>{lead_By_Id?.lead_number || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Lead Status:</td>
+                    <td>{lead_By_Id?.lead_status || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Call Status:</td>
+                    <td>{lead_By_Id?.call_status || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Follow-up Date:</td>
+                    <td>{lead_By_Id?.followup || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Lead Entry Date:</td>
+                    <td>{date}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
 
             {/* Contact Information */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Contact Information
+            <section className="p-5 bg-green-50 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold text-green-700 flex items-center gap-2">
+                <FiPhone /> Contact Information
               </h2>
-              <div className="space-y-2">
-                <p>
-                  <strong>Name:</strong> {lead_By_Id?.hostname}
-                </p>
-                <p>
-                  <strong>Mobile:</strong> {lead_By_Id?.mobile}
-                </p>
-                <p>
-                  <strong>Email:</strong> {lead_By_Id?.email}
-                </p>
-              </div>
+              <Separator className="my-3" />
+              <table className="w-full text-gray-700 text-sm">
+                <tbody>
+                  <tr>
+                    <td className="font-semibold">Name:</td>
+                    <td>{lead_By_Id?.hostname || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Mobile:</td>
+                    <td>{lead_By_Id?.mobile || "N/A"}</td>
+                  </tr>
+                  <tr>
+                    <td className="font-semibold">Email:</td>
+                    <td>{lead_By_Id?.email || "N/A"}</td>
+                  </tr>
+                </tbody>
+              </table>
             </section>
-
-            <Separator />
-
-            {/* Salesperson Information */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Salesperson Information
-              </h2>
-              <div className="space-y-2">
-                <p>
-                  <strong>Name:</strong> {lead_By_Id.sales_person?.name}
-                </p>
-                <p>
-                  <strong>Role:</strong> {lead_By_Id.sales_person?.role}
-                </p>
-              </div>
-            </section>
-
-            <Separator />
 
             {/* Venue Information */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Venue Information
+            <section className="p-5 bg-purple-50 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold text-purple-700 flex items-center gap-2">
+                <FiMapPin /> Venue Information
               </h2>
-              <div className="space-y-2">
-                <p>
-                  <strong>Venue ID:</strong> {lead_By_Id?.venue_id}
-                </p>
-                <p>
-                  <strong>Location ID:</strong> {lead_By_Id?.location_id}
-                </p>
+              <Separator className="my-3" />
+              <p className="text-gray-700 font-medium">
+                Location ID: {lead_By_Id?.location_id || "N/A"}
+              </p>
+            </section>
+
+            {/* Occasion Details */}
+            <section className="p-5 bg-orange-50 rounded-lg shadow-md">
+              <h2 className="text-lg font-semibold text-orange-700">
+                Occasion Details
+              </h2>
+              <Separator className="my-3" />
+              <div className="space-y-4">
+                {lead_By_Id?.occasions?.map((occasion) => (
+                  <div
+                    key={occasion.id}
+                    className="p-4 border border-orange-200 rounded-md bg-white shadow-sm"
+                  >
+                    <h3 className="text-md font-semibold text-orange-600 capitalize">
+                      {occasion.occasion_type === "wedding"
+                        ? "Wedding Event"
+                        : "Room Arrangement"}
+                    </h3>
+                    <Separator className="my-2" />
+
+                    {/* Wedding Event Details Table */}
+                    {occasion.occasion_type === "wedding" ? (
+                      <table className="w-full text-gray-600 text-sm">
+                        <tbody>
+                          <tr>
+                            <td className="font-semibold">Date of Function:</td>
+                            <td>{occasion.date_of_function || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Day:</td>
+                            <td>{occasion.day || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Lunch Pax:</td>
+                            <td>{occasion.lunch_pax || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Hi Tea Pax:</td>
+                            <td>{occasion.hi_tea_pax || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Dinner Pax:</td>
+                            <td>{occasion.dinner_pax || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">DJ Value:</td>
+                            <td>{occasion.dj_value || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Decor Value:</td>
+                            <td>{occasion.decor_value || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Liquor Value:</td>
+                            <td>{occasion.liquor_value || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Vedi Value:</td>
+                            <td>{occasion.vedi_value || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Total:</td>
+                            <td>{occasion.total || "N/A"}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    ) : (
+                      <table className="w-full text-gray-600 text-sm">
+                        <tbody>
+                          <tr>
+                            <td className="font-semibold">Number of Pax:</td>
+                            <td>{occasion.number_of_pax || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Number of Rooms:</td>
+                            <td>{occasion.number_of_rooms || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Plan:</td>
+                            <td>{occasion.plan || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td className="font-semibold">Total:</td>
+                            <td>{occasion.total || "N/A"}</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                ))}
               </div>
-            </section>
-
-            <Separator />
-
-            {/* Engagements */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Engagements
-              </h2>
-              <table className="w-full border border-gray-200 text-center text-sm md:text-base">
-                <thead>
-                  <tr className="bg-blue-200 text-gray-600">
-                    <th>Date</th>
-                    <th>Day</th>
-                    <th>Lunch Min Pax</th>
-                    <th>Hi Tea Min Pax</th>
-                    <th>Dinner Min Pax</th>
-                    <th>DJ</th>
-                    <th>Decor</th>
-                    <th>Liquor</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lead_By_Id?.engagements?.map((engagement, index) => (
-                    <tr key={index} className="border-b">
-                      <td>{engagement.date_of_function}</td>
-                      <td>{engagement.day}</td>
-                      <td>{engagement.lunch_min_pax_value || "N/A"}</td>
-                      <td>{engagement.hi_tea_min_pax_value || "N/A"}</td>
-                      <td>{engagement.dinner_min_pax_value || "N/A"}</td>
-                      <td>{engagement.dj_type === "yes" ? "Yes" : "No"}</td>
-                      <td>{engagement.decor_value || "N/A"}</td>
-                      <td>{engagement.liquor_value || "N/A"}</td>
-                      <td>{engagement.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
-
-            {/* Weddings */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Weddings
-              </h2>
-              <table className="w-full border border-gray-200 text-center text-sm md:text-base">
-                <thead>
-                  <tr className="bg-blue-200 text-gray-600">
-                    <th>Date</th>
-                    <th>Day</th>
-                    <th>Lunch Min Pax</th>
-                    <th>Hi Tea Min Pax</th>
-                    <th>Dinner Min Pax</th>
-                    <th>DJ</th>
-                    <th>Decor</th>
-                    <th>Liquor</th>
-                    <th>Vedi</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lead_By_Id?.weddings?.map((wedding, index) => (
-                    <tr key={index} className="border-b">
-                      <td>{wedding.date_of_function}</td>
-                      <td>{wedding.day}</td>
-                      <td>{wedding.lunch_min_pax_value || "N/A"}</td>
-                      <td>
-                        {wedding.hi_tea_min_pax_type === "yes" ? "Yes" : "No"}
-                      </td>
-                      <td>{wedding.dinner_min_pax_value || "N/A"}</td>
-                      <td>{wedding.dj_type === "yes" ? "Yes" : "No"}</td>
-                      <td>{wedding.decor_value || "N/A"}</td>
-                      <td>{wedding.liquor_value || "N/A"}</td>
-                      <td>{wedding.vedi_value || "N/A"}</td>
-                      <td>{wedding.total}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
-
-            {/* Room Arrangements */}
-            <section>
-              <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Room Arrangements
-              </h2>
-              <table className="w-full border border-gray-200 text-center text-sm md:text-base">
-                <thead>
-                  <tr className="bg-blue-200 text-gray-600">
-                    <th>Number of Pax</th>
-                    <th>Number of Rooms</th>
-                    <th>Plan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {lead_By_Id?.rooms?.map((room, index) => (
-                    <tr key={index} className="border-b">
-                      <td>{room.number_of_pax}</td>
-                      <td>{room.number_of_rooms}</td>
-                      <td>{room.plan}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
             </section>
           </div>
         </DialogContent>

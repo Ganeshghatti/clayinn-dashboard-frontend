@@ -1,23 +1,19 @@
-// Salesperson Name
-// Event Date
-// No. Of People(Pax)
-// Follow up date
-
 "use client";
 
 import React, { useState } from "react";
 import {
   flexRender,
+  useReactTable,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   getSortedRowModel,
-  useReactTable,
+  getFilteredRowModel,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
-
+import { ChevronDown, MoreHorizontal } from "lucide-react";
+import { BiSort } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -27,7 +23,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -36,11 +31,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-import { BiSort } from "react-icons/bi";
 import LeadsDetails from "../Leads_Details";
 import Lead_Delete from "../Leads_Delete";
 
+// Define column configuration
 const columns = [
   {
     id: "select",
@@ -62,92 +56,92 @@ const columns = [
       />
     ),
     enableSorting: false,
-    enableHiding: false,
   },
   {
     accessorKey: "hostname",
     header: "Host Name",
-    cell: ({ row }) => <div>{row.getValue("hostname")}</div>,
+    cell: ({ row }) => (
+      <div className="text-center capitalize">{row.getValue("hostname")}</div>
+    ),
   },
   {
     accessorKey: "mobile",
     header: "Mobile",
-    cell: ({ row }) => <div>{row.getValue("mobile")}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("mobile")}</div>
+    ),
   },
   {
-    accessorKey: "salesperson_name",
-    header: "Salesperson Name",
-    cell: ({ row }) => <div>{row.getValue("salesperson_name")}</div>,
+    accessorKey: "sales_person",
+    header: "Salesperson",
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("sales_person")}</div>
+    ),
   },
-  {
-    accessorKey: "event_date",
-    header: "Event Date",
-    cell: ({ row }) => <div>{row.getValue("event_date")}</div>,
-  },
-  {
-    accessorKey: "pax",
-    header: "No. of People (Pax)",
-    cell: ({ row }) => <div>{row.getValue("pax")}</div>,
-  },
+
   {
     accessorKey: "followup",
     header: "Follow-up Date",
-    cell: ({ row }) => <div>{row.getValue("followup")}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("followup")}</div>
+    ),
   },
   {
     accessorKey: "call_status",
     header: "Call Status",
-    cell: ({ row }) => <div>{row.getValue("call_status")}</div>,
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("call_status")}</div>
+    ),
   },
   {
     accessorKey: "lead_status",
     header: "Lead Status",
-    cell: ({ row }) => <div>{row.getValue("lead_status")}</div>,
+    cell: ({ row }) => {
+      const leadStatus = row.getValue("lead_status");
+      const statusStyles =
+        leadStatus === "untouched"
+          ? "bg-red-700 text-white"
+          : "bg-green-600 text-white";
+      return (
+        <div className={`text-center py-1 px-2 rounded-full ${statusStyles}`}>
+          {leadStatus}
+        </div>
+      );
+    },
   },
   {
     accessorKey: "lead_number",
-    header: "Lead Number",
-    cell: ({ row }) => {
-      const leadStatus = row.getValue("lead_status");
-      const textColor =
-        leadStatus === "untouched"
-          ? "bg-red-700 text-center p-1 text-mainBg rounded-full"
-          : "text-green-700 text-center p-1 text-mainBg rounded-full";
-      return <div className={textColor}>{leadStatus}</div>;
-    },
+    header: "Lead #",
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("lead_number")}</div>
+    ),
   },
   {
     id: "actions",
     header: "Actions",
-    enableHiding: false,
-    cell: ({ row }) => {
-      const lead = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center">
-            <DropdownMenuLabel className="hidden">Actions</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(lead.lead_number)}
-            >
-              Copy Lead Number
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <div className="flex items-center justify-center">
-              <LeadsDetails lead={lead} />
-            </div>
-            <div className="flex items-center justify-center">
-              <Lead_Delete lead={lead} />
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
+    cell: ({ row }) => (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="center" className="space-y-2">
+          <DropdownMenuLabel className="text-center">Actions</DropdownMenuLabel>
+          <DropdownMenuItem
+            onClick={() =>
+              navigator.clipboard.writeText(row.original.lead_number)
+            }
+          >
+            Copy Lead Number
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <LeadsDetails lead={row.original} />
+          <Lead_Delete lead={row.original} />
+        </DropdownMenuContent>
+      </DropdownMenu>
+    ),
   },
 ];
 
@@ -157,6 +151,8 @@ export default function LeadsTable({ leads, locationId }) {
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [filterValue, setFilterValue] = useState("");
+
+  console.log(leads, "leads");
 
   const table = useReactTable({
     data: leads,
@@ -171,8 +167,8 @@ export default function LeadsTable({ leads, locationId }) {
     onRowSelectionChange: setRowSelection,
     state: { sorting, columnFilters, columnVisibility, rowSelection },
     globalFilterFn: (row, columnId, filterValue) => {
-      const hostname = row.getValue("hostname")?.toString().toLowerCase() || "";
-      const leadNumber = row.getValue("lead_number")?.toString() || "";
+      const hostname = row.getValue("hostname")?.toLowerCase() || "";
+      const leadNumber = String(row.getValue("lead_number") || "");
       return (
         hostname.includes(filterValue.toLowerCase()) ||
         leadNumber.includes(filterValue)
@@ -181,50 +177,57 @@ export default function LeadsTable({ leads, locationId }) {
   });
 
   return (
-    <div className="w-full">
-      <div className="flex max-md:flex-col gap-4 flex-row items-center py-4">
+    <div className="w-full p-4 lg:p-6 bg-gray-50 rounded-lg shadow-md">
+      {/* Search and Sort Controls */}
+      <div className="flex flex-wrap gap-4 items-center justify-between pb-4">
         <Input
-          placeholder="Filter by host name or lead number..."
+          placeholder="Search by host name or lead number..."
           value={filterValue}
-          onChange={(event) => {
-            setFilterValue(event.target.value);
-            table.setGlobalFilter(event.target.value);
+          onChange={(e) => {
+            setFilterValue(e.target.value);
+            table.setGlobalFilter(e.target.value);
           }}
-          className="max-w-sm"
+          className="w-full lg:max-w-xs bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:border-indigo-500"
         />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="ml-auto max-md:w-full">
-              <span>
-                <BiSort size={20} />
-              </span>{" "}
-              Filter <ChevronDown className="ml-2 h-4 w-4" />
+            <Button className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition">
+              <BiSort size={20} /> Filter{" "}
+              <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            align="end"
+            className="bg-white shadow-lg p-2 rounded-md"
+          >
             {table
               .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => (
+              .filter((col) => col.getCanHide())
+              .map((col) => (
                 <DropdownMenuCheckboxItem
-                  key={column.id}
-                  className="capitalize"
-                  checked={column.getIsVisible()}
-                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                  key={col.id}
+                  className="capitalize text-gray-700"
+                  checked={col.getIsVisible()}
+                  onCheckedChange={(value) => col.toggleVisibility(!!value)}
                 >
-                  {column.id}
+                  {col.id}
                 </DropdownMenuCheckboxItem>
               ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
+
+      {/* Leads Table */}
+      <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
+        <Table className="w-full">
+          <TableHeader className="bg-gray-100">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
+                  <TableHead
+                    key={header.id}
+                    className="text-center py-3 font-medium text-gray-700"
+                  >
                     {header.isPlaceholder
                       ? null
                       : flexRender(
@@ -237,14 +240,14 @@ export default function LeadsTable({ leads, locationId }) {
             ))}
           </TableHeader>
           <TableBody>
-            {table?.getRowModel()?.rows?.length ? (
+            {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
+                <TableRow key={row.id} className="hover:bg-gray-50 transition">
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell
+                      key={cell.id}
+                      className="text-center py-2 px-4 text-gray-600"
+                    >
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -257,15 +260,17 @@ export default function LeadsTable({ leads, locationId }) {
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center"
+                  className="text-center py-4 text-gray-500"
                 >
-                  No results.
+                  No results found.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination Controls */}
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
           {table.getFilteredSelectedRowModel().rows?.length || 0} of{" "}
