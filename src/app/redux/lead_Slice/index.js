@@ -56,6 +56,7 @@ export const fetchLeads_Action = createAsyncThunk(
       console.log(response.data)
       return response.data?.results;
     } catch (error) {
+      console.log(error)
       return rejectWithValue(error.response?.data || "Failed to fetch leads");
     }
   }

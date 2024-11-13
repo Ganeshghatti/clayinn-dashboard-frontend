@@ -1,6 +1,6 @@
 "use client";
 
-import { fetch_Lead_By_ID } from "@/app/redux/lead_Slice/index";
+import { fetch_Lead_By_ID } from "@/app/redux/lead_Slice";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -25,7 +25,7 @@ import { PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { create_Lead_Action } from "@/app/redux/lead_Slice/index";
+import { create_Lead_Action } from "@/app/redux/lead_Slice";
 import { useParams } from "next/navigation";
 
 const standardOccasionSchema = z.object({
