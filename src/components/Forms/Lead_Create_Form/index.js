@@ -332,7 +332,7 @@ export default function Lead_Create_Form({ setOpen }) {
 
       const formData = {
         ...values,
-        sales_person:"sales-person-4d712"
+        sales_person:"sales-person-4d712",
       };
 
       await dispatch(create_Lead_Action({ formData, locationId })).unwrap();
