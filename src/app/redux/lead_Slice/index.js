@@ -10,29 +10,64 @@ const initialState = {
 
 const url = process.env.NEXT_PUBLIC_URL;
 
-export const fetchLeads_Action = createAsyncThunk(
-  "leads/fetchLeads",
-  async (locationId) => {
-    const token = localStorage.getItem("access-token");
+// Helper function for token
+const getToken = () => {
+  const token = localStorage.getItem("access-token");
+  if (!token) throw new Error("No token found. Please login again.");
+  return token;
+};
 
-    const response = await axios.get(
-      `${url}/leads-management/leads/get/${locationId}/`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    return response.data?.results;
+// Create Lead Action
+export const create_Lead_Action = createAsyncThunk(
+  "leads/create",
+  async ({ formData, locationId }, { rejectWithValue }) => {
+    try {
+      const token = getToken();
+      const response = await axios.post(
+        `${url}/leads-management/leads/create/`,
+        { ...formData, location_id: locationId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to create lead");
+    }
   }
 );
 
+// Fetch Leads
+export const fetchLeads_Action = createAsyncThunk(
+  "leads/fetchLeads",
+  async (locationId, { rejectWithValue }) => {
+    try {
+      const token = getToken();
+      const response = await axios.get(
+        `${url}/leads-management/leads/get/${locationId}/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data)
+      return response.data?.results;
+    } catch (error) {
+      console.log(error)
+      return rejectWithValue(error.response?.data || "Failed to fetch leads");
+    }
+  }
+);
+
+// Fetch Lead By ID
 export const fetch_Lead_By_ID = createAsyncThunk(
   "lead/fetchLeadById",
   async (lead_number, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-
+      const token = getToken();
       const response = await axios.get(
         `${url}/leads-management/leads/detail/${lead_number}/`,
         {
@@ -41,23 +76,21 @@ export const fetch_Lead_By_ID = createAsyncThunk(
           },
         }
       );
-
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error?.response.data || "Failed to fetch Lead By Id " || error?.message
+        error.response?.data || "Failed to fetch Lead By Id"
       );
     }
   }
 );
 
-// DELETE
+// Delete Lead
 export const delete_Lead_By_SuperAdmin = createAsyncThunk(
   "lead/delete",
   async (lead_number, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-
+      const token = getToken();
       await axios.delete(
         `${url}/leads-management/leads/delete/${lead_number}/`,
         {
@@ -66,11 +99,10 @@ export const delete_Lead_By_SuperAdmin = createAsyncThunk(
           },
         }
       );
-
       return lead_number;
     } catch (error) {
       return rejectWithValue(
-        error.response.data || "Failed to delete the lead "
+        error.response?.data || "Failed to delete the lead"
       );
     }
   }
@@ -82,6 +114,20 @@ const leadsSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Create Lead
+      .addCase(create_Lead_Action.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(create_Lead_Action.fulfilled, (state, action) => {
+        state.loading = false;
+        state.leads = [...state.leads, action.payload];
+      })
+      .addCase(create_Lead_Action.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch Leads
       .addCase(fetchLeads_Action.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -92,8 +138,9 @@ const leadsSlice = createSlice({
       })
       .addCase(fetchLeads_Action.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload;
       })
+      // Fetch Lead By ID
       .addCase(fetch_Lead_By_ID.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -104,9 +151,9 @@ const leadsSlice = createSlice({
       })
       .addCase(fetch_Lead_By_ID.rejected, (state, action) => {
         state.loading = false;
-        state.lead_By_Id = {};
         state.error = action.payload;
       })
+      // Delete Lead
       .addCase(delete_Lead_By_SuperAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;

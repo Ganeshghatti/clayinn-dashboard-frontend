@@ -3,277 +3,479 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
-
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PlusCircle, Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { create_Lead_Action } from "@/app/redux/lead_Slice";
+import { useParams } from "next/navigation";
 
-const eventSchema = z.object({
-  date_of_function: z.string().optional(),
-  day: z.string().optional(),
-  lunch_min_pax_type: z.string().optional(),
-  lunch_min_pax_value: z.number().nullable().optional(),
-  hi_tea_min_pax_type: z.string().optional(),
-  hi_tea_min_pax_value: z.number().nullable().optional(),
-  dinner_min_pax_type: z.string().optional(),
-  dinner_min_pax_value: z.number().nullable().optional(),
-  dj_type: z.string().optional(),
-  dj_value: z.number().nullable().optional(),
-  decor_type: z.string().optional(),
-  decor_value: z.number().nullable().optional(),
-  liquor_type: z.string().optional(),
-  liquor_value: z.number().nullable().optional(),
-  total: z.number().optional(),
-  vedi_type: z.string().optional(),
-  vedi_value: z.number().nullable().optional(),
+const standardOccasionSchema = z.object({
+  occasion_type: z.string(),
+  date_of_function: z.string(),
+  day: z.string(),
+  lunch_pax: z.number().default(0),
+  hi_tea_pax: z.number().default(0),
+  dinner_pax: z.number().default(0),
+  dj_value: z.number().default(0),
+  decor_value: z.number().default(0),
+  liquor_value: z.number().default(0),
+  total: z.number(),
+});
+
+const weddingSchema = standardOccasionSchema.extend({
+  vedi_value: z.number().default(0),
+});
+
+const roomSchema = z.object({
+  occasion_type: z.literal('room'),
+  number_of_pax: z.number(),
+  number_of_rooms: z.number(),
+  plan: z.string(),
+  total: z.number(),
 });
 
 const formSchema = z.object({
-  hostname: z.string(),
-  mobile: z.string(),
-  venue_id: z.string(),
-  location_id: z.string(),
-  lead_status: z.string(),
-  call_status: z.string(),
+  hostname: z.string().min(2, "Host name is required"),
+  mobile: z.string().length(10, "Mobile number must be 10 digits"),
+  email: z.string().email("Invalid email format"),
+  lead_status: z.string().default("untouched"),
+  call_status: z.string().default("not_yet_call"),
   followup: z.string(),
-  remark: z.string(),
-  email: z.string().email(),
-  engagements: z.array(eventSchema),
-  weddings: z.array(eventSchema),
-  corporates: z.array(eventSchema),
-  haldis: z.array(eventSchema),
-  mehndis: z.array(eventSchema),
-  rokas: z.array(eventSchema),
-  sagans: z.array(eventSchema),
-  receptions: z.array(eventSchema),
-  rooms: z.array(
-    z.object({
-      number_of_pax: z.number(),
-      number_of_rooms: z.number(),
-      plan: z.string(),
-    })
-  ),
+  occasions: z.array(z.discriminatedUnion("occasion_type", [
+    weddingSchema.extend({ occasion_type: z.literal("wedding") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("reception") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("engagement") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("haldi") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("mehndi") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("roka") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("sagan") }),
+    standardOccasionSchema.extend({ occasion_type: z.literal("corporate") }),
+    roomSchema,
+  ])),
 });
 
-export default function Lead_Create_Form() {
+export default function Lead_Create_Form({ setOpen }) {
+  const dispatch = useDispatch();
+  const { toast } = useToast();
+  const auth = useSelector((state) => state.auth);
+  const user = auth?.user;
+  const { locationId } = useParams();
+  
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       hostname: "",
       mobile: "",
-      venue_id: "",
-      location_id: "",
-      lead_status: "",
-      call_status: "",
-      followup: "",
-      remark: "",
       email: "",
-      engagements: [{}],
-      weddings: [{}],
-      corporates: [{}],
-      haldis: [{}],
-      mehndis: [{}],
-      rokas: [{}],
-      sagans: [{}],
-      receptions: [{}],
-      rooms: [{}],
+      lead_status: "untouched",
+      call_status: "not_yet_call",
+      followup: "",
+      occasions: [],
     },
   });
 
-  const { control, handleSubmit } = form;
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "occasions",
+  });
 
-  const { fields: engagementFields } = useFieldArray({ control, name: "engagements" });
-  const { fields: weddingFields } = useFieldArray({ control, name: "weddings" });
-  const { fields: roomFields } = useFieldArray({ control, name: "rooms" });
+  const occasionTypes = [
+    { value: "wedding", label: "Wedding" },
+    { value: "reception", label: "Reception" },
+    { value: "engagement", label: "Engagement" },
+    { value: "haldi", label: "Haldi" },
+    { value: "mehndi", label: "Mehndi" },
+    { value: "roka", label: "Roka" },
+    { value: "sagan", label: "Sagan" },
+    { value: "corporate", label: "Corporate" },
+    { value: "room", label: "Room" },
+  ];
 
-  function onSubmit(values) {
-    console.log(values);
+  // Function to get day name from date
+  const getDayName = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  };
+
+  // Handle date change to automatically update day
+  const handleDateChange = (index, value) => {
+    form.setValue(`occasions.${index}.date_of_function`, value);
+    form.setValue(`occasions.${index}.day`, getDayName(value));
+  };
+
+  const renderOccasionFields = (index) => {
+    const occasionType = form.watch(`occasions.${index}.occasion_type`);
+
+    if (!occasionType) return null;
+
+    if (occasionType === "room") {
+      return (
+        <div className="space-y-4 mt-4">
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.number_of_pax`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Number of Pax</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.number_of_rooms`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Number of Rooms</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.plan`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Plan</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.total`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Total</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-4 mt-4">
+        <FormField
+          control={form.control}
+          name={`occasions.${index}.date_of_function`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Date of Function</FormLabel>
+              <FormControl>
+                <Input 
+                  type="date" 
+                  {...field} 
+                  onChange={(e) => handleDateChange(index, e.target.value)}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.lunch_pax`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lunch Pax</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.hi_tea_pax`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Hi Tea Pax</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.dinner_pax`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dinner Pax</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.dj_value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>DJ Value</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.decor_value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Decor Value</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name={`occasions.${index}.liquor_value`}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Liquor Value</FormLabel>
+                <FormControl>
+                  <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          {occasionType === "wedding" && (
+            <FormField
+              control={form.control}
+              name={`occasions.${index}.vedi_value`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Vedi Value</FormLabel>
+                  <FormControl>
+                    <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+        </div>
+        <FormField
+          control={form.control}
+          name={`occasions.${index}.total`}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Total</FormLabel>
+              <FormControl>
+                <Input type="number" {...field} onChange={e => field.onChange(Number(e.target.value))} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
+    );
+  };
+
+  async function onSubmit(values) {
+    try {
+      // if (!user) {
+      //   toast({
+      //     variant: "destructive",
+      //     title: "Error",
+      //     description: "User information not found. Please login again.",
+      //   });
+      //   return;
+      // }
+
+      const formData = {
+        ...values,
+        sales_person:"sales-person-4d712"
+      };
+
+      await dispatch(create_Lead_Action({ formData, locationId })).unwrap();
+      
+      toast({
+        title: "Success",
+        description: "Lead created successfully",
+      });
+      
+      setOpen(false);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create lead",
+      });
+    }
   }
 
   return (
-    <div>
-      <Form {...form}>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-          <FormField
-            control={control}
-            name="hostname"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Host Name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter host name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="mobile"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Mobile</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter mobile number" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="venue_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Venue ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter venue ID" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="location_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Location ID</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter location ID" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="lead_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Lead Status</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter lead status" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="call_status"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Call Status</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter call status" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="followup"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Follow-Up</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter follow-up date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="remark"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Remark</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter remark" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Email</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter email" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="general">General Information</TabsTrigger>
+            <TabsTrigger value="occasions">Occasions</TabsTrigger>
+          </TabsList>
 
-          {engagementFields.map((_, index) => (
-            <FormField
-              key={index}
-              control={control}
-              name={`engagements.${index}.date_of_function`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Engagement Date</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+          <TabsContent value="general" className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="hostname"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Host Name</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="mobile"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="followup"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Follow Up Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </TabsContent>
 
-          {weddingFields.map((_, index) => (
-            <FormField
-              key={index}
-              control={control}
-              name={`weddings.${index}.date_of_function`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Wedding Date</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter date" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+          <TabsContent value="occasions" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-semibold">Occasions</h3>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => append({ occasion_type: "" })}
+                className="flex items-center gap-2"
+              >
+                <PlusCircle className="h-4 w-4" />
+                Add Occasion
+              </Button>
+            </div>
 
-          {roomFields.map((_, index) => (
-            <FormField
-              key={index}
-              control={control}
-              name={`rooms.${index}.number_of_pax`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Room Pax</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter number of pax" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
+            {fields.map((field, index) => (
+              <div key={field.id} className="border p-4 rounded-lg relative">
+                <FormField
+                  control={form.control}
+                  name={`occasions.${index}.occasion_type`}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Occasion Type</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select occasion type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {occasionTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {renderOccasionFields(index)}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2"
+                  onClick={() => remove(index)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+          </TabsContent>
+        </Tabs>
 
-          <Button type="submit">Submit</Button>
-        </form>
-      </Form>
-    </div>
+        <Button type="submit">Create Lead</Button>
+      </form>
+    </Form>
   );
 }

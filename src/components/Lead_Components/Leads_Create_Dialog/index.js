@@ -1,13 +1,11 @@
 "use client";
 
 import Lead_Create_Form from "@/components/Forms/Lead_Create_Form";
-import VenueForm from "@/components/Forms/Lead_Create_Form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -27,11 +25,11 @@ export default function Lead_Create_Dialog({ action }) {
         </DialogTrigger>
         <DialogContent className="h-[600px] overflow-auto">
           <DialogHeader>
-            <DialogTitle className="capitalize">{action} Team</DialogTitle>
+            <DialogTitle className="capitalize">{action} Lead</DialogTitle>
             <DialogDescription></DialogDescription>
           </DialogHeader>
           <div>
-            <Lead_Create_Form />
+            <Lead_Create_Form setOpen={setOpen} />
           </div>
         </DialogContent>
       </Dialog>
