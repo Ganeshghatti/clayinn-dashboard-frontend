@@ -9,6 +9,15 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { BiSort } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
@@ -34,123 +43,136 @@ import {
 import LeadsDetails from "../Leads_Details";
 import Lead_Delete from "../Leads_Delete";
 
-// Define column configuration
-const columns = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "hostname",
-    header: "Host Name",
-    cell: ({ row }) => (
-      <div className="text-center capitalize">{row.getValue("hostname")}</div>
-    ),
-  },
-  {
-    accessorKey: "mobile",
-    header: "Mobile",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("mobile")}</div>
-    ),
-  },
-  {
-    accessorKey: "sales_person",
-    header: "Salesperson",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("sales_person")}</div>
-    ),
-  },
-
-  {
-    accessorKey: "followup",
-    header: "Follow-up Date",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("followup")}</div>
-    ),
-  },
-  {
-    accessorKey: "call_status",
-    header: "Call Status",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("call_status")}</div>
-    ),
-  },
-  {
-    accessorKey: "lead_status",
-    header: "Lead Status",
-    cell: ({ row }) => {
-      const leadStatus = row.getValue("lead_status");
-      const statusStyles =
-        leadStatus === "untouched"
-          ? "bg-red-700 text-white"
-          : "bg-green-600 text-white";
-      return (
-        <div className={`text-center py-1 px-2 rounded-full ${statusStyles}`}>
-          {leadStatus}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "lead_number",
-    header: "Lead #",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("lead_number")}</div>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="space-y-2">
-          <DropdownMenuLabel className="text-center">Actions</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              navigator.clipboard.writeText(row.original.lead_number)
-            }
-          >
-            Copy Lead Number
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <LeadsDetails lead={row.original} />
-          <Lead_Delete lead={row.original} />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
-
 export default function LeadsTable({ leads, locationId }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
   const [columnVisibility, setColumnVisibility] = useState({});
   const [rowSelection, setRowSelection] = useState({});
   const [filterValue, setFilterValue] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState(null);
+
+  const handleLeadStatusClick = (rowData) => {
+    setSelectedRowData(rowData);
+    setIsModalOpen(true);
+  };
+
+  // Define column configuration
+  const columns = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: "hostname",
+      header: "Host Name",
+      cell: ({ row }) => (
+        <div className="text-center capitalize">{row.getValue("hostname")}</div>
+      ),
+    },
+    {
+      accessorKey: "mobile",
+      header: "Mobile",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("mobile")}</div>
+      ),
+    },
+    {
+      accessorKey: "sales_person",
+      header: "Salesperson",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("sales_person")}</div>
+      ),
+    },
+
+    {
+      accessorKey: "followup",
+      header: "Follow-up Date",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("followup")}</div>
+      ),
+    },
+    {
+      accessorKey: "call_status",
+      header: "Call Status",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("call_status")}</div>
+      ),
+    },
+    {
+      accessorKey: "lead_status",
+      header: "Lead Status",
+      cell: ({ row }) => {
+        const leadStatus = row.getValue("lead_status");
+        const statusStyles =
+          leadStatus === "untouched"
+            ? "bg-red-700 text-white"
+            : "bg-green-600 text-white";
+        return (
+          <div
+            className={`text-center py-1 px-2 rounded-full ${statusStyles}`}
+            onClick={() => handleLeadStatusClick(row.original)}
+          >
+            {leadStatus}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "lead_number",
+      header: "Lead #",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("lead_number")}</div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="space-y-2">
+            <DropdownMenuLabel className="text-center">
+              Actions
+            </DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() =>
+                navigator.clipboard.writeText(row.original.lead_number)
+              }
+            >
+              Copy Lead Number
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <LeadsDetails lead={row.original} />
+            <Lead_Delete lead={row.original} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   console.log(leads, "leads");
 
@@ -294,6 +316,49 @@ export default function LeadsTable({ leads, locationId }) {
             Next
           </Button>
         </div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Lead Status Details</DialogTitle>
+              <DialogDescription>
+                {/* You can add a brief description if necessary */}
+              </DialogDescription>
+            </DialogHeader>
+            <div>
+              {/* Display data from the selected row */}
+              {selectedRowData ? (
+                <div>
+                  <p>
+                    <strong>Host Name:</strong> {selectedRowData.hostname}
+                  </p>
+                  <p>
+                    <strong>Mobile:</strong> {selectedRowData.mobile}
+                  </p>
+                  <p>
+                    <strong>Salesperson:</strong> {selectedRowData.sales_person}
+                  </p>
+                  <p>
+                    <strong>Follow-up Date:</strong> {selectedRowData.followup}
+                  </p>
+                  <p>
+                    <strong>Call Status:</strong> {selectedRowData.call_status}
+                  </p>
+                  <p>
+                    <strong>Lead Status:</strong> {selectedRowData.lead_status}
+                  </p>
+                  <p>
+                    <strong>Lead Number:</strong> {selectedRowData.lead_number}
+                  </p>
+                </div>
+              ) : (
+                <p>No data available.</p>
+              )}
+            </div>
+            <div className="mt-4">
+              <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
