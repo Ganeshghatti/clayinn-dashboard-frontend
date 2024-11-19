@@ -34,7 +34,36 @@ export const create_Lead_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to create lead");
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.post(
+            `${url}/leads-management/leads/create/`,
+            { ...formData, location_id: locationId },
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Faile to create the Lead");
     }
   }
 );
@@ -55,8 +84,35 @@ export const fetchLeads_Action = createAsyncThunk(
       );
       return response.data?.results;
     } catch (error) {
-      console.log(error);
-      return rejectWithValue(error.response?.data || "Failed to fetch leads");
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.get(
+            `${url}/leads-management/leads/get/${locationId}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data?.results;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Failed to fetch the Lead");
     }
   }
 );
@@ -78,8 +134,36 @@ export const fetch_Lead_By_ID = createAsyncThunk(
 
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.get(
+            `${url}/leads-management/leads/detail/${lead_number}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(
-        error.response?.data || "Failed to fetch Lead By Id"
+        error.response.data || "Failed to fetch the Lead by Id"
       );
     }
   }
@@ -103,8 +187,36 @@ export const delete_Lead_By_SuperAdmin = createAsyncThunk(
       );
       return lead_number;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          await axios.delete(
+            `${url}/leads-management/leads/delete/${lead_number}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return lead_number;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(
-        error.response?.data || "Failed to delete the lead"
+        error.response.data || "Failed to Delete the Lead by Id"
       );
     }
   }

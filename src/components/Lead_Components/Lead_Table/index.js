@@ -43,6 +43,8 @@ import {
 import LeadsDetails from "../Leads_Details";
 import Lead_Delete from "../Leads_Delete";
 
+import Booking_Create_Form from "@/components/Forms/Booking_Create_Form";
+
 export default function LeadsTable({ leads, locationId }) {
   const [sorting, setSorting] = useState([]);
   const [columnFilters, setColumnFilters] = useState([]);
@@ -55,6 +57,7 @@ export default function LeadsTable({ leads, locationId }) {
 
   const handleLeadStatusClick = (rowData) => {
     setSelectedRowData(rowData);
+    console.log(leads);
     setIsModalOpen(true);
   };
 
@@ -173,8 +176,6 @@ export default function LeadsTable({ leads, locationId }) {
       ),
     },
   ];
-
-  console.log(leads, "leads");
 
   const table = useReactTable({
     data: leads,
@@ -317,46 +318,17 @@ export default function LeadsTable({ leads, locationId }) {
           </Button>
         </div>
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent>
+          <DialogContent className=" space-y-4 max-md:max-w-[90%] max-w-[50%]  rounded-xl ">
             <DialogHeader>
-              <DialogTitle>Lead Status Details</DialogTitle>
-              <DialogDescription>
-                {/* You can add a brief description if necessary */}
-              </DialogDescription>
+              <DialogTitle className="capitalize text-center mt-10">
+                Create a New Booking
+              </DialogTitle>
             </DialogHeader>
-            <div>
-              {/* Display data from the selected row */}
-              {selectedRowData ? (
-                <div>
-                  <p>
-                    <strong>Host Name:</strong> {selectedRowData.hostname}
-                  </p>
-                  <p>
-                    <strong>Mobile:</strong> {selectedRowData.mobile}
-                  </p>
-                  <p>
-                    <strong>Salesperson:</strong> {selectedRowData.sales_person}
-                  </p>
-                  <p>
-                    <strong>Follow-up Date:</strong> {selectedRowData.followup}
-                  </p>
-                  <p>
-                    <strong>Call Status:</strong> {selectedRowData.call_status}
-                  </p>
-                  <p>
-                    <strong>Lead Status:</strong> {selectedRowData.lead_status}
-                  </p>
-                  <p>
-                    <strong>Lead Number:</strong> {selectedRowData.lead_number}
-                  </p>
-                </div>
-              ) : (
-                <p>No data available.</p>
-              )}
-            </div>
-            <div className="mt-4">
-              <Button onClick={() => setIsDialogOpen(false)}>Close</Button>
-            </div>
+            <Booking_Create_Form
+              setOpen={isModalOpen}
+              leadNumber={selectedRowData?.lead_number}
+              occasions={leads[selectedRowData?.lead_number - 1]?.occasions}
+            />
           </DialogContent>
         </Dialog>
       </div>

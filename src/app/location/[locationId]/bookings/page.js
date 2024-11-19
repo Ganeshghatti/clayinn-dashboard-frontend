@@ -27,13 +27,10 @@ export default function Bookings() {
         <div>
           <Header content={`${locationName}`} />
         </div>
-        <div>
-          <Booking_Create_Dialog action={"create"} />
-        </div>
       </div>
-      {/* <div className="mt-10 flex-1">
+      <div className="mt-10 flex-1">
         <LeadTable leads={leads} locationId={locationId} />
-      </div> */}
+      </div>
       <div>
         <Footer_Component content={location_Name} />
       </div>

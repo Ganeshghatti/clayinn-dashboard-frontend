@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useToast } from "@/hooks/use-toast";
 import { useParams } from "next/navigation";
+import { useEffect } from "react";
 
 import { z } from "zod";
 
@@ -15,6 +16,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import jwt from "jsonwebtoken";
+
 import {
   Form,
   FormControl,
@@ -26,26 +29,41 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { create_Booking_Action } from "@/app/redux/booking_Slice";
+import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
+import { decode } from "punycode";
 
 const BookingSchema = z.object({
   venue: z.string().min(1),
-  sales_person: z.string().min(1),
+  occasion: z.string().min(1),
   event_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   slot: z.string().min(1),
 });
 
-export default function Booking_Create_Form({ setOpen, action }) {
+export default function Booking_Create_Form({
+  setOpen,
+  leadNumber,
+  occasions,
+}) {
   const dispatch = useDispatch();
   const { toast } = useToast();
   const auth = useSelector((state) => state.auth);
   const user = auth?.user;
   const { locationId } = useParams();
 
+  const token = localStorage.getItem("access-token");
+  const decodedToken = jwt.decode(token);
+
+  const { all_venues } = useSelector((state) => state.venues);
+
+  useEffect(() => {
+    dispatch(fetchVenues_Actions(locationId));
+  }, [dispatch, locationId]);
+
   const form = useForm({
     resolver: zodResolver(BookingSchema),
     defaultValues: {
       venue: "",
-      sales_person: "",
+      ocassion: "",
       event_date: "",
       slot: "",
     },
@@ -63,20 +81,25 @@ export default function Booking_Create_Form({ setOpen, action }) {
       // }
 
       const formData = {
-        ...values,
-        lead: 4,
-        occasion: 7,
+        lead: leadNumber,
+        occasion: parseInt(values.occasion),
+        venue: values.venue,
         location: locationId,
+        sales_person: decodedToken.user_id,
+        event_date: values.event_date,
+        slot: values.slot,
       };
 
       await dispatch(create_Booking_Action({ formData })).unwrap();
+      console.log(formData);
+      console.log(occasions);
+      console.log(decodedToken);
 
       toast({
         title: "Success",
         description: "Lead created successfully",
       });
 
-      setOpen(false);
       form.reset();
     } catch (error) {
       toast({
@@ -88,8 +111,8 @@ export default function Booking_Create_Form({ setOpen, action }) {
   }
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)}>
-      <Form {...form} className="">
+    <Form {...form} className="">
+      <form onSubmit={form.handleSubmit(onSubmit)}>
         <FormField
           control={form.control}
           name="venue"
@@ -97,21 +120,22 @@ export default function Booking_Create_Form({ setOpen, action }) {
             <FormItem className="mt-2">
               <FormLabel>Venue</FormLabel>
               <FormControl>
-                <Input placeholder="select the venue for booking" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="sales_person"
-          render={({ field }) => (
-            <FormItem className="mt-2">
-              <FormLabel>Sales Person</FormLabel>
-              <FormControl>
-                <Input placeholder="who is the sales person" {...field} />
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Venues" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {all_venues.map((item, index) => (
+                      <SelectItem key={index} value={item.venue_id}>
+                        {item.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -125,6 +149,39 @@ export default function Booking_Create_Form({ setOpen, action }) {
               <FormLabel>Event Date</FormLabel>
               <FormControl>
                 <Input type="date" placeholder="event date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="occasion"
+          render={({ field }) => (
+            <FormItem className="mt-2">
+              <FormLabel>Occasion</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  value={field.value}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className="w-full capitalize">
+                    <SelectValue placeholder="Occasion" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {occasions.map((item, index) => (
+                      <SelectItem
+                        key={index}
+                        className="capitalize"
+                        value={item.id.toString()}
+                      >
+                        {item.occasion_type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -161,7 +218,7 @@ export default function Booking_Create_Form({ setOpen, action }) {
         >
           Create Booking
         </Button>
-      </Form>
-    </form>
+      </form>
+    </Form>
   );
 }

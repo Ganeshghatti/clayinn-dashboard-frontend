@@ -25,6 +25,34 @@ export const fetchVenues_Actions = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.get(
+            `${URL}/venue-management/locations/${location_Id}/venues/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -51,7 +79,35 @@ export const create_Venue_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      console.log(error, "error redux");
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.post(
+            `${URL}/venue-management/locations/${location_Id}/venues/`,
+            values,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response?.data || error.message);
     }
   }
@@ -76,7 +132,36 @@ export const venue_Update_action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      console.log(error, "error redux");
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.put(
+            `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
+            values,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );
@@ -100,7 +185,35 @@ export const venue_Delete_Action = createAsyncThunk(
 
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data || error?.message);
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.delete(
+            `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response?.data || error.message);
     }
   }
 );

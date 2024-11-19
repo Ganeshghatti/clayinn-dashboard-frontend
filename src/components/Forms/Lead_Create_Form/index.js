@@ -28,6 +28,8 @@ import { useSelector, useDispatch } from "react-redux";
 import { create_Lead_Action } from "@/app/redux/lead_Slice";
 import { useParams } from "next/navigation";
 
+import jwt from "jsonwebtoken";
+
 const standardOccasionSchema = z.object({
   occasion_type: z.string(),
   date_of_function: z.string(),
@@ -81,6 +83,9 @@ export default function Lead_Create_Form({ setOpen, action }) {
   const auth = useSelector((state) => state.auth);
   const user = auth?.user;
   const { locationId } = useParams();
+
+  const token = localStorage.getItem("access-token");
+  const decodedToken = jwt.decode(token);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -378,8 +383,38 @@ export default function Lead_Create_Form({ setOpen, action }) {
 
       const formData = {
         ...values,
-        sales_person: "sales-person-4d712",
+        sales_person: decodedToken.user_id,
+        location_id: locationId,
       };
+
+      const ApiData = {
+        hostname: "Adarsh",
+        mobile: "9876543210",
+        location_id: "Delhi-43a9a",
+        sales_person: "super-admin-461a0",
+        email: "john@example.com",
+        lead_status: "untouched",
+        call_status: "not_yet_call",
+        followup: "2024-03-20",
+        occasions: [
+          {
+            occasion_type: "wedding",
+            date_of_function: "2024-11-24",
+            day: "Wednesday",
+            lunch_pax: 200,
+            hi_tea_pax: 150,
+            dinner_pax: 300,
+            dj_value: 25000,
+            decor_value: 50000,
+            liquor_value: 30000,
+            vedi_value: 10000,
+            total: 115000,
+          },
+        ],
+      };
+
+      console.log(formData);
+      console.log(ApiData);
 
       await dispatch(create_Lead_Action({ formData, locationId })).unwrap();
 
