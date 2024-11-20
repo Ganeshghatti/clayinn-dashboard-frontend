@@ -9,6 +9,15 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
 } from "@tanstack/react-table";
+
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import { BiSort } from "react-icons/bi";
 import { Button } from "@/components/ui/button";
@@ -34,116 +43,7 @@ import {
 import LeadsDetails from "../Leads_Details";
 import Lead_Delete from "../Leads_Delete";
 
-// Define column configuration
-const columns = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-  },
-  {
-    accessorKey: "hostname",
-    header: "Host Name",
-    cell: ({ row }) => (
-      <div className="text-center capitalize">{row.getValue("hostname")}</div>
-    ),
-  },
-  {
-    accessorKey: "mobile",
-    header: "Mobile",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("mobile")}</div>
-    ),
-  },
-  {
-    accessorKey: "sales_person",
-    header: "Salesperson",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("sales_person")}</div>
-    ),
-  },
-
-  {
-    accessorKey: "followup",
-    header: "Follow-up Date",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("followup")}</div>
-    ),
-  },
-  {
-    accessorKey: "call_status",
-    header: "Call Status",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("call_status")}</div>
-    ),
-  },
-  {
-    accessorKey: "lead_status",
-    header: "Lead Status",
-    cell: ({ row }) => {
-      const leadStatus = row.getValue("lead_status");
-      const statusStyles =
-        leadStatus === "untouched"
-          ? "bg-red-700 text-white"
-          : "bg-green-600 text-white";
-      return (
-        <div className={`text-center py-1 px-2 rounded-full ${statusStyles}`}>
-          {leadStatus}
-        </div>
-      );
-    },
-  },
-  {
-    accessorKey: "lead_number",
-    header: "Lead #",
-    cell: ({ row }) => (
-      <div className="text-center">{row.getValue("lead_number")}</div>
-    ),
-  },
-  {
-    id: "actions",
-    header: "Actions",
-    cell: ({ row }) => (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-8 w-8 p-0">
-            <span className="sr-only">Open menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="center" className="space-y-2">
-          <DropdownMenuLabel className="text-center">Actions</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() =>
-              navigator.clipboard.writeText(row.original.lead_number)
-            }
-          >
-            Copy Lead Number
-          </DropdownMenuItem>
-          <DropdownMenuSeparator />
-          <LeadsDetails lead={row.original} />
-          <Lead_Delete lead={row.original} />
-        </DropdownMenuContent>
-      </DropdownMenu>
-    ),
-  },
-];
+import Booking_Create_Form from "@/components/Forms/Booking_Create_Form";
 
 export default function LeadsTable({ leads, locationId }) {
   const [sorting, setSorting] = useState([]);
@@ -152,7 +52,130 @@ export default function LeadsTable({ leads, locationId }) {
   const [rowSelection, setRowSelection] = useState({});
   const [filterValue, setFilterValue] = useState("");
 
-  console.log(leads, "leads");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState(null);
+
+  const handleLeadStatusClick = (rowData) => {
+    setSelectedRowData(rowData);
+    console.log(leads);
+    setIsModalOpen(true);
+  };
+
+  // Define column configuration
+  const columns = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: "hostname",
+      header: "Host Name",
+      cell: ({ row }) => (
+        <div className="text-center capitalize">{row.getValue("hostname")}</div>
+      ),
+    },
+    {
+      accessorKey: "mobile",
+      header: "Mobile",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("mobile")}</div>
+      ),
+    },
+    {
+      accessorKey: "sales_person",
+      header: "Salesperson",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("sales_person")}</div>
+      ),
+    },
+
+    {
+      accessorKey: "followup",
+      header: "Follow-up Date",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("followup")}</div>
+      ),
+    },
+    {
+      accessorKey: "call_status",
+      header: "Call Status",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("call_status")}</div>
+      ),
+    },
+    {
+      accessorKey: "lead_status",
+      header: "Lead Status",
+      cell: ({ row }) => {
+        const leadStatus = row.getValue("lead_status");
+        const statusStyles =
+          leadStatus === "untouched"
+            ? "bg-red-700 text-white"
+            : "bg-green-600 text-white";
+        return (
+          <div
+            className={`text-center py-1 px-2 rounded-full ${statusStyles}`}
+            onClick={() => handleLeadStatusClick(row.original)}
+          >
+            {leadStatus}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "lead_number",
+      header: "Lead #",
+      cell: ({ row }) => (
+        <div className="text-center">{row.getValue("lead_number")}</div>
+      ),
+    },
+    {
+      id: "actions",
+      header: "Actions",
+      cell: ({ row }) => (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="space-y-2">
+            <DropdownMenuLabel className="text-center">
+              Actions
+            </DropdownMenuLabel>
+            <DropdownMenuItem
+              onClick={() =>
+                navigator.clipboard.writeText(row.original.lead_number)
+              }
+            >
+              Copy Lead Number
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <LeadsDetails lead={row.original} />
+            <Lead_Delete lead={row.original} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      ),
+    },
+  ];
 
   const table = useReactTable({
     data: leads,
@@ -294,6 +317,20 @@ export default function LeadsTable({ leads, locationId }) {
             Next
           </Button>
         </div>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className=" space-y-4 max-md:max-w-[90%] max-w-[50%]  rounded-xl ">
+            <DialogHeader>
+              <DialogTitle className="capitalize text-center mt-10">
+                Create a New Booking
+              </DialogTitle>
+            </DialogHeader>
+            <Booking_Create_Form
+              setOpen={isModalOpen}
+              leadNumber={selectedRowData?.lead_number}
+              occasions={leads[selectedRowData?.lead_number - 1]?.occasions}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

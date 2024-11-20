@@ -73,6 +73,17 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Calendar Forced CSS for Venue Calendar View */
+
+  .venue-calendar .fc-toolbar {
+    gap: 1rem !important;
+    margin-top: 1rem;
+  }
+
+  .venue-calendar .fc-toolbar-title {
+    font-size: 20px !important;
+  }
 }
 
 * {

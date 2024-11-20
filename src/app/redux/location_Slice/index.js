@@ -31,6 +31,34 @@ export const fetch_All_Location_Action = createAsyncThunk(
 
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.get(
+            `${URL}/location-management/locations/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response.data);
     }
   }
@@ -58,6 +86,35 @@ export const create_New_Location_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.post(
+            `${URL}/location-management/locations/`,
+            values,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response.data);
     }
   }
@@ -82,6 +139,35 @@ export const update_Location_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.put(
+            `${URL}/location-management/locations/${location_Id}/`,
+            values,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response.data);
     }
   }
@@ -104,6 +190,34 @@ export const delete_Location_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.delete(
+            `${URL}/location-management/locations/${location_Id}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
       return rejectWithValue(error.response.data);
     }
   }

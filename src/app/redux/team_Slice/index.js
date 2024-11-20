@@ -30,9 +30,35 @@ export const fetchAllMembers = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch members."
-      );
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.get(
+            `${url}/user-management/locations/${location_id}/sales-persons/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Failed to fetch members");
     }
   }
 );
@@ -54,9 +80,36 @@ export const createMember = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to create member."
-      );
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.post(
+            `${url}/user-management/locations/${location_id}/sales-persons/`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Failed to create members");
     }
   }
 );
@@ -79,9 +132,36 @@ export const updateMember = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to update member."
-      );
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          const newResponse = await axios.put(
+            `${url}/user-management/locations/${location_id}/sales-persons/${member_id}/`,
+            data,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return newResponse.data;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Failed to update members");
     }
   }
 );
@@ -102,9 +182,35 @@ export const deleteMember = createAsyncThunk(
       );
       return member_id;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data || "Failed to delete member."
-      );
+      if (error.response && error.response.status === 401) {
+        console.log("Refreshing the Token");
+        const refresh_token = localStorage.getItem("refresh-token");
+
+        try {
+          const response = await axios.post(
+            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
+            {
+              refresh: refresh_token,
+            }
+          );
+          localStorage.setItem("access-token", response.data.access);
+
+          await axios.delete(
+            `${url}/user-management/locations/${location_id}/sales-persons/${member_id}/`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          return member_id;
+        } catch (error) {
+          return rejectWithValue(error.response.data);
+        }
+      }
+
+      return rejectWithValue(error.response.data || "Failed to delete members");
     }
   }
 );

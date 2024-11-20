@@ -2,10 +2,10 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
-  leads: [],
+  booking: [],
   loading: false,
   error: null,
-  lead_By_Id: {},
+  booking_By_Id: {},
 };
 
 const url = process.env.NEXT_PUBLIC_URL;
@@ -17,15 +17,16 @@ const getToken = () => {
   return token;
 };
 
-// Create Lead Action
-export const create_Lead_Action = createAsyncThunk(
-  "leads/create",
-  async ({ formData, locationId }, { rejectWithValue }) => {
+// Create Booking Action
+
+export const create_Booking_Action = createAsyncThunk(
+  "bookings/create",
+  async ({ formData }, { rejectWithValue }) => {
     try {
       const token = getToken();
       const response = await axios.post(
-        `${url}/leads-management/leads/create/`,
-        { ...formData, location_id: locationId },
+        `${url}/bookings-management/bookings/create/`,
+        formData,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,8 +49,8 @@ export const create_Lead_Action = createAsyncThunk(
           localStorage.setItem("access-token", response.data.access);
 
           const newResponse = await axios.post(
-            `${url}/leads-management/leads/create/`,
-            { ...formData, location_id: locationId },
+            `${url}/bookings-management/bookings/create/`,
+            formData,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -63,19 +64,21 @@ export const create_Lead_Action = createAsyncThunk(
         }
       }
 
-      return rejectWithValue(error.response.data || "Faile to create the Lead");
+      return rejectWithValue(
+        error.response?.data || "Failed to create Bookings"
+      );
     }
   }
 );
 
-// Fetch Leads
-export const fetchLeads_Action = createAsyncThunk(
-  "leads/fetchLeads",
+// Fetch Bookings
+export const fetchBookings_Action = createAsyncThunk(
+  "bookings/fetchBookings",
   async (locationId, { rejectWithValue }) => {
     try {
       const token = getToken();
       const response = await axios.get(
-        `${url}/leads-management/leads/get/${locationId}/`,
+        `${url}/bookings-management/bookings/get/${locationId}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -98,7 +101,7 @@ export const fetchLeads_Action = createAsyncThunk(
           localStorage.setItem("access-token", response.data.access);
 
           const newResponse = await axios.get(
-            `${url}/leads-management/leads/get/${locationId}/`,
+            `${url}/bookings-management/bookings/get/${locationId}/`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -112,19 +115,21 @@ export const fetchLeads_Action = createAsyncThunk(
         }
       }
 
-      return rejectWithValue(error.response.data || "Failed to fetch the Lead");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch Bookings"
+      );
     }
   }
 );
 
-// Fetch Lead By ID
-export const fetch_Lead_By_ID = createAsyncThunk(
-  "lead/fetchLeadById",
-  async (lead_number, { rejectWithValue }) => {
+// Fetch Booking By ID
+export const fetch_Booking_By_ID = createAsyncThunk(
+  "booking/fetchBookingById",
+  async (booking_number, { rejectWithValue }) => {
     try {
       const token = getToken();
       const response = await axios.get(
-        `${url}/leads-management/leads/detail/${lead_number}/`,
+        `${url}/bookings-management/bookings/detail/${booking_number}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -148,7 +153,7 @@ export const fetch_Lead_By_ID = createAsyncThunk(
           localStorage.setItem("access-token", response.data.access);
 
           const newResponse = await axios.get(
-            `${url}/leads-management/leads/detail/${lead_number}/`,
+            `${url}/bookings-management/bookings/detail/${booking_number}/`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -163,29 +168,27 @@ export const fetch_Lead_By_ID = createAsyncThunk(
       }
 
       return rejectWithValue(
-        error.response.data || "Failed to fetch the Lead by Id"
+        error.response?.data || "Failed to fetch Bookings by Id"
       );
     }
   }
 );
 
-// UPDATE LEAD
-
-// Delete Lead
-export const delete_Lead_By_SuperAdmin = createAsyncThunk(
-  "lead/delete",
-  async (lead_number, { rejectWithValue }) => {
+// Delete Booking
+export const delete_Booking_By_SuperAdmin = createAsyncThunk(
+  "booking/delete",
+  async (booking_number, { rejectWithValue }) => {
     try {
       const token = getToken();
       await axios.delete(
-        `${url}/leads-management/leads/delete/${lead_number}/`,
+        `${url}/bookings-management/bookings/delete/${booking_number}/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         }
       );
-      return lead_number;
+      return booking_number;
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.log("Refreshing the Token");
@@ -201,7 +204,7 @@ export const delete_Lead_By_SuperAdmin = createAsyncThunk(
           localStorage.setItem("access-token", response.data.access);
 
           await axios.delete(
-            `${url}/leads-management/leads/delete/${lead_number}/`,
+            `${url}/bookings-management/bookings/delete/${booking_number}/`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -209,80 +212,80 @@ export const delete_Lead_By_SuperAdmin = createAsyncThunk(
             }
           );
 
-          return lead_number;
+          return booking_number;
         } catch (error) {
           return rejectWithValue(error.response.data);
         }
       }
 
       return rejectWithValue(
-        error.response.data || "Failed to Delete the Lead by Id"
+        error.response?.data || "Failed to Delete Booking"
       );
     }
   }
 );
 
-const leadsSlice = createSlice({
-  name: "leads",
+const bookingSlice = createSlice({
+  name: "bookings",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      // Create Lead
-      .addCase(create_Lead_Action.pending, (state) => {
+      //Create Booking
+      .addCase(create_Booking_Action.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(create_Lead_Action.fulfilled, (state, action) => {
+      .addCase(create_Booking_Action.fulfilled, (state) => {
         state.loading = false;
-        state.leads = [...state.leads, action.payload];
+        state.booking = [...state.booking, action.payload];
       })
-      .addCase(create_Lead_Action.rejected, (state, action) => {
+      .addCase(create_Booking_Action.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch Leads
-      .addCase(fetchLeads_Action.pending, (state) => {
+      // Fetch Booking
+      .addCase(fetchBookings_Action.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchLeads_Action.fulfilled, (state, action) => {
+      .addCase(fetchBookings_Action.fulfilled, (state, action) => {
         state.loading = false;
-        state.leads = action.payload;
+        state.booking = action.payload;
       })
-      .addCase(fetchLeads_Action.rejected, (state, action) => {
+      .addCase(fetchBookings_Action.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Fetch Lead By ID
-      .addCase(fetch_Lead_By_ID.pending, (state) => {
+      // Fetch Booking By ID
+      .addCase(fetch_Booking_By_ID.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetch_Lead_By_ID.fulfilled, (state, action) => {
+      .addCase(fetch_Booking_By_ID.fulfilled, (state, action) => {
         state.loading = false;
-        state.lead_By_Id = action.payload;
+        state.booking_By_Id = action.payload;
       })
-      .addCase(fetch_Lead_By_ID.rejected, (state, action) => {
+      .addCase(fetch_Booking_By_ID.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
-      // Delete Lead
-      .addCase(delete_Lead_By_SuperAdmin.pending, (state) => {
+      // Delete Booking
+      .addCase(delete_Booking_By_SuperAdmin.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(delete_Lead_By_SuperAdmin.fulfilled, (state, action) => {
+      .addCase(delete_Booking_By_SuperAdmin.fulfilled, (state, action) => {
         state.loading = false;
-        state.leads = state.leads.filter(
-          (lead) => lead.lead_number !== action.payload
+        state.booking = state.booking.filter(
+          (booking) => booking.booking_number !== action.payload
         );
       })
-      .addCase(delete_Lead_By_SuperAdmin.rejected, (state, action) => {
+      .addCase(delete_Booking_By_SuperAdmin.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
   },
 });
 
-export default leadsSlice.reducer;
+export default bookingSlice.reducer;
