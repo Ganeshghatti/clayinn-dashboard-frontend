@@ -1,39 +1,46 @@
 "use client";
 
-import { fetchLeads_Action } from "@/app/redux/lead_Slice";
-import Booking_Create_Dialog from "@/components/Booking_Components/Booking_Create_Dialog";
-import Footer_Component from "@/components/Footer";
-import Header from "@/components/Header";
-import LeadTable from "@/components/Lead_Components/Lead_Table";
-import { useParams, usePathname } from "next/navigation";
 import { useEffect } from "react";
+import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
+import { fetchBookings_Action } from "@/app/redux/booking_Slice";
+import Header from "@/components/Header";
+import Footer_Component from "@/components/Footer";
+import BookingsTable from "@/components/Booking_Components/Booking_Table";
 
 export default function Bookings() {
-  const pathName = usePathname();
-  const locationName = pathName.split("/")[3];
-  const location_Name = pathName.split("/")[2];
   const { locationId } = useParams();
   const dispatch = useDispatch();
-  const { leads } = useSelector((state) => state.leads);
+  const { bookings, loading, error } = useSelector((state) => state.bookings);
 
   useEffect(() => {
-    dispatch(fetchLeads_Action(locationId));
+    dispatch(fetchBookings_Action(locationId));
   }, [dispatch, locationId]);
 
+  // Debug logs
+  console.log("Bookings from state:", bookings);
+  console.log("Loading state:", loading);
+  console.log("Error state:", error);
+
   return (
-    <div className="space-y-14 flex flex-col justify-between h-[95vh]">
+    <div className="space-y-14 flex flex-col justify-between min-h-screen">
       <div className="flex flex-col gap-4">
-        <div>
-          <Header content={`${locationName}`} />
-        </div>
+        <Header content="Bookings Management" />
       </div>
-      <div className="mt-10 flex-1">
-        <LeadTable leads={leads} locationId={locationId} />
+
+      <div className="flex-1">
+        {loading ? (
+          <div className="text-center">Loading bookings...</div>
+        ) : error ? (
+          <div className="text-center text-red-600">Error: {error}</div>
+        ) : bookings?.length === 0 ? (
+          <div className="text-center">No bookings found</div>
+        ) : (
+          <BookingsTable bookings={bookings} locationId={locationId} />
+        )}
       </div>
-      <div>
-        <Footer_Component content={location_Name} />
-      </div>
+
+      <Footer_Component content={locationId} />
     </div>
   );
 }

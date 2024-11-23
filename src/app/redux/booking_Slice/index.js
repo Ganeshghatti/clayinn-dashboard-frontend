@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
 const initialState = {
-  booking: [],
+  bookings: [],
   loading: false,
   error: null,
   booking_By_Id: {},
@@ -18,7 +18,6 @@ const getToken = () => {
 };
 
 // Create Booking Action
-
 export const create_Booking_Action = createAsyncThunk(
   "bookings/create",
   async ({ formData }, { rejectWithValue }) => {
@@ -63,10 +62,7 @@ export const create_Booking_Action = createAsyncThunk(
           return rejectWithValue(error.response.data);
         }
       }
-
-      return rejectWithValue(
-        error.response?.data || "Failed to create Bookings"
-      );
+      return rejectWithValue(error.response.data || "Failed to create the Booking");
     }
   }
 );
@@ -85,7 +81,19 @@ export const fetchBookings_Action = createAsyncThunk(
           },
         }
       );
-      return response.data?.results;
+      
+      // Add debug logs
+      console.log("API Response:", response);
+      console.log("Response Data:", response.data);
+      
+      // Check if response.data exists and has the expected structure
+      if (!response.data) {
+        return rejectWithValue("No data received from the API");
+      }
+
+      // Return the results array directly (not nested under results)
+      return response.data;
+
     } catch (error) {
       if (error.response && error.response.status === 401) {
         console.log("Refreshing the Token");
@@ -104,83 +112,39 @@ export const fetchBookings_Action = createAsyncThunk(
             `${url}/bookings-management/bookings/get/${locationId}/`,
             {
               headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${response.data.access}`, // Use the new token
               },
             }
           );
 
-          return newResponse.data?.results;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
+          // Add debug logs for refresh token case
+          console.log("Refreshed API Response:", newResponse);
+          console.log("Refreshed Response Data:", newResponse.data);
 
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch Bookings"
-      );
-    }
-  }
-);
-
-// Fetch Booking By ID
-export const fetch_Booking_By_ID = createAsyncThunk(
-  "booking/fetchBookingById",
-  async (booking_number, { rejectWithValue }) => {
-    try {
-      const token = getToken();
-      const response = await axios.get(
-        `${url}/bookings-management/bookings/detail/${booking_number}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      return response.data;
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.get(
-            `${url}/bookings-management/bookings/detail/${booking_number}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
+          if (!newResponse.data) {
+            return rejectWithValue("No data received after token refresh");
+          }
 
           return newResponse.data;
         } catch (error) {
-          return rejectWithValue(error.response.data);
+          console.error("Token refresh error:", error);
+          return rejectWithValue(error.response?.data || "Token refresh failed");
         }
       }
 
-      return rejectWithValue(
-        error.response?.data || "Failed to fetch Bookings by Id"
-      );
+      console.error("API error:", error);
+      return rejectWithValue(error.response?.data || "Failed to fetch Bookings");
     }
   }
 );
 
 // Delete Booking
-export const delete_Booking_By_SuperAdmin = createAsyncThunk(
+export const delete_Booking_Action = createAsyncThunk(
   "booking/delete",
   async (booking_number, { rejectWithValue }) => {
     try {
       const token = getToken();
-      await axios.delete(
+      const response = await axios.delete(
         `${url}/bookings-management/bookings/delete/${booking_number}/`,
         {
           headers: {
@@ -188,39 +152,9 @@ export const delete_Booking_By_SuperAdmin = createAsyncThunk(
           },
         }
       );
-      return booking_number;
+      return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          await axios.delete(
-            `${url}/bookings-management/bookings/delete/${booking_number}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return booking_number;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(
-        error.response?.data || "Failed to Delete Booking"
-      );
+      return rejectWithValue(error.response.data || "Failed to delete the Booking");
     }
   }
 );
@@ -231,59 +165,19 @@ const bookingSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      //Create Booking
-      .addCase(create_Booking_Action.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(create_Booking_Action.fulfilled, (state) => {
-        state.loading = false;
-        state.booking = [...state.booking, action.payload];
-      })
-      .addCase(create_Booking_Action.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Fetch Booking
       .addCase(fetchBookings_Action.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchBookings_Action.fulfilled, (state, action) => {
         state.loading = false;
-        state.booking = action.payload;
+        state.bookings = action.payload;
+        console.log("State updated with bookings:", state.bookings); // Debug log
       })
       .addCase(fetchBookings_Action.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
-      // Fetch Booking By ID
-      .addCase(fetch_Booking_By_ID.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetch_Booking_By_ID.fulfilled, (state, action) => {
-        state.loading = false;
-        state.booking_By_Id = action.payload;
-      })
-      .addCase(fetch_Booking_By_ID.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
-      // Delete Booking
-      .addCase(delete_Booking_By_SuperAdmin.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(delete_Booking_By_SuperAdmin.fulfilled, (state, action) => {
-        state.loading = false;
-        state.booking = state.booking.filter(
-          (booking) => booking.booking_number !== action.payload
-        );
-      })
-      .addCase(delete_Booking_By_SuperAdmin.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        console.error("Fetch bookings rejected:", action.payload); // Debug log
       });
   },
 });

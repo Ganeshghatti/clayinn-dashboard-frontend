@@ -82,6 +82,7 @@ export const fetchLeads_Action = createAsyncThunk(
           },
         }
       );
+      console.log(response.data);
       return response.data?.results;
     } catch (error) {
       if (error.response && error.response.status === 401) {

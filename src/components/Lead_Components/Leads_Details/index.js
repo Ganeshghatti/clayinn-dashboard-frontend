@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -13,20 +12,18 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { FiCalendar, FiPhone, FiMail, FiMapPin } from "react-icons/fi"; // Add icons
+import { FiPhone, FiMapPin } from "react-icons/fi";
 
 export default function LeadsDetails({ lead }) {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { lead_By_Id } = useSelector((state) => state.leads);
 
-  console.log(lead, "----------");
-
   useEffect(() => {
-    if (lead?.lead_number) {
+    if (open && lead?.lead_number) {
       dispatch(fetch_Lead_By_ID(lead.lead_number));
     }
-  }, [dispatch, lead?.lead_number]);
+  }, [dispatch, lead?.lead_number, open]);
 
   const date = lead_By_Id?.lead_entry_date
     ? new Date(lead_By_Id.lead_entry_date).toLocaleDateString()
@@ -36,11 +33,11 @@ export default function LeadsDetails({ lead }) {
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button
-            variant="ghost"
+          <Button 
+            variant="ghost" 
             className="text-blue-700 font-medium hover:text-blue-900"
           >
-            View Lead Details
+            Details
           </Button>
         </DialogTrigger>
         <DialogContent className="max-md:max-w-[90%] md:max-w-[85%] h-[90vh] mx-auto p-6 bg-white rounded-lg shadow-lg overflow-auto">
@@ -48,9 +45,7 @@ export default function LeadsDetails({ lead }) {
             <DialogTitle className="text-3xl font-bold text-blue-700 text-center mb-6">
               Lead Information
             </DialogTitle>
-            <DialogDescription className="hidden"></DialogDescription>
           </DialogHeader>
-
           <div className="space-y-8">
             {/* Basic Lead Information */}
             <section className="p-5 bg-blue-50 rounded-lg shadow-md">
@@ -126,9 +121,9 @@ export default function LeadsDetails({ lead }) {
               </h2>
               <Separator className="my-3" />
               <div className="space-y-4">
-                {lead_By_Id?.occasions?.map((occasion) => (
+                {lead_By_Id?.occasions?.map((occasion, index) => (
                   <div
-                    key={occasion.id}
+                    key={index}
                     className="p-4 border border-orange-200 rounded-md bg-white shadow-sm"
                   >
                     <h3 className="text-md font-semibold text-orange-600 capitalize">
@@ -137,7 +132,6 @@ export default function LeadsDetails({ lead }) {
                         : "Room Arrangement"}
                     </h3>
                     <Separator className="my-2" />
-
                     {/* Wedding Event Details Table */}
                     {occasion.occasion_type === "wedding" ? (
                       <table className="w-full text-gray-600 text-sm">

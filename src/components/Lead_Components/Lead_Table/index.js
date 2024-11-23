@@ -1,337 +1,376 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import LeadsDetails from "../Leads_Details";
+import Lead_Delete from "../Leads_Delete";
 import {
-  flexRender,
-  useReactTable,
-  getCoreRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-} from "@tanstack/react-table";
-
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
+import { format } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import axios from "axios";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-
-import { ChevronDown, MoreHorizontal } from "lucide-react";
-import { BiSort } from "react-icons/bi";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import LeadsDetails from "../Leads_Details";
-import Lead_Delete from "../Leads_Delete";
-
-import Booking_Create_Form from "@/components/Forms/Booking_Create_Form";
+import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LeadsTable({ leads, locationId }) {
-  const [sorting, setSorting] = useState([]);
-  const [columnFilters, setColumnFilters] = useState([]);
-  const [columnVisibility, setColumnVisibility] = useState({});
-  const [rowSelection, setRowSelection] = useState({});
-  const [filterValue, setFilterValue] = useState("");
-
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedRowData, setSelectedRowData] = useState(null);
-
-  const handleLeadStatusClick = (rowData) => {
-    setSelectedRowData(rowData);
-    console.log(leads);
-    setIsModalOpen(true);
-  };
-
-  // Define column configuration
-  const columns = [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
-          }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-    },
-    {
-      accessorKey: "hostname",
-      header: "Host Name",
-      cell: ({ row }) => (
-        <div className="text-center capitalize">{row.getValue("hostname")}</div>
-      ),
-    },
-    {
-      accessorKey: "mobile",
-      header: "Mobile",
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("mobile")}</div>
-      ),
-    },
-    {
-      accessorKey: "sales_person",
-      header: "Salesperson",
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("sales_person")}</div>
-      ),
-    },
-
-    {
-      accessorKey: "followup",
-      header: "Follow-up Date",
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("followup")}</div>
-      ),
-    },
-    {
-      accessorKey: "call_status",
-      header: "Call Status",
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("call_status")}</div>
-      ),
-    },
-    {
-      accessorKey: "lead_status",
-      header: "Lead Status",
-      cell: ({ row }) => {
-        const leadStatus = row.getValue("lead_status");
-        const statusStyles =
-          leadStatus === "untouched"
-            ? "bg-red-700 text-white"
-            : "bg-green-600 text-white";
-        return (
-          <div
-            className={`text-center py-1 px-2 rounded-full ${statusStyles}`}
-            onClick={() => handleLeadStatusClick(row.original)}
-          >
-            {leadStatus}
-          </div>
-        );
-      },
-    },
-    {
-      accessorKey: "lead_number",
-      header: "Lead #",
-      cell: ({ row }) => (
-        <div className="text-center">{row.getValue("lead_number")}</div>
-      ),
-    },
-    {
-      id: "actions",
-      header: "Actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="center" className="space-y-2">
-            <DropdownMenuLabel className="text-center">
-              Actions
-            </DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() =>
-                navigator.clipboard.writeText(row.original.lead_number)
-              }
-            >
-              Copy Lead Number
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <LeadsDetails lead={row.original} />
-            <Lead_Delete lead={row.original} />
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
-    },
-  ];
-
-  const table = useReactTable({
-    data: leads,
-    columns,
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
-    onRowSelectionChange: setRowSelection,
-    state: { sorting, columnFilters, columnVisibility, rowSelection },
-    globalFilterFn: (row, columnId, filterValue) => {
-      const hostname = row.getValue("hostname")?.toLowerCase() || "";
-      const leadNumber = String(row.getValue("lead_number") || "");
-      return (
-        hostname.includes(filterValue.toLowerCase()) ||
-        leadNumber.includes(filterValue)
-      );
-    },
+  const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const itemsPerPage = 10;
+  const [venues, setVenues] = useState([]);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedLead, setSelectedLead] = useState(null);
+  const [bookingData, setBookingData] = useState({
+    slot: "",
+    venue: "",
+    occasion: "",
+    event_date: "",
   });
 
+  const leadStatuses = [
+    "untouched",
+    "in-progress",
+    "closed-won",
+    "closed-lost",
+    "not-interested",
+  ];
+
+  // Search filter
+  const filteredLeads = leads?.filter(lead => 
+    lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    lead.lead_number.toString().includes(searchTerm) ||
+    lead.mobile.includes(searchTerm)
+  );
+
+  // Sorting
+  const sortedLeads = [...(filteredLeads || [])].sort((a, b) => {
+    if (!sortConfig.key) return 0;
+    
+    if (a[sortConfig.key] < b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? -1 : 1;
+    }
+    if (a[sortConfig.key] > b[sortConfig.key]) {
+      return sortConfig.direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  // Pagination
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedLeads?.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil((sortedLeads?.length || 0) / itemsPerPage);
+
+  const handleSort = (key) => {
+    setSortConfig({
+      key,
+      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+    });
+  };
+
+  // Fetch venues when needed
+  const fetchVenues = async () => {
+    try {
+      const token = localStorage.getItem("access-token");
+      const URL = process.env.NEXT_PUBLIC_URL;
+      const response = await axios.get(
+        `${URL}/venue-management/locations/${locationId}/venues/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      setVenues(response.data);
+    } catch (error) {
+      console.error("Error fetching venues:", error);
+    }
+  };
+
+  // Handle status change
+  const handleStatusChange = async (lead, newStatus) => {
+    if (newStatus === "closed-won") {
+      setSelectedLead(lead);
+      await fetchVenues();
+      setShowBookingModal(true);
+    }
+    toast({
+      title: "Status Updated",
+      description: `Lead status changed to ${newStatus}`,
+    });
+  };
+
+  // Handle booking creation
+  const handleCreateBooking = async () => {
+    try {
+      const token = localStorage.getItem("access-token");
+      const URL = process.env.NEXT_PUBLIC_URL;
+      const requestBody = {
+        lead: selectedLead.lead_number,
+        occasion: parseInt(bookingData.occasion),
+        venue: bookingData.venue_id,
+        location: locationId,
+        sales_person: selectedLead.sales_person,
+        event_date: format(new Date(bookingData.event_date), "yyyy-MM-dd"),
+        slot: bookingData.slot
+      };
+      console.log(requestBody)
+      const response = await axios.post(
+        `${URL}/bookings-management/bookings/create/`,
+        requestBody,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      setShowBookingModal(false);
+      toast({
+        title: "Success",
+        description: "Booking created successfully",
+      });
+    } catch (error) {
+      console.error("Error creating booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to create booking",
+      });
+    }
+  };
+
+  // In your table cell render
+  const renderStatusCell = (lead) => (
+    <td className="p-3">
+      <DropdownMenu>
+        <DropdownMenuTrigger className="flex items-center gap-2">
+          <span className={`px-2 py-1 rounded-full text-xs ${
+            lead.lead_status === 'untouched' ? 'bg-red-100 text-red-800' :
+            lead.lead_status === 'closed-won' ? 'bg-green-100 text-green-800' :
+            'bg-yellow-100 text-yellow-800'
+          }`}>
+            {lead.lead_status}
+          </span>
+          <ChevronDown className="h-4 w-4" />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          {leadStatuses.map((status) => (
+            <DropdownMenuItem
+              key={status}
+              onClick={() => handleStatusChange(lead, status)}
+            >
+              {status}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </td>
+  );
+
   return (
-    <div className="w-full p-4 lg:p-6 bg-gray-50 rounded-lg shadow-md">
-      {/* Search and Sort Controls */}
-      <div className="flex flex-wrap gap-4 items-center justify-between pb-4">
+    <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
+      {/* Search and Filters */}
+      <div className="mb-4">
         <Input
-          placeholder="Search by host name or lead number..."
-          value={filterValue}
-          onChange={(e) => {
-            setFilterValue(e.target.value);
-            table.setGlobalFilter(e.target.value);
-          }}
-          className="w-full lg:max-w-xs bg-white border border-gray-300 rounded-md shadow-sm px-4 py-2 focus:outline-none focus:border-indigo-500"
+          type="text"
+          placeholder="Search by name, lead number, or mobile..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-sm"
         />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button className="flex items-center bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600 transition">
-              <BiSort size={20} /> Filter{" "}
-              <ChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="bg-white shadow-lg p-2 rounded-md"
-          >
-            {table
-              .getAllColumns()
-              .filter((col) => col.getCanHide())
-              .map((col) => (
-                <DropdownMenuCheckboxItem
-                  key={col.id}
-                  className="capitalize text-gray-700"
-                  checked={col.getIsVisible()}
-                  onCheckedChange={(value) => col.toggleVisibility(!!value)}
-                >
-                  {col.id}
-                </DropdownMenuCheckboxItem>
-              ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
-      {/* Leads Table */}
-      <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-sm">
-        <Table className="w-full">
-          <TableHeader className="bg-gray-100">
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-center py-3 font-medium text-gray-700"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                ))}
-              </TableRow>
+      {/* Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead className="bg-gray-100">
+            <tr>
+              <th onClick={() => handleSort('lead_number')} className="p-3 text-left cursor-pointer">
+                Lead #
+              </th>
+              <th onClick={() => handleSort('hostname')} className="p-3 text-left cursor-pointer">
+                Host Name
+              </th>
+              <th onClick={() => handleSort('mobile')} className="p-3 text-left cursor-pointer">
+                Mobile
+              </th>
+              <th onClick={() => handleSort('email')} className="p-3 text-left cursor-pointer">
+                Email
+              </th>
+              <th onClick={() => handleSort('lead_status')} className="p-3 text-left cursor-pointer">
+                Status
+              </th>
+              <th className="p-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentItems?.map((lead) => (
+              <tr key={lead.lead_number} className="border-b hover:bg-gray-50">
+                <td className="p-3">{lead.lead_number}</td>
+                <td className="p-3">{lead.hostname}</td>
+                <td className="p-3">{lead.mobile}</td>
+                <td className="p-3">{lead.email}</td>
+                <td className="p-3">
+                  {renderStatusCell(lead)}
+                </td>
+                <td className="p-3">
+                  <div className="flex gap-2">
+                    <LeadsDetails lead={lead} />
+                    <Lead_Delete lead={lead} />
+                  </div>
+                </td>
+              </tr>
             ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-gray-50 transition">
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className="text-center py-2 px-4 text-gray-600"
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="text-center py-4 text-gray-500"
-                >
-                  No results found.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+          </tbody>
+        </table>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="flex-1 text-sm text-muted-foreground">
-          {table.getFilteredSelectedRowModel().rows?.length || 0} of{" "}
-          {table.getFilteredRowModel().rows?.length || 0} row(s) selected.
+      {/* Pagination */}
+      <div className="mt-4 flex items-center justify-between">
+        <div className="text-sm text-gray-500">
+          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedLeads?.length || 0)} of {sortedLeads?.length || 0} entries
         </div>
-        <div className="space-x-2">
+        <div className="flex gap-2">
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => table.previousPage()}
-            disabled={!table.getCanPreviousPage()}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            size="sm"
-            onClick={() => table.nextPage()}
-            disabled={!table.getCanNextPage()}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
           >
             Next
           </Button>
         </div>
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className=" space-y-4 max-md:max-w-[90%] max-w-[50%]  rounded-xl ">
-            <DialogHeader>
-              <DialogTitle className="capitalize text-center mt-10">
-                Create a New Booking
-              </DialogTitle>
-            </DialogHeader>
-            <Booking_Create_Form
-              setOpen={isModalOpen}
-              leadNumber={selectedRowData?.lead_number}
-              occasions={leads[selectedRowData?.lead_number - 1]?.occasions}
-            />
-          </DialogContent>
-        </Dialog>
       </div>
+
+      {/* Updated Booking Modal */}
+      <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Create Booking</DialogTitle>
+            <DialogDescription>
+              Fill in the booking details for this lead
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Slot</Label>
+              <Select
+                value={bookingData.slot}
+                onValueChange={(value) => 
+                  setBookingData((prev) => ({ ...prev, slot: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select slot" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="afternoon">Afternoon</SelectItem>
+                  <SelectItem value="evening">Evening</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Venue</Label>
+              <Select
+                value={bookingData.venue_id}
+                onValueChange={(value) => 
+                  setBookingData((prev) => ({ ...prev, venue_id: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select venue" />
+                </SelectTrigger>
+                <SelectContent>
+                  {venues.map((venue) => (
+                    <SelectItem key={venue.venue_id} value={venue.venue_id}>
+                      {venue.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Occasion</Label>
+              <Select
+                value={bookingData.occasion}
+                onValueChange={(value) => 
+                  setBookingData((prev) => ({ ...prev, occasion: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select occasion" />
+                </SelectTrigger>
+                <SelectContent>
+                  {selectedLead?.occasions?.map((occasion) => (
+                    <SelectItem key={occasion.id} value={occasion.id.toString()}>
+                      {occasion.occasion_type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>Event Date</Label>
+              <Input 
+                type="date" 
+                value={bookingData.event_date}
+                onChange={(e) => 
+                  setBookingData((prev) => ({ ...prev, event_date: e.target.value }))
+                }
+                className="w-full"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={() => setShowBookingModal(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleCreateBooking}
+              disabled={!bookingData.slot || !bookingData.venue_id || !bookingData.occasion || !bookingData.event_date}
+            >
+              Create Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

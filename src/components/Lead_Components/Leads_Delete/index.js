@@ -46,6 +46,10 @@ export default function Lead_Delete({ lead }) {
           <Button
             variant="ghost"
             className="text-red-600 hover:bg-transparent hover:text-red-500"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
           >
             Delete
           </Button>
