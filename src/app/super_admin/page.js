@@ -7,6 +7,8 @@ import Loading from "../loading";
 import { useRouter } from "next/navigation";
 import Logout from "@/components/Auth_Components/Logout";
 import Link from "next/link";
+import { jwtDecode } from "jwt-decode";
+import { getAccessToken } from '@/utils/auth';
 
 // REACT ICONS
 import { FaLocationArrow } from "react-icons/fa";
@@ -24,85 +26,84 @@ export default function Super_Admin() {
   const { all_locations, isLoading, isError } = useSelector(
     (state) => state.location
   );
+  console.log(all_locations);
 
   useEffect(() => {
-    dispatch(fetch_All_Location_Action());
-  }, [dispatch]);
+    const checkAndFetchData = async () => {
+      try {
+        const token = getAccessToken();
+        if (!token) {
+          router.push('/auth/login');
+          return;
+        }
+
+        const decoded = jwtDecode(token);
+        if (decoded.role !== 'super-admin') {
+          router.push('/auth/login');
+          return;
+        }
+
+        dispatch(fetch_All_Location_Action());
+      } catch (error) {
+        console.error('Auth error:', error);
+        router.push('/auth/login');
+      }
+    };
+
+    checkAndFetchData();
+  }, [dispatch, router]);
 
   if (isLoading) {
     return <Loading />;
   }
 
-  if (isError) {
-    return (
-      <p className="text-red-500 flex justify-center items-center h-screen font-semibold">
-        Failed to load locations. Please try again.
-      </p>
-    );
-  }
-
   return (
-    <div className="flex flex-col items-center h-screen space-y-8 relative">
-      <h1 className="max-md:text-xl md:text-3xl xl:text-4xl font-bold capitalize text-center text-mainText mt-10">
-        Welcome to ClayInn Hotels
-      </h1>
-      <div>
-        <h1 className="max-md:text-sm md:text-lg xl:text-xl font-bold capitalize">
-          Access your Hotel all Locations
-        </h1>
+    <div className="min-h-screen flex flex-col">
+      <div className="flex items-center justify-between px-4 py-4 bg-white shadow-md">
+        <div className="flex items-center gap-2">
+          <PiBuildingsFill size={30} />
+          <h1 className="text-2xl font-bold">Locations</h1>
+        </div>
+        <div className="flex items-center gap-4">
+          <Add_New_Location />
+          <Logout className="bg-red-600 hover:bg-red-500" />
+        </div>
       </div>
 
-      <div className="flex max-md:flex-col flex-row items-end justify-end gap-2">
-        <Add_New_Location action={"create"} />
-        <Logout className={"px-8 py-2 rounded-full"} />
-      </div>
+      <Separator />
 
-      {isError ? (
-        <p className="text-red-500 flex justify-center items-center h-screen font-semibold">
-          Failed to load locations. Please try again.
-        </p>
-      ) : (
-        <div className="flex max-md:flex-col  items-center justify-center flex-wrap gap-4">
-          {all_locations.length > 0 ? (
-            all_locations.map((location, index) => (
+      <div className="flex-1 p-4">
+        {isError ? (
+          <div className="text-center text-red-600">
+            Error: {isError}
+          </div>
+        ) : !all_locations || all_locations.length === 0 ? (
+          <div className="text-center">No locations found</div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {all_locations.map((location) => (
               <div
-                key={index}
-                className="flex justify-between  border border-black/5 shadow  rounded-xl max-md:w-[90vw] md:w-[400px] h-[200px] p-4 "
+                key={location.loc_id}
+                className="bg-white rounded-lg shadow-md p-4 relative group"
                 style={{ backgroundColor: getRandomLightColor() }}
               >
-                <Link
-                  href={`/location/${location?.loc_id}/dashboard`}
-                  className="space-y-6 mt-8"
-                >
-                  <h1 className="max-md:text-lg md:text-xl font-semibold flex items-center gap-4">
-                    <span>
-                      <PiBuildingsFill size={20} />
-                    </span>
-                    <span>{location?.name}</span>
-                  </h1>
-                  <div className="">
-                    <Separator />
-                  </div>
-                  <p className="text-xs flex items-center gap-4">
-                    <span>
-                      <FaLocationArrow size={20} />
-                    </span>
-                    <span>{location?.address}</span>
-                  </p>
-                </Link>
-
-                <div className="bg-black/5  rounded-full p-2 flex h-fit w-fit hover:bg-black/20 transition-all duration-300 ease-linear cursor-pointer">
+                <div className="absolute top-2 right-2">
                   <Location_Card_Menu location={location} />
                 </div>
+                <Link href={`/location/${location.loc_id}/dashboard`}>
+                  <div className="flex items-center gap-4 cursor-pointer">
+                    <FaLocationArrow size={25} />
+                    <div>
+                      <h2 className="text-xl font-semibold">{location.name}</h2>
+                      <p className="text-gray-600">{location.address}</p>
+                    </div>
+                  </div>
+                </Link>
               </div>
-            ))
-          ) : (
-            <p>Please Add Location To Access!</p>
-          )}
-        </div>
-      )}
-      <div className="absolute top-0 left-0 w-[100px] h-[150px] bg-sideBg/50 blur-3xl -z-10"></div>
-      <div className="absolute bottom-0 right-0 w-[100px] h-[150px] bg-sideBg/50 blur-3xl z-10"></div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

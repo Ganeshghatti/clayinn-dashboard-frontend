@@ -2,98 +2,47 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import jwt from "jsonwebtoken";
-import axios from "axios";
+import { jwtDecode } from "jwt-decode";
+import { getAccessToken, clearTokens } from '@/utils/auth';
+
+const PUBLIC_ROUTES = ['/auth/login', '/'];
+const SUPER_ADMIN_ROUTES = ['/super_admin'];
 
 export default function Auth_Check({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isClient, setIsClient] = useState(false);
-
-  const URL = process.env.NEXT_PUBLIC_URL;
-  if (!URL) {
-    console.error("NEXT_PUBLIC_URL environment variable is not defined.");
-  }
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsClient(true);
-    }
+    setIsClient(true);
   }, []);
-
-  const checkTokenExpiry = (token) => {
-    try {
-      const decoded = jwt.decode(token);
-      if (!decoded) return true;
-      const currentTime = Math.floor(Date.now() / 1000);
-      return decoded.exp < currentTime;
-    } catch (error) {
-      console.error("Error decoding token:", error);
-      return true;
-    }
-  };
-
-  const refreshAccessToken = async () => {
-    try {
-      const refresh_token = localStorage.getItem("refresh-token");
-      if (!refresh_token) {
-        console.error("No refresh token found.");
-        return false;
-      }
-
-      const response = await axios.post(
-        `${URL}/user-management/token/refresh/`,
-        {
-          refresh: refresh_token,
-        }
-      );
-
-      const newAccessToken = response.data.access;
-      localStorage.setItem("access-token", newAccessToken);
-      return true;
-    } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.warn("Refresh token expired or invalid, logging out.");
-        logoutAndRedirect();
-      } else {
-        console.error("Token refresh failed:", error.response?.data || error);
-      }
-      return false;
-    }
-  };
-
-  const logoutAndRedirect = () => {
-    localStorage.removeItem("access-token");
-    localStorage.removeItem("refresh-token");
-    router.push("/auth/login");
-  };
 
   useEffect(() => {
     const checkAuthStatus = async () => {
-      const access_token = localStorage.getItem("access-token");
-      const refresh_token = localStorage.getItem("refresh-token");
-
-      if (!access_token || !refresh_token) {
-        console.warn("No access or refresh token found, redirecting to login.");
-        logoutAndRedirect();
-        return;
-      }
-
-      const isTokenExpired = checkTokenExpiry(access_token);
-      if (isTokenExpired) {
-        const refreshSuccess = await refreshAccessToken();
-        if (!refreshSuccess) {
+      try {
+        if (PUBLIC_ROUTES.includes(pathname)) {
+          setIsAuthorized(true);
           return;
         }
-      }
 
-      const updatedAccessToken = localStorage.getItem("access-token");
-      const user = jwt.decode(updatedAccessToken);
-      if (
-        !user ||
-        (user.role !== "super-admin" && !pathname.includes("/auth"))
-      ) {
-        logoutAndRedirect();
+        const token = getAccessToken();
+        if (!token) {
+          throw new Error('No access token');
+        }
+
+        const decoded = jwtDecode(token);
+        
+        if (SUPER_ADMIN_ROUTES.includes(pathname)) {
+          if (decoded.role !== 'super-admin') {
+            throw new Error('Unauthorized: Super admin access required');
+          }
+        }
+
+        setIsAuthorized(true);
+      } catch (error) {
+        clearTokens();
+        router.push('/auth/login');
       }
     };
 
@@ -102,7 +51,7 @@ export default function Auth_Check({ children }) {
     }
   }, [isClient, router, pathname]);
 
-  if (!isClient) return null;
+  if (!isClient || !isAuthorized) return null;
 
   return <>{children}</>;
 }

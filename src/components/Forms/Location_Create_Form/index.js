@@ -1,70 +1,47 @@
 "use client";
 
-import React from "react";
-import {
-  Form,
-  FormItem,
-  FormLabel,
-  FormControl,
-  FormField,
-  FormMessage,
-} from "@/components/ui/form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { IoCreate } from "react-icons/io5";
-import { createLocationForm_Inputs } from "@/constants";
 import { useDispatch } from "react-redux";
-import {
-  create_New_Location_Action,
-  update_Location_Action,
-} from "@/app/redux/location_Slice";
+import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { create_New_Location_Action, update_Location_Action } from "@/app/redux/location_Slice";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import * as z from "zod";
 
-// URL From Environment Variable
-const url = process.env.NEXT_PUBLIC_URL;
+const LocationSchema = (action) => {
+  const baseSchema = {
+    name: z.string().min(2, "Name must be at least 2 characters"),
+    address: z.string().min(5, "Address must be at least 5 characters"),
+  };
 
-// Dynamic Schema based on action
-const LocationSchema = (action) =>
-  z.object({
-    name: z
-      .string()
-      .trim()
-      .min(3, "Location name must be at least 3 characters")
-      .nonempty("Location name is required"),
-    address: z
-      .string()
-      .trim()
-      .min(5, "Address must be at least 5 characters")
-      .nonempty("Address is required"),
-    location_admin_name: z
-      .string()
-      .trim()
-      .min(3, "Admin name must be at least 3 characters")
-      .nonempty("Admin name is required"),
-    location_admin_email: z
-      .string()
-      .email("Invalid email format")
-      .nonempty("Admin email is required"),
-    location_admin_password:
-      action === "create"
-        ? z
-            .string()
-            .trim()
-            .min(6, "Password must be at least 6 characters")
-            .nonempty("Password is required")
-        : z.string().optional(),
-  });
+  // Add admin fields only for create action
+  if (action === "create") {
+    return z.object({
+      ...baseSchema,
+      location_admin_name: z.string().min(2, "Admin name must be at least 2 characters"),
+      location_admin_email: z.string().email("Invalid email address"),
+      location_admin_password: z.string().min(8, "Password must be at least 8 characters"),
+    });
+  }
 
-export default function Location_Create_Form({ setOpen, action, location }) {
-  const router = useRouter();
+  return z.object(baseSchema);
+};
+
+export default function Location_Create_Form({ setOpen, action = "create", location }) {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { toast } = useToast();
 
-  // Form configuration using react-hook-form and dynamic schema
   const form = useForm({
     resolver: zodResolver(LocationSchema(action)),
     defaultValues: {
@@ -76,92 +53,139 @@ export default function Location_Create_Form({ setOpen, action, location }) {
     },
   });
 
-  // Handle form submission
-  const onSubmit = async (values) => {
+  async function onSubmit(values) {
     try {
       if (action === "create") {
-        await dispatch(create_New_Location_Action(values));
+        await dispatch(create_New_Location_Action(values)).unwrap();
         toast({
-          title: "Location Created Successfully",
-          description: "You have successfully created a new location.",
+          title: "Location Created",
+          description: "New location has been created successfully.",
         });
       } else {
         await dispatch(
-          update_Location_Action({ values, location_Id: location?.loc_id })
-        );
+          update_Location_Action({ 
+            locationId: location.loc_id, 
+            values: { 
+              name: values.name, 
+              address: values.address 
+            } 
+          })
+        ).unwrap();
         toast({
-          title: "Location Updated Successfully",
-          description: "The location has been updated.",
+          title: "Location Updated",
+          description: "Location has been updated successfully.",
         });
       }
       setOpen(false);
       form.reset();
       router.refresh();
     } catch (error) {
-      console.error(error);
       toast({
         variant: "destructive",
-        title: action === "create" ? "Creation Failed" : "Update Failed",
-        description: "Please try again.",
+        title: "Error",
+        description: error.message || "Something went wrong. Please try again.",
       });
     }
-  };
+  }
 
   return (
-    <div className="space-y-4">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {createLocationForm_Inputs.map((input, index) => (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Location Name</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter location name" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="address"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Address</FormLabel>
+              <FormControl>
+                <Input placeholder="Enter location address" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {action === "create" && (
+          <>
             <FormField
-              key={index}
               control={form.control}
-              name={input.name}
+              name="location_admin_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel
-                    className={
-                      action === "update" &&
-                      input.name === "location_admin_password"
-                        ? "hidden"
-                        : "block"
-                    }
-                  >
-                    {input.label}
-                  </FormLabel>
+                  <FormLabel>Admin Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder={input.placeholder}
-                      {...field}
-                      className={
-                        action === "update" &&
-                        input.name === "location_admin_password"
-                          ? "hidden"
-                          : "block placeholder:text-sm"
-                      }
-                      type={input.type}
-                    />
+                    <Input placeholder="Enter admin name" {...field} />
                   </FormControl>
-                  <FormMessage
-                    className={
-                      action === "update" &&
-                      input.name === "location_admin_password"
-                        ? "hidden"
-                        : "block"
-                    }
-                  />
+                  <FormMessage />
                 </FormItem>
               )}
             />
-          ))}
-          {/* Submit Button */}
-          <div className="flex items-end justify-end">
-            <Button type="submit" className="flex gap-2 items-center">
-              <span>{action === "create" ? "Create" : "Update"}</span>
-              <IoCreate size={20} />
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+
+            <FormField
+              control={form.control}
+              name="location_admin_email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Admin Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      placeholder="Enter admin email" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="location_admin_password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Admin Password</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="password" 
+                      placeholder="Enter admin password" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        <div className="flex justify-end gap-4">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button type="submit">
+            {action === "create" ? "Create Location" : "Update Location"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

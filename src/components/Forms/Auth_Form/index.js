@@ -26,6 +26,8 @@ import { useRouter } from "next/navigation";
 import logo_Black from "/public/logo_black.png";
 
 import { useToast } from "@/hooks/use-toast";
+import { setTokens } from '@/utils/auth';
+import axiosInstance from '@/utils/axiosInstance';
 
 const formSchema = z.object({
   email: z
@@ -60,27 +62,16 @@ export default function Login_Form() {
 
   async function onSubmit(values) {
     try {
-      const response = await axios.post(
-        `${URL}/user-management/login/`,
-        values
-      );
-
-      // Storing tokens in local storage
-      localStorage.setItem("access-token", response.data.access);
-      localStorage.setItem("refresh-token", response.data.refresh);
-
-      form.reset();
-      router.push("/super_admin");
+      const response = await axiosInstance.post('/user-management/login/', values);
+      setTokens(response.data.access, response.data.refresh);
+      router.push('/super_admin');
       toast({
         title: "Login Successful",
         description: "You have successfully logged in.",
       });
     } catch (error) {
-      const errorMessage =
-        error.response?.data?.message ||
+      const errorMessage = error.response?.data?.message || 
         "Please check your email and password and try again.";
-      console.error("Login error:", errorMessage);
-
       toast({
         variant: "destructive",
         title: "Login Failed",

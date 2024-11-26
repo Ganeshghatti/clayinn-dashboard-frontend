@@ -2,99 +2,88 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { MoreVertical, Edit, Trash2, UserPlus, UserMinus } from "lucide-react";
 import { useState } from "react";
-
-// REACT ICONS
-import { FaEllipsisVertical } from "react-icons/fa6";
-import { ImUser } from "react-icons/im";
-import { MdWorkspaces, MdEmail } from "react-icons/md";
-import { AiOutlineNumber } from "react-icons/ai";
-import { FaMobile } from "react-icons/fa";
-
-// -------------------
-import Add_New_Location from "../Add_New_Location";
-import Location_Delete from "../Location_Delete";
+import Location_Delete_Dialog from "../Location_Delete_Dialog";
+import Location_Admin_Dialog from "../Location_Admin_Dialog";
+import Location_Create_Dialog from "../Location_Create_Dialog";
 
 export default function Location_Card_Menu({ location }) {
-  const [open, setOpen] = useState(false);
-
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [adminAction, setAdminAction] = useState(null);
+console.log(location)
   return (
-    <div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button variant="ghost" className="hover:bg-transparent p-0">
-            <FaEllipsisVertical size={25} />
+    <>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <MoreVertical className="h-4 w-4" />
           </Button>
-        </DialogTrigger>
-        <DialogContent className="max-md:w-[90vw] w-[500px] m-auto space-y-10">
-          <DialogHeader>
-            <div className="flex items-center justify-center">
-              <DialogTitle>Location Admin Details</DialogTitle>
-              <DialogDescription className="hidden"></DialogDescription>
-            </div>
-          </DialogHeader>
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 max-md:text-sm">
-              <span>
-                <ImUser size={20} />
-              </span>
-              <span className="max-md:hidden">Name : </span>
-              <span>{location?.location_admin?.name}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center gap-2 max-md:text-sm">
-              <span>
-                <MdWorkspaces size={20} />
-              </span>
-              <span className="max-md:hidden">Role : </span>
-              <span>{location?.location_admin?.role}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center gap-2 max-md:text-sm">
-              <span>
-                <MdEmail size={20} />
-              </span>
-              <span className="max-md:hidden">Email : </span>
-              <span>{location?.location_admin?.email}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center gap-2 max-md:text-sm">
-              <span>
-                <AiOutlineNumber size={20} />
-              </span>
-              <span className="max-md:hidden">User ID : </span>
-              <span>{location?.location_admin?.user_id}</span>
-            </div>
-            <Separator />
-            <div className="flex items-center gap-2 max-md:text-sm">
-              <span>
-                <FaMobile size={20} />
-              </span>
-              <span className="max-md:hidden">Mobile : </span>
-              <span>{location?.location_admin?.mobile ?? "Not Added"}</span>
-            </div>
-          </div>
-          {/* Options */}
-          <div className="flex items-center justify-center gap-2">
-            <Add_New_Location
-              setOpen={setOpen}
-              action={"update"}
-              location={location}
-            />
-            <Location_Delete location={location} />
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+            <Edit className="mr-2 h-4 w-4" />
+            Update Location
+          </DropdownMenuItem>
+          {location.location_admin.email ? (
+            <DropdownMenuItem 
+              onClick={() => {
+                setAdminAction('delete');
+                setShowAdminDialog(true);
+              }}
+              className="text-red-500"
+            >
+              <UserMinus className="mr-2 h-4 w-4" />
+              Remove Location Admin
+            </DropdownMenuItem>
+          ) : (
+            <DropdownMenuItem 
+              onClick={() => {
+                setAdminAction('add');
+                setShowAdminDialog(true);
+              }}
+              className="text-green-600"
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Location Admin
+            </DropdownMenuItem>
+          )}
+          <DropdownMenuItem 
+            onClick={() => setShowDeleteDialog(true)}
+            className="text-red-600"
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            Delete Location
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
+      <Location_Create_Dialog 
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        action="edit"
+        location={location}
+      />
+
+      <Location_Delete_Dialog
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
+        location={location}
+      />
+
+      <Location_Admin_Dialog
+        open={showAdminDialog}
+        onOpenChange={setShowAdminDialog}
+        location={location}
+        action={adminAction}
+      />
+    </>
   );
 }

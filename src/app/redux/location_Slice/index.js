@@ -1,224 +1,113 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from '@/utils/axiosInstance';
 
 const initialState = {
-  isLoading: false,
   all_locations: [],
-  isError: false,
+  current_location: null,
+  isLoading: false,
+  isError: null,
 };
 
-const URL = process.env.NEXT_PUBLIC_URL;
-
-// FETCH ALL LOCATIONS
+// Fetch all locations
 export const fetch_All_Location_Action = createAsyncThunk(
-  "all_locations/fetch_all_locations",
+  "location/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-
-      if (!token) {
-        throw new Error("No token found. Please login again.");
-      }
-
-      const response = await axios.get(
-        `${URL}/location-management/locations/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      const response = await axiosInstance.get('/location-management/locations/');
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.get(
-            `${URL}/location-management/locations/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to fetch locations");
     }
   }
 );
 
-// CREATE NEW LOCATION
+// Create new location
 export const create_New_Location_Action = createAsyncThunk(
-  "create/NewLocation",
-  async (values, { rejectWithValue }) => {
+  "location/create",
+  async (locationData, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-
-      if (!token) {
-        throw new Error("No token found. Please login again.");
-      }
-
-      const response = await axios.post(
-        `${URL}/location-management/locations/`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.post(
+        '/location-management/locations/',
+        locationData
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.post(
-            `${URL}/location-management/locations/`,
-            values,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to create location");
     }
   }
 );
 
-// UPDATE LOCATION
+// Get location details
+export const get_Location_Details = createAsyncThunk(
+  "location/getDetails",
+  async (locationId, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/location-management/locations/${locationId}/`
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to fetch location details");
+    }
+  }
+);
+
+// Update location
 export const update_Location_Action = createAsyncThunk(
   "location/update",
-  async ({ values, location_Id }, { rejectWithValue }) => {
-    console.log(values, location_Id, "-----------REDUX");
+  async ({ locationId, values }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-
-      const response = await axios.put(
-        `${URL}/location-management/locations/${location_Id}/`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.put(
+        `/location-management/locations/${locationId}/`,
+        values
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.put(
-            `${URL}/location-management/locations/${location_Id}/`,
-            values,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to update location");
     }
   }
 );
 
-// DELETE LOCATION
+// Delete location
 export const delete_Location_Action = createAsyncThunk(
   "location/delete",
-  async (location_Id, { rejectWithValue }) => {
+  async (locationId, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
+      await axiosInstance.delete(`/location-management/locations/${locationId}/`);
+      return locationId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to delete location");
+    }
+  }
+);
 
-      const response = await axios.delete(
-        `${URL}/location-management/locations/${location_Id}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+// Delete location admin
+export const delete_Location_Admin = createAsyncThunk(
+  "location/deleteAdmin",
+  async (locationId, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(
+        `/location-management/locations/${locationId}/delete-admin/`
+      );
+      return locationId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to delete location admin");
+    }
+  }
+);
+
+// Create new location admin
+export const create_Location_Admin = createAsyncThunk(
+  "location/createAdmin",
+  async ({ locationId, adminData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.post(
+        `/location-management/locations/${locationId}/add-admin/`,
+        adminData
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.delete(
-            `${URL}/location-management/locations/${location_Id}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to create location admin");
     }
   }
 );
@@ -226,64 +115,101 @@ export const delete_Location_Action = createAsyncThunk(
 const locationSlice = createSlice({
   name: "location",
   initialState,
-  reducers: {},
+  reducers: {
+    clearLocationError: (state) => {
+      state.isError = null;
+    },
+    clearCurrentLocation: (state) => {
+      state.current_location = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
+      // Fetch all locations
       .addCase(fetch_All_Location_Action.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
-        state.all_locations = [];
       })
       .addCase(fetch_All_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
         state.all_locations = action.payload;
+        state.isError = null;
       })
-      .addCase(fetch_All_Location_Action.rejected, (state) => {
+      .addCase(fetch_All_Location_Action.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = true;
-        state.all_locations = [];
+        state.isError = action.payload;
       })
+      // Create new location
       .addCase(create_New_Location_Action.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
       })
       .addCase(create_New_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
         state.all_locations.push(action.payload);
+        state.isError = null;
       })
-      .addCase(create_New_Location_Action.rejected, (state) => {
+      .addCase(create_New_Location_Action.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = true;
+        state.isError = action.payload;
       })
+      // Get location details
+      .addCase(get_Location_Details.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(get_Location_Details.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.current_location = action.payload;
+        state.isError = null;
+      })
+      .addCase(get_Location_Details.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = action.payload;
+      })
+      // Update location
       .addCase(update_Location_Action.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
       })
       .addCase(update_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.all_locations = state.all_locations.map((location) =>
-          location.loc_id === action.payload.loc_id ? action.payload : location
+        state.all_locations = state.all_locations.map(location =>
+          location.loc_id === action.payload.id ? action.payload : location
         );
+        state.current_location = action.payload;
+        state.isError = null;
       })
-      .addCase(update_Location_Action.rejected, (state) => {
+      .addCase(update_Location_Action.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = true;
+        state.isError = action.payload;
       })
+      // Delete location
       .addCase(delete_Location_Action.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
       })
       .addCase(delete_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
         state.all_locations = state.all_locations.filter(
-          (location) => location.loc_id !== action.payload.loc_id
+          location => location.loc_id !== action.payload
         );
+        state.isError = null;
       })
-      .addCase(delete_Location_Action.rejected, (state) => {
+      .addCase(delete_Location_Action.rejected, (state, action) => {
         state.isLoading = false;
-        state.isError = true;
+        state.isError = action.payload;
+      })
+      // Admin actions
+      .addCase(delete_Location_Admin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.current_location?.id === action.payload) {
+          state.current_location.location_admin = null;
+        }
+      })
+      .addCase(create_Location_Admin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (state.current_location?.id === action.payload.location_id) {
+          state.current_location.location_admin = action.payload.admin;
+        }
       });
   },
 });
 
+export const { clearLocationError, clearCurrentLocation } = locationSlice.actions;
 export default locationSlice.reducer;

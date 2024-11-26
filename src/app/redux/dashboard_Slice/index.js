@@ -1,8 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { getToken, handleTokenRefresh } from "@/utils/getToken";
-
-const url = process.env.NEXT_PUBLIC_URL;
+import axiosInstance from '@/utils/axiosInstance';
 
 const initialState = {
   dashboardData: null,
@@ -10,39 +7,19 @@ const initialState = {
   isError: null,
 };
 
-// Fetch Dashboard Data
 export const fetchDashboardData = createAsyncThunk(
   "dashboard/fetchData",
   async (locationId, { rejectWithValue }) => {
     try {
-      const token = getToken();
-      const response = await axios.get(
-        `${url}/dashboard-management/locations/${locationId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.get(
+        `/dashboard-management/locations/${locationId}/`
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        try {
-          const newToken = await handleTokenRefresh();
-          const newResponse = await axios.get(
-            `${url}/dashboard-management/locations/${locationId}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${newToken}`,
-              },
-            }
-          );
-          return newResponse.data;
-        } catch (refreshError) {
-          return rejectWithValue("Session expired. Please login again.");
-        }
+      if (!error.response) {
+        throw error;
       }
-      return rejectWithValue(error.response?.data || "Failed to fetch dashboard data");
+      return rejectWithValue(error.response.data || "Failed to fetch dashboard data");
     }
   }
 );
