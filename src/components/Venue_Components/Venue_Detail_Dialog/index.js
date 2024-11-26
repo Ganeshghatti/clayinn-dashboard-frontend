@@ -12,11 +12,9 @@ import {
 } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import axios from "axios";
-
-// Calendar Imports
-
+import { useDispatch, useSelector } from "react-redux";
+import { fetchVenueDetails_Action } from "@/app/redux/venue_Slice";
 import FullCalendar from "@fullcalendar/react";
-
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -34,10 +32,12 @@ import { FaBuilding } from "react-icons/fa6";
 import "../../../app/globals.css";
 
 export default function Venue_Detail({ location_Id, venue }) {
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const [bookings, setBookings] = useState();
   const [events, setEvents] = useState();
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const handleEventsSet = async (arg) => {
     const currentMonth = arg.start.getMonth() + 1; // Months are 0-indexed
@@ -53,7 +53,7 @@ export default function Venue_Detail({ location_Id, venue }) {
       const URL = process.env.NEXT_PUBLIC_URL;
 
       const response = await axios.get(
-        `${URL}/venue-management/venues/detail/venue-9b573/?year=${currentYear}&month=${currentMonth}`,
+        `${URL}/venue-management/venues/detail/${venue?.venue_id}/?year=${currentYear}&month=${currentMonth}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -78,6 +78,16 @@ export default function Venue_Detail({ location_Id, venue }) {
     setEvents(eventsArray); // Set the converted events in state
   }, [bookings]);
 
+  useEffect(() => {
+    if (venue?.venue_id) {
+      dispatch(fetchVenueDetails_Action({
+        venue_id: venue.venue_id,
+        year: currentDate.getFullYear(),
+        month: currentDate.getMonth() + 1 // Adding 1 because getMonth() returns 0-11
+      }));
+    }
+  }, [dispatch, venue?.venue_id, currentDate]);
+
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
@@ -98,21 +108,22 @@ export default function Venue_Detail({ location_Id, venue }) {
               <span>{venue?.name}</span>
               {/* Calendar Implementation */}
               <div className="venue-calendar w-full max-w-6xl mx-auto">
-                <FullCalendar
-                  eventClassNames="bg-blue-500 text-white rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
-                  dayCellClassNames={"p-5"}
-                  plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-                  initialView="dayGridMonth"
-                  events={events}
-                  datesSet={handleEventsSet}
-                  showNonCurrentDates={false}
-                  eventClick={handleEventClick}
-                  eventTimeFormat={{
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hour12: false, // Use true for 12-hour format
-                  }}
-                />
+                  <FullCalendar
+                    eventClassNames="bg-blue-500 text-white rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
+                    dayCellClassNames={"p-5"}
+                    plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+                    initialView="dayGridMonth"
+                    events={events}
+                    datesSet={handleEventsSet}
+                    showNonCurrentDates={false}
+                    eventClick={handleEventClick}
+                    eventTimeFormat={{
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      hour12: false, // Use true for 12-hour format
+                    }}
+                  />
+
                 {selectedEvent && (
                   <Dialog
                     open={true}

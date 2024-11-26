@@ -2,15 +2,13 @@
 
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import Header from "@/components/Header";
-import Venue_Dialog from "@/components/Venue_Componets/Venue_Dialog";
+import Venue_Dialog from "@/components/Venue_Components/Venue_Dialog";
 import { usePathname } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 
 import getRandomLightColor from "@/constants/random_Color";
-import Venue_Calendar from "@/components/Venue_Componets/Venue_Calendar";
-import { Button } from "@/components/ui/button";
-import Venue_Detail from "@/components/Venue_Componets/Venue_Detail_Dialog";
+import Venue_Detail from "@/components/Venue_Components/Venue_Detail_Dialog";
 import Footer_Component from "@/components/Footer";
 
 export default function Venues() {
@@ -31,7 +29,6 @@ export default function Venues() {
         <Header content={`${locationName}`} />
       </div>
       <div className="flex justify-end items-center gap-4">
-        <Venue_Calendar />
         <Venue_Dialog action="create" location_Id={location_Id} />
       </div>
 
@@ -41,16 +38,12 @@ export default function Venues() {
             {all_venues.map((venue) => (
               <div key={venue?.venue_id} className="relative">
                 <div
-                  className="max-md:w-[95vw] md:w-[300px]  p-4 rounded-lg h-[200px] border border-black/5 shadow-md flex flex-col items-center justify-center space-y-4"
-                  style={{ backgroundColor: getRandomLightColor() }}
+                  className={`max-md:w-[95vw] md:w-[300px]  p-4 rounded-lg h-[200px] border border-black/5 shadow-md flex flex-col items-center justify-center space-y-4`}
+                  style={{ backgroundColor: venue?.bg_color }}
                 >
                   <span className="text-xl font-bold capitalize">
                     {venue?.name}
                   </span>
-                  <span className="text-sm bg-mainBg p-4 border border-black/5 rounded-xl shadow-lg font-semibold">
-                    80%
-                  </span>
-                  <span className="text-sm ">Booked</span>
                 </div>
                 <div className="absolute top-2 right-2">
                   <Venue_Detail location_Id={location_Id} venue={venue} />

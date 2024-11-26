@@ -3,6 +3,8 @@
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,10 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useDispatch } from "react-redux";
-import { useRouter } from "next/navigation";
-import { createVenue_Action } from "@/app/redux/venue_Slice";
-import { useToast } from "@/hooks/use-toast";
+import { updateVenue_Action } from "@/app/redux/venue_Slice";
 
 const formSchema = z.object({
   name: z
@@ -26,33 +25,42 @@ const formSchema = z.object({
   bg_color: z.string().regex(/^#([A-Fa-f0-9]{6})$/, "Invalid color format"),
 });
 
-export default function Venue_Create_Form({ setOpen, location_Id }) {
+export default function Venue_Edit_Form({
+  setOpen,
+  location_Id,
+  venue,
+}) {
   const dispatch = useDispatch();
-  const router = useRouter();
   const { toast } = useToast();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      bg_color: "#3357FF"
+      name: venue?.name || "",
+      bg_color: venue?.bg_color || "#3357FF"
     },
   });
 
   async function onSubmit(values) {
     try {
-      await dispatch(createVenue_Action({ values, location_Id }));
+      await dispatch(
+        updateVenue_Action({
+          location_id: location_Id,
+          venue_id: venue.venue_id,
+          values,
+        })
+      ).unwrap();
+
       setOpen(false);
       form.reset();
-      router.refresh();
       toast({
-        title: "Venue Created Successfully!",
+        title: "Venue Updated Successfully!",
       });
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create venue",
+        description: error.message || "Failed to update venue",
       });
     }
   }
@@ -91,9 +99,9 @@ export default function Venue_Create_Form({ setOpen, location_Id }) {
           )}
         />
         <Button type="submit" className="w-full">
-          Create Venue
+          Update Venue
         </Button>
       </form>
     </Form>
   );
-}
+} 

@@ -1,42 +1,28 @@
 "use client";
 
 import Venue_Create_Form from "@/components/Forms/Venue_Create_Form";
+import Venue_Edit_Form from "@/components/Forms/Venue_Edit_Form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
+import { FaPlus, FaRegEdit } from "react-icons/fa";
 
-import { FaPlus } from "react-icons/fa6";
-import { FaRegEdit } from "react-icons/fa";
-
-export default function Venue_Dialog({
-  action,
-  location_Id,
-  venue,
-  classname,
-}) {
+export default function Venue_Dialog({ action, location_Id, venue }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
-          <Button
-            className={`flex items-center gap-2 bg-buttonBg text-white hover:bg-buttonBg/80 transition-all duration-300 ease-linear`}
-          >
+          <Button className="flex items-center gap-2">
             <span>
-              {action === "create" ? (
-                <FaPlus size={20} />
-              ) : (
-                <FaRegEdit size={20} />
-              )}
+              {action === "create" ? <FaPlus size={20} /> : <FaRegEdit size={20} />}
             </span>
             <span>{action === "create" ? "Create Venue" : "Edit Venue"}</span>
           </Button>
@@ -44,17 +30,15 @@ export default function Venue_Dialog({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle className="capitalize text-center">
-              {action}
+              {action === "create" ? "Create Venue" : "Edit Venue"}
             </DialogTitle>
-            <DialogDescription></DialogDescription>
           </DialogHeader>
-          <div className="">
-            <Venue_Create_Form
-              action={action}
-              setOpen={setOpen}
-              location_Id={location_Id}
-              venue={venue}
-            />
+          <div>
+            {action === "create" ? (
+              <Venue_Create_Form setOpen={setOpen} location_Id={location_Id} />
+            ) : (
+              <Venue_Edit_Form setOpen={setOpen} location_Id={location_Id} venue={venue} />
+            )}
           </div>
         </DialogContent>
       </Dialog>

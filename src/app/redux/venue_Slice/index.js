@@ -1,219 +1,87 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axiosInstance from "@/utils/axiosInstance";
 
 const initialState = {
   all_venues: [],
+  currentVenueDetails: null,
   isLoading: false,
   error: null,
 };
 
-const URL = process.env.NEXT_PUBLIC_URL;
-
-// FETCH
+// Fetch venues
 export const fetchVenues_Actions = createAsyncThunk(
   "venues/fetchVenues",
   async (location_Id, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-      const response = await axios.get(
-        `${URL}/venue-management/locations/${location_Id}/venues/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.get(
+        `/venue-management/locations/${location_Id}/venues/`
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.get(
-            `${URL}/venue-management/locations/${location_Id}/venues/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch venues");
     }
   }
 );
 
-// CREATE VENUE
-export const create_Venue_Action = createAsyncThunk(
-  "venue/create",
-  async ({ values, location_Id }, { rejectWithValue }) => {
-    console.log(location_Id, "data redux------------");
-
+// Create venue
+export const createVenue_Action = createAsyncThunk(
+  "venues/create",
+  async ({ location_Id, values }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-      if (!token) throw new Error("Token not found");
-
-      const response = await axios.post(
-        `${URL}/venue-management/locations/${location_Id}/venues/`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.post(
+        `/venue-management/locations/${location_Id}/venues/`,
+        values
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.post(
-            `${URL}/venue-management/locations/${location_Id}/venues/`,
-            values,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to create venue");
     }
   }
 );
 
-// Update
-export const venue_Update_action = createAsyncThunk(
-  "venue/update",
-  async ({ values, location_Id, venue_id }, { rejectWithValue }) => {
+// Update venue
+export const updateVenue_Action = createAsyncThunk(
+  "venues/update",
+  async ({ location_id, venue_id, values }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("access-token");
-      if (!token) throw new Error("Token not found");
-
-      const response = await axios.put(
-        `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.put(
+        `/venue-management/locations/${location_id}/venues/${venue_id}/`,
+        values
       );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.put(
-            `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
-            values,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to update venue");
     }
   }
 );
 
-// DELETE
-
+// Delete venue
 export const venue_Delete_Action = createAsyncThunk(
-  "delete/venue",
+  "venues/delete",
   async ({ location_Id, venue_id }, { rejectWithValue }) => {
+    console.log(location_Id,venue_id)
     try {
-      const token = localStorage.getItem("access-token");
-
-      const response = await axios.delete(
-        `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      await axiosInstance.delete(
+        `/venue-management/locations/${location_Id}/venues/${venue_id}/`
       );
+      return venue_id;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to delete venue");
+    }
+  }
+);
 
+// Add new action for fetching venue details
+export const fetchVenueDetails_Action = createAsyncThunk(
+  "venues/fetchDetails",
+  async ({ venue_id, year, month }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.get(
+        `/venue-management/venues/detail/${venue_id}/?year=${year}&month=${month}`
+      );
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.delete(
-            `${URL}/venue-management/locations/${location_Id}/venues/${venue_id}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-
-      return rejectWithValue(error.response?.data || error.message);
+      return rejectWithValue(error.response?.data || "Failed to fetch venue details");
     }
   }
 );
@@ -224,8 +92,10 @@ const venueSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Fetch venues
       .addCase(fetchVenues_Actions.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchVenues_Actions.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -235,48 +105,37 @@ const venueSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      .addCase(create_Venue_Action.pending, (state) => {
-        state.isLoading = true;
+      // Create venue
+      .addCase(createVenue_Action.fulfilled, (state, action) => {
+        state.all_venues.push(action.payload);
       })
-      .addCase(create_Venue_Action.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.all_venues = [...state.all_venues, action.payload];
-        state.error = null;
-      })
-      .addCase(create_Venue_Action.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || action.error.message;
-      })
-      .addCase(venue_Update_action.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(venue_Update_action.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const updatedVenueIndex = state.all_venues.findIndex(
-          (venue) => venue.id === action.payload.id
+      // Update venue
+      .addCase(updateVenue_Action.fulfilled, (state, action) => {
+        const index = state.all_venues.findIndex(
+          (venue) => venue.venue_id === action.payload.venue_id
         );
-        if (updatedVenueIndex !== -1) {
-          state.all_venues[updatedVenueIndex] = action.payload;
+        if (index !== -1) {
+          state.all_venues[index] = action.payload;
         }
+      })
+      // Delete venue
+      .addCase(venue_Delete_Action.fulfilled, (state, action) => {
+        state.all_venues = state.all_venues.filter(
+          (venue) => venue.venue_id !== action.payload
+        );
+      })
+      // Add cases for venue details
+      .addCase(fetchVenueDetails_Action.pending, (state) => {
+        state.isLoading = true;
         state.error = null;
       })
-      .addCase(venue_Update_action.rejected, (state, action) => {
+      .addCase(fetchVenueDetails_Action.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || action.error.message;
+        state.currentVenueDetails = action.payload;
       })
-      .addCase(venue_Delete_Action.pending, (state) => {
-        state.isLoading = true;
-      })
-      .addCase(venue_Delete_Action.fulfilled, (state, action) => {
+      .addCase(fetchVenueDetails_Action.rejected, (state, action) => {
         state.isLoading = false;
-        state.all_venues = state.all_venues.filter((venue) => {
-          venue.id !== action.payload;
-        });
-      })
-      .addCase(venue_Delete_Action.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload || action.error.message;
+        state.error = action.payload;
       });
   },
 });
