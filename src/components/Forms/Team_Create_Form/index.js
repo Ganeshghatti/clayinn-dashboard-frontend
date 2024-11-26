@@ -20,7 +20,7 @@ import { createNew_Team_Form_Inputs } from "@/constants";
 import { useDispatch } from "react-redux";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
-import { createMember, updateMember } from "@/app/redux/team_Slice";
+import { createMember, updateMember, fetchAllMembers } from "@/app/redux/team_Slice";
 
 const formSchema = z.object({
   name: z.string().min(4).max(50),
@@ -73,30 +73,33 @@ export default function Team_Create_Form({
   async function onSubmit(values) {
     try {
       if (action === "create") {
-        await dispatch(createMember({ data: values, location_id: locationId }));
+        await dispatch(createMember({ data: values, location_id: locationId })).unwrap();
       } else {
         await dispatch(
           updateMember({
             location_id: locationId,
             member_id: member.user_id,
-            data: values,
+            data: {
+              name: values.name,
+              mobile: values.mobile
+            }
           })
-        );
+        ).unwrap();
       }
+      
+      // Refresh the members list
+      await dispatch(fetchAllMembers(locationId));
+      
       form.reset();
-      router.refresh();
       setOpen(false);
       toast({
-        title: `${
-          action === "create" ? "New Member Created" : "Member Updated"
-        } Successfully!`,
+        title: `${action === "create" ? "New Member Created" : "Member Updated"} Successfully!`,
       });
     } catch (error) {
-      console.log("Error creating/updating member:", error);
       toast({
         variant: "destructive",
-        title: "Something went wrong!",
-        description: "Please try again or contact support.",
+        title: "Error",
+        description: error.message || "Operation failed. Please try again.",
       });
     }
   }

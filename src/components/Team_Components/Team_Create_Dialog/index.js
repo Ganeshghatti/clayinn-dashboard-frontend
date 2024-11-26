@@ -21,7 +21,7 @@ export default function Team_Create_Dialog({ action, locationId, member }) {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>
           <Button className="bg-team_Btn_Bg hover:bg-team_Btn_Bg/90 transition-all duration-300 ease-linear capitalize">
-            {action} Team
+            {action} Member
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[425px]">

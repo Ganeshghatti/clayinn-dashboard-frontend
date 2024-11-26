@@ -22,21 +22,19 @@ export default function Team() {
   }, [dispatch, locationId]);
 
   return (
-    <div className="space-y-10 flex flex-col h-[90vh]">
-      <div>
-        <div>
-          <Header content={`${locationName}`} />
-        </div>
-
-        <div className="mt-10">
-          <Team_Create_Dialog action={"create"} locationId={locationId} />
+    <div className="flex flex-col min-h-screen">
+      <div className="flex-none space-y-4">
+        <Header content={`${locationName}`} />
+        <div className="px-4">
+          <Team_Create_Dialog action="create" locationId={locationId} />
         </div>
       </div>
 
-      <div className="flex-1 h-screen">
+      <div className="flex-1 py-6">
         <TeamTable members={members} locationId={locationId} />
       </div>
-      <div>
+
+      <div className="flex-none">
         <Footer_Component content={location_Name} />
       </div>
     </div>
