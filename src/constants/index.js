@@ -141,10 +141,114 @@ const createNew_Team_Form_Inputs = [
   },
 ];
 
+// Function parameters shared across regular occasions
+const functionParameters = [
+  { name: "date_of_function", label: "Date of Function", type: "date" },
+  { name: "day", label: "Day", type: "text" },
+  { name: "lunch_pax", label: "Lunch (Min. Pax)", type: "number" },
+  { name: "hi_tea_pax", label: "Hi Tea (Min. Pax)", type: "number" },
+  { name: "dinner_pax", label: "Dinner (Min. Pax)", type: "number" },
+  { name: "dj_value", label: "DJ", type: "number" },
+  { name: "decor_value", label: "Decor", type: "number" },
+  { name: "liquor_value", label: "Liquor", type: "number" }
+];
+
+// All occasion types including rooms
+const occasionTypes = [
+  {
+    id: "engagement",
+    label: "Engagement",
+    parameters: functionParameters
+  },
+  {
+    id: "sagan",
+    label: "Sagan",
+    parameters: functionParameters
+  },
+  {
+    id: "roka",
+    label: "Roka",
+    parameters: functionParameters
+  },
+  {
+    id: "haldi",
+    label: "Haldi",
+    parameters: functionParameters
+  },
+  {
+    id: "mehndi",
+    label: "Mehndi",
+    parameters: functionParameters
+  },
+  {
+    id: "wedding",
+    label: "Wedding",
+    parameters: [
+      ...functionParameters,
+      { name: "vedi_value", label: "Vedi", type: "number" }
+    ]
+  },
+  {
+    id: "reception",
+    label: "Reception",
+    parameters: [
+      ...functionParameters,
+      { name: "vedi_value", label: "Vedi", type: "number" }
+    ]
+  },
+  {
+    id: "rooms",
+    label: "Rooms",
+    parameters: [
+      { name: "date_of_booking", label: "Date of Booking", type: "date" },
+      { name: "day", label: "Day", type: "text" },
+      { name: "number_of_pax", label: "Number of Pax (Min. Pax)", type: "number" },
+      { name: "number_of_rooms", label: "Number of Rooms", type: "number" },
+      { name: "plan", label: "Plan", type: "text" }
+    ]
+  }
+];
+
+const createLeadForm_Inputs = [
+  {
+    name: "hostname",
+    label: "Host Name",
+    placeholder: "Enter host name",
+    type: "text"
+  },
+  {
+    name: "mobile",
+    label: "Mobile Number",
+    placeholder: "Enter mobile number",
+    type: "text"
+  },
+  {
+    name: "email",
+    label: "Email",
+    placeholder: "Enter email address",
+    type: "email"
+  },
+  {
+    name: "followup",
+    label: "Follow Up Date",
+    placeholder: "Select follow up date",
+    type: "date"
+  },
+  {
+    name: "occasions",
+    label: "Occasions",
+    type: "occasions",
+    options: occasionTypes
+  }
+];
+
 export {
   loginForm_Inputs,
   createLocationForm_Inputs,
   navLinks,
   createNewVenueForm_Inputs,
   createNew_Team_Form_Inputs,
+  createLeadForm_Inputs,
+  occasionTypes,
+  functionParameters
 };

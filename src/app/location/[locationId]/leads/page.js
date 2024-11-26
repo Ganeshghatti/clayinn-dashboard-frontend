@@ -2,7 +2,7 @@
 
 import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Header from "@/components/Header";
 import Footer_Component from "@/components/Footer";
@@ -12,10 +12,12 @@ import LeadsTable from "@/components/Lead_Components/Lead_Table";
 export default function Leads() {
   const { locationId } = useParams();
   const dispatch = useDispatch();
-  const { leads, loading, error } = useSelector((state) => state.leads);
+  const { leads, isLoading, error } = useSelector((state) => state.leads);
 
   useEffect(() => {
-    dispatch(fetchLeads_Action(locationId));
+    if (locationId) {
+      dispatch(fetchLeads_Action(locationId));
+    }
   }, [dispatch, locationId]);
 
   return (
@@ -23,12 +25,12 @@ export default function Leads() {
       <div className="flex flex-col gap-4">
         <Header content="Leads Management" />
         <div className="px-4">
-          <Lead_Create_Dialog action="create" />
+          <Lead_Create_Dialog action="create" locationId={locationId} />
         </div>
       </div>
       
       <div className="flex-1">
-        {loading ? (
+        {isLoading ? (
           <div className="text-center">Loading leads...</div>
         ) : error ? (
           <div className="text-center text-red-600">Error: {error}</div>

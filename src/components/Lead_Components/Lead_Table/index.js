@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect,useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -34,14 +34,18 @@ import {
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { updateLead_Action } from "@/app/redux/lead_Slice";
+import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 
 export default function LeadsTable({ leads, locationId }) {
   const { toast } = useToast();
+  const dispatch = useDispatch();
+  const { all_venues: venues } = useSelector((state) => state.venues);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const itemsPerPage = 10;
-  const [venues, setVenues] = useState([]);
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [bookingData, setBookingData] = useState({
@@ -59,25 +63,36 @@ export default function LeadsTable({ leads, locationId }) {
     "not-interested",
   ];
 
+  useEffect(() => {
+    if (locationId) {
+      dispatch(fetchVenues_Actions(locationId));
+    }
+  }, [dispatch, locationId]);
+
   // Search filter
-  const filteredLeads = leads?.filter(lead => 
+  const filteredLeads = leads?.length > 0 ? leads?.filter(lead => 
     lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
     lead.lead_number.toString().includes(searchTerm) ||
     lead.mobile.includes(searchTerm)
-  );
+  ) : [];
 
   // Sorting
-  const sortedLeads = [...(filteredLeads || [])].sort((a, b) => {
-    if (!sortConfig.key) return 0;
-    
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? -1 : 1;
+  const sortedLeads = useMemo(() => {
+    if (!filteredLeads) return [];
+    let sortableLeads = [...filteredLeads];
+    if (sortConfig.key) {
+      sortableLeads.sort((a, b) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
     }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'asc' ? 1 : -1;
-    }
-    return 0;
-  });
+    return sortableLeads;
+  }, [filteredLeads, sortConfig]);
 
   // Pagination
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -91,38 +106,33 @@ export default function LeadsTable({ leads, locationId }) {
       direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
     });
   };
-
-  // Fetch venues when needed
-  const fetchVenues = async () => {
-    try {
-      const token = localStorage.getItem("access-token");
-      const URL = process.env.NEXT_PUBLIC_URL;
-      const response = await axios.get(
-        `${URL}/venue-management/locations/${locationId}/venues/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data);
-      setVenues(response.data);
-    } catch (error) {
-      console.error("Error fetching venues:", error);
-    }
-  };
-
   // Handle status change
   const handleStatusChange = async (lead, newStatus) => {
-    if (newStatus === "closed-won") {
-      setSelectedLead(lead);
-      await fetchVenues();
-      setShowBookingModal(true);
+    try {
+      await dispatch(updateLead_Action({
+        leadNumber: lead.lead_number,
+        data: {
+          ...lead,
+          lead_status: newStatus
+        }
+      })).unwrap();
+
+      if (newStatus === "closed-won") {
+        setSelectedLead(lead);
+        setShowBookingModal(true);
+      }
+
+      toast({
+        title: "Success",
+        description: `Lead status updated to ${newStatus}`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to update lead status",
+      });
     }
-    toast({
-      title: "Status Updated",
-      description: `Lead status changed to ${newStatus}`,
-    });
   };
 
   // Handle booking creation

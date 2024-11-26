@@ -1,8 +1,10 @@
 "use client";
 
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { occasionTypes, createLeadForm_Inputs } from "@/constants";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -13,79 +15,53 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useDispatch } from "react-redux";
 import { useToast } from "@/hooks/use-toast";
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { create_Lead_Action } from "@/app/redux/lead_Slice";
-import { useParams } from "next/navigation";
-
 import jwt from "jsonwebtoken";
+import { createLead_Action } from "@/app/redux/lead_Slice";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-const standardOccasionSchema = z.object({
-  occasion_type: z.string(),
-  date_of_function: z.string(),
-  day: z.string(),
-  lunch_pax: z.number().default(0),
-  hi_tea_pax: z.number().default(0),
-  dinner_pax: z.number().default(0),
-  dj_value: z.number().default(0),
-  decor_value: z.number().default(0),
-  liquor_value: z.number().default(0),
-  total: z.number(),
-});
-
-const weddingSchema = standardOccasionSchema.extend({
-  vedi_value: z.number().default(0),
-});
-
-const roomSchema = z.object({
-  occasion_type: z.literal("room"),
-  number_of_pax: z.number(),
-  number_of_rooms: z.number(),
-  plan: z.string(),
-  total: z.number(),
-});
-
+// Zod schema for validation
 const formSchema = z.object({
-  hostname: z.string().min(2, "Host name is required"),
-  mobile: z.string().length(10, "Mobile number must be 10 digits"),
-  email: z.string().email("Invalid email format"),
-  lead_status: z.string().default("untouched"),
-  call_status: z.string().default("not_yet_call"),
-  followup: z.string(),
-  occasions: z.array(
-    z.discriminatedUnion("occasion_type", [
-      weddingSchema.extend({ occasion_type: z.literal("wedding") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("reception") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("engagement") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("haldi") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("mehndi") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("roka") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("sagan") }),
-      standardOccasionSchema.extend({ occasion_type: z.literal("corporate") }),
-      roomSchema,
-    ])
-  ),
+  hostname: z.string().min(1, "Host name is required"),
+  mobile: z.string().min(10, "Valid mobile number required").max(10, "Mobile number must be 10 digits"),
+  email: z.string().email("Valid email required"),
+  followup: z.string().min(1, "Follow up date is required"),
+  occasions: z.array(z.object({
+    occasion_type: z.string(),
+    date_of_function: z.string().min(1, "Date is required"),
+    day: z.string().optional().nullable(),
+    lunch_pax: z.number().min(0).optional().nullable(),
+    hi_tea_pax: z.number().min(0).optional().nullable(),
+    dinner_pax: z.number().min(0).optional().nullable(),
+    dj_value: z.number().min(0).optional().nullable(),
+    decor_value: z.number().min(0).optional().nullable(),
+    liquor_value: z.number().min(0).optional().nullable(),
+    vedi_value: z.number().min(0).optional().nullable(),
+    number_of_pax: z.number().min(0).optional().nullable(),
+    number_of_rooms: z.number().min(0).optional().nullable(),
+    plan: z.string().optional().nullable(),
+    total: z.number().min(0).optional()
+  })).min(1, "At least one occasion is required")
 });
 
-export default function Lead_Create_Form({ setOpen, action }) {
+export default function Lead_Create_Form({ setOpen, locationId }) {
   const dispatch = useDispatch();
   const { toast } = useToast();
-  const auth = useSelector((state) => state.auth);
-  const user = auth?.user;
-  const { locationId } = useParams();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const token = localStorage.getItem("access-token");
-  const decodedToken = jwt.decode(token);
+  const decodedToken = token ? jwt.decode(token) : null;
+
+  if (!decodedToken) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Authentication token not found. Please login again.",
+    });
+    return null;
+  }
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -93,334 +69,87 @@ export default function Lead_Create_Form({ setOpen, action }) {
       hostname: "",
       mobile: "",
       email: "",
-      lead_status: "untouched",
-      call_status: "not_yet_call",
-      followup: "",
-      occasions: [],
-    },
+      followup: new Date().toISOString().split('T')[0],
+      occasions: []
+    }
   });
 
   const { fields, append, remove } = useFieldArray({
     control: form.control,
-    name: "occasions",
+    name: "occasions"
   });
 
-  const occasionTypes = [
-    { value: "wedding", label: "Wedding" },
-    { value: "reception", label: "Reception" },
-    { value: "engagement", label: "Engagement" },
-    { value: "haldi", label: "Haldi" },
-    { value: "mehndi", label: "Mehndi" },
-    { value: "roka", label: "Roka" },
-    { value: "sagan", label: "Sagan" },
-    { value: "corporate", label: "Corporate" },
-    { value: "room", label: "Room" },
-  ];
-
-  // Function to get day name from date
-  const getDayName = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-US", { weekday: "long" });
-  };
-
-  // Handle date change to automatically update day
-  const handleDateChange = (index, value) => {
-    form.setValue(`occasions.${index}.date_of_function`, value);
-    form.setValue(`occasions.${index}.day`, getDayName(value));
-  };
-
-  const renderOccasionFields = (index) => {
-    const occasionType = form.watch(`occasions.${index}.occasion_type`);
-
-    if (!occasionType) return null;
-
-    if (occasionType === "room") {
-      return (
-        <div className="space-y-4 mt-4 ">
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.number_of_pax`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Number of Pax</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.number_of_rooms`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Number of Rooms</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.plan`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Plan</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.total`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-      );
+  const calculateTotal = (values) => {
+    if (!values) return 0;
+    
+    if (values.occasion_type === "rooms") {
+      return (values.number_of_rooms || 0) * (values.number_of_pax || 0) * 3000;
     }
-
+    
     return (
-      <div className="space-y-4 mt-4">
-        <FormField
-          control={form.control}
-          name={`occasions.${index}.date_of_function`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Date of Function</FormLabel>
-              <FormControl>
-                <Input
-                  type="date"
-                  {...field}
-                  onChange={(e) => handleDateChange(index, e.target.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.lunch_pax`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Lunch Pax</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.hi_tea_pax`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Hi Tea Pax</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.dinner_pax`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Dinner Pax</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.dj_value`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>DJ Value</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.decor_value`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Decor Value</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name={`occasions.${index}.liquor_value`}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Liquor Value</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          {occasionType === "wedding" && (
-            <FormField
-              control={form.control}
-              name={`occasions.${index}.vedi_value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Vedi Value</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      {...field}
-                      onChange={(e) => field.onChange(Number(e.target.value))}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          )}
-        </div>
-        <FormField
-          control={form.control}
-          name={`occasions.${index}.total`}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Total</FormLabel>
-              <FormControl>
-                <Input
-                  type="number"
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
+      (values.dj_value || 0) + 
+      (values.decor_value || 0) + 
+      (values.liquor_value || 0) + 
+      (values.vedi_value || 0)
     );
+  };
+
+  const addOccasion = (occasionType) => {
+    if (!occasionType) return;
+
+    const defaultValues = {
+      occasion_type: occasionType,
+      date_of_function: new Date().toISOString().split('T')[0],
+      day: new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+      total: 0
+    };
+    
+    if (occasionType === "rooms") {
+      append({
+        ...defaultValues,
+        number_of_pax: 0,
+        number_of_rooms: 0,
+        plan: ""
+      });
+    } else {
+      append({
+        ...defaultValues,
+        lunch_pax: 0,
+        hi_tea_pax: 0,
+        dinner_pax: 0,
+        dj_value: 0,
+        decor_value: 0,
+        liquor_value: 0,
+        ...(occasionType === "wedding" || occasionType === "reception" ? { vedi_value: 0 } : {})
+      });
+    }
   };
 
   async function onSubmit(values) {
     try {
-      // if (!user) {
-      //   toast({
-      //     variant: "destructive",
-      //     title: "Error",
-      //     description: "User information not found. Please login again.",
-      //   });
-      //   return;
-      // }
+      setIsSubmitting(true);
+
+      if (!locationId || !decodedToken.user_id) {
+        throw new Error("Missing required parameters");
+      }
 
       const formData = {
         ...values,
-        sales_person: decodedToken.user_id,
         location_id: locationId,
-      };
-
-      const ApiData = {
-        hostname: "Adarsh",
-        mobile: "9876543210",
-        location_id: "Delhi-43a9a",
-        sales_person: "super-admin-461a0",
-        email: "john@example.com",
+        sales_person: decodedToken.user_id,
         lead_status: "untouched",
         call_status: "not_yet_call",
-        followup: "2024-03-20",
-        occasions: [
-          {
-            occasion_type: "wedding",
-            date_of_function: "2024-11-24",
-            day: "Wednesday",
-            lunch_pax: 200,
-            hi_tea_pax: 150,
-            dinner_pax: 300,
-            dj_value: 25000,
-            decor_value: 50000,
-            liquor_value: 30000,
-            vedi_value: 10000,
-            total: 115000,
-          },
-        ],
+        occasions: values.occasions.map(occasion => ({
+          ...occasion,
+          total: calculateTotal(occasion)
+        }))
       };
 
-      console.log(formData);
-      console.log(ApiData);
-
-      await dispatch(create_Lead_Action({ formData, locationId })).unwrap();
-
+      await dispatch(createLead_Action({ formData, locationId })).unwrap();
+      
       toast({
         title: "Success",
-        description: "Lead created successfully",
+        description: "Lead created successfully"
       });
 
       setOpen(false);
@@ -429,149 +158,123 @@ export default function Lead_Create_Form({ setOpen, action }) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to create lead",
+        description: error.message || "Failed to create lead"
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="space-y-4 h-[60vh] overflow-y-auto flex flex-col items-center justify-between"
-      >
-        <Tabs defaultValue="general" className="w-full space-y-14">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="general">General Information</TabsTrigger>
-            <TabsTrigger value="occasions">Occasions</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="general" className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="max-h-[80vh] overflow-y-auto pr-4">
+          {/* Basic Lead Information */}
+          <div className="space-y-4 mb-6">
+            {createLeadForm_Inputs.filter(input => input.name !== "occasions").map((input, index) => (
               <FormField
+                key={index}
                 control={form.control}
-                name="hostname"
+                name={input.name}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Host Name</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="mobile"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mobile</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="followup"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Follow Up Date</FormLabel>
+                    <FormLabel>{input.label}</FormLabel>
                     <FormControl>
                       <Input
-                        type="date"
+                        type={input.type}
+                        placeholder={input.placeholder}
                         {...field}
-                        className="flex items-center justify-between"
+                        disabled={isSubmitting}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-          </TabsContent>
-
-          <TabsContent value="occasions" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-semibold">Occasions</h3>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => append({ occasion_type: "" })}
-                className="flex items-center gap-2"
-              >
-                <PlusCircle className="h-4 w-4" />
-                Add Occasion
-              </Button>
-            </div>
-
-            {fields.map((field, index) => (
-              <div key={field.id} className="border p-4 rounded-lg relative">
-                <FormField
-                  control={form.control}
-                  name={`occasions.${index}.occasion_type`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Occasion Type</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select occasion type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {occasionTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                {renderOccasionFields(index)}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2"
-                  onClick={() => remove(index)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
             ))}
-          </TabsContent>
-        </Tabs>
+          </div>
 
-        <Button
-          type="submit"
-          className="w-full capitalize bg-buttonBg hover:bg-buttonBg/80 transition-all ease-linear duration-300"
-        >
-          {action} Lead
-        </Button>
+          {/* Occasions Section */}
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <FormLabel>Occasions</FormLabel>
+              <Select onValueChange={addOccasion} disabled={isSubmitting}>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Add Occasion" />
+                </SelectTrigger>
+                <SelectContent>
+                  {occasionTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Accordion type="multiple" className="w-full">
+              {fields.map((field, index) => (
+                <AccordionItem key={field.id} value={`occasion-${index}`}>
+                  <AccordionTrigger className="hover:no-underline">
+                    <div className="flex justify-between items-center w-full pr-4">
+                      <span className="font-semibold capitalize">
+                        {field.occasion_type} - {index + 1}
+                      </span>
+                      <Button 
+                        type="button" 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          remove(index);
+                        }}
+                        disabled={isSubmitting}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4 p-4">
+                      {occasionTypes.find(type => type.id === field.occasion_type)?.parameters.map((param, paramIndex) => (
+                        <FormField
+                          key={paramIndex}
+                          control={form.control}
+                          name={`occasions.${index}.${param.name}`}
+                          render={({ field: paramField }) => (
+                            <FormItem>
+                              <FormLabel>{param.label}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type={param.type}
+                                  {...paramField}
+                                  disabled={isSubmitting}
+                                  onChange={e => {
+                                    const value = param.type === "number" ? 
+                                      parseFloat(e.target.value) || 0 : 
+                                      e.target.value;
+                                    paramField.onChange(value);
+                                  }}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </div>
+
+        <div className="sticky bottom-0 bg-white pt-4 border-t">
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Creating Lead..." : "Create Lead"}
+          </Button>
+        </div>
       </form>
     </Form>
   );
