@@ -59,7 +59,7 @@ export const updateVenue_Action = createAsyncThunk(
 export const venue_Delete_Action = createAsyncThunk(
   "venues/delete",
   async ({ location_Id, venue_id }, { rejectWithValue }) => {
-    console.log(location_Id,venue_id)
+
     try {
       await axiosInstance.delete(
         `/venue-management/locations/${location_Id}/venues/${venue_id}/`

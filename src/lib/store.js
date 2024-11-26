@@ -5,7 +5,7 @@ import memberReducer from "@/app/redux/team_Slice";
 import leadReducer from "@/app/redux/lead_Slice";
 import bookingReducer from "@/app/redux/booking_Slice";
 import dashboardReducer from "@/app/redux/dashboard_Slice";
-
+import calendarReducer from "@/app/redux/calendar_Slice";
 export const store = configureStore({
   reducer: {
     location: locationReducer,
@@ -13,6 +13,7 @@ export const store = configureStore({
     members: memberReducer,
     leads: leadReducer,
     bookings: bookingReducer,
+    calendar: calendarReducer,
     dashboard: dashboardReducer,
   },
 });
