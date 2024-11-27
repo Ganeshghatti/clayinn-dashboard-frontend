@@ -4,7 +4,6 @@ import { useState, useEffect,useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import LeadsDetails from "../Leads_Details";
 import Lead_Delete from "../Leads_Delete";
 import {
   DropdownMenu,
@@ -14,7 +13,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
 import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Select,
   SelectContent,
@@ -37,6 +35,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { updateLead_Action } from "@/app/redux/lead_Slice";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
+import Lead_Detail from "../Lead_Detail";
 
 export default function LeadsTable({ leads, locationId }) {
   const { toast } = useToast();
@@ -54,6 +53,8 @@ export default function LeadsTable({ leads, locationId }) {
     occasion: "",
     event_date: "",
   });
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedLeadNumber, setSelectedLeadNumber] = useState(null);
 
   const leadStatuses = [
     "untouched",
@@ -251,8 +252,16 @@ export default function LeadsTable({ leads, locationId }) {
                 </td>
                 <td className="p-3">
                   <div className="flex gap-2">
-                    <LeadsDetails lead={lead} />
-                    <Lead_Delete lead={lead} />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedLeadNumber(lead.lead_number);
+                        setDetailOpen(true);
+                      }}
+                    >
+                      View Details
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -381,6 +390,12 @@ export default function LeadsTable({ leads, locationId }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Lead_Detail 
+        leadNumber={selectedLeadNumber}
+        open={detailOpen}
+        setOpen={setDetailOpen}
+      />
     </div>
   );
 }

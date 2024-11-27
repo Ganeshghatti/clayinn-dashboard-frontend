@@ -16,6 +16,7 @@ export const fetchLeads_Action = createAsyncThunk(
       const response = await axiosInstance.get(
         `/leads-management/leads/get/${locationId}/`
       );
+      console.log(response.data);
       return response.data?.results || response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch leads");
@@ -42,22 +43,6 @@ export const createLead_Action = createAsyncThunk(
   }
 );
 
-// Update lead
-export const updateLead_Action = createAsyncThunk(
-  "leads/update",
-  async ({ leadNumber, data }, { rejectWithValue }) => {
-    try {
-      const response = await axiosInstance.put(
-        `/leads-management/leads/detail/${leadNumber}/`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to update lead");
-    }
-  }
-);
-
 // Delete lead
 export const deleteLead_Action = createAsyncThunk(
   "leads/delete",
@@ -70,18 +55,35 @@ export const deleteLead_Action = createAsyncThunk(
     }
   }
 );
-
-// Get lead details
-export const getLeadDetails_Action = createAsyncThunk(
-  "leads/getDetails",
-  async (leadNumber, { rejectWithValue }) => {
+// Fetch Lead Detail Action
+export const fetch_Lead_By_ID = createAsyncThunk(
+  "leads/fetchDetail",
+  async ({ leadNumber }, { rejectWithValue }) => {
     try {
+      console.log(leadNumber);
       const response = await axiosInstance.get(
         `/leads-management/leads/detail/${leadNumber}/`
       );
+      console.log(response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch lead details");
+    }
+  }
+);
+
+// Update Lead Action
+export const updateLead_Action = createAsyncThunk(
+  "leads/update",
+  async ({ leadNumber, formData }, { rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.put(
+        `/leads-management/leads/detail/${leadNumber}/`,
+        formData
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to update lead");
     }
   }
 );
@@ -118,24 +120,6 @@ const leadSlice = createSlice({
         state.isLoading = false;
         state.error = action.payload;
       })
-      // Update lead
-      .addCase(updateLead_Action.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(updateLead_Action.fulfilled, (state, action) => {
-        state.isLoading = false;
-        const index = state.leads.findIndex(
-          lead => lead.lead_number === action.payload.lead_number
-        );
-        if (index !== -1) {
-          state.leads[index] = action.payload;
-        }
-      })
-      .addCase(updateLead_Action.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload;
-      })
       // Delete lead
       .addCase(deleteLead_Action.pending, (state) => {
         state.isLoading = true;
@@ -150,17 +134,37 @@ const leadSlice = createSlice({
       .addCase(deleteLead_Action.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      })
-      // Get lead details
-      .addCase(getLeadDetails_Action.pending, (state) => {
+      }) 
+      // Fetch Lead Detail cases
+      .addCase(fetch_Lead_By_ID.pending, (state) => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(getLeadDetails_Action.fulfilled, (state, action) => {
+      .addCase(fetch_Lead_By_ID.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.currentLead = action.payload;
+        state.lead_By_Id = action.payload;
       })
-      .addCase(getLeadDetails_Action.rejected, (state, action) => {
+      .addCase(fetch_Lead_By_ID.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Update Lead cases
+      .addCase(updateLead_Action.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateLead_Action.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.lead_By_Id = action.payload;
+        // Update the lead in the leads array if it exists
+        const index = state.leads.findIndex(
+          (lead) => lead.lead_number === action.payload.lead_number
+        );
+        if (index !== -1) {
+          state.leads[index] = action.payload;
+        }
+      })
+      .addCase(updateLead_Action.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });
