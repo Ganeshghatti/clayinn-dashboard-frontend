@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect,useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -36,14 +36,19 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateLead_Action } from "@/app/redux/lead_Slice";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import Lead_Detail from "../Lead_Detail";
+import axiosInstance from "@/utils/axiosInstance";
+import { create_Booking_Action } from "@/app/redux/booking_Slice";
+import { deleteLead_Action } from "@/app/redux/lead_Slice";
 
 export default function LeadsTable({ leads, locationId }) {
   const { toast } = useToast();
   const dispatch = useDispatch();
   const { all_venues: venues } = useSelector((state) => state.venues);
+  const auth = useSelector((state) => state.auth);
+  const user = auth?.user;
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
   const itemsPerPage = 10;
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
@@ -71,11 +76,15 @@ export default function LeadsTable({ leads, locationId }) {
   }, [dispatch, locationId]);
 
   // Search filter
-  const filteredLeads = leads?.length > 0 ? leads?.filter(lead => 
-    lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    lead.lead_number.toString().includes(searchTerm) ||
-    lead.mobile.includes(searchTerm)
-  ) : [];
+  const filteredLeads =
+    leads?.length > 0
+      ? leads?.filter(
+          (lead) =>
+            lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            lead.lead_number.toString().includes(searchTerm) ||
+            lead.mobile.includes(searchTerm)
+        )
+      : [];
 
   // Sorting
   const sortedLeads = useMemo(() => {
@@ -84,10 +93,10 @@ export default function LeadsTable({ leads, locationId }) {
     if (sortConfig.key) {
       sortableLeads.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? -1 : 1;
+          return sortConfig.direction === "asc" ? -1 : 1;
         }
         if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === 'asc' ? 1 : -1;
+          return sortConfig.direction === "asc" ? 1 : -1;
         }
         return 0;
       });
@@ -104,24 +113,32 @@ export default function LeadsTable({ leads, locationId }) {
   const handleSort = (key) => {
     setSortConfig({
       key,
-      direction: sortConfig.key === key && sortConfig.direction === 'asc' ? 'desc' : 'asc'
+      direction:
+        sortConfig.key === key && sortConfig.direction === "asc"
+          ? "desc"
+          : "asc",
     });
   };
   // Handle status change
   const handleStatusChange = async (lead, newStatus) => {
     try {
-      await dispatch(updateLead_Action({
-        leadNumber: lead.lead_number,
-        data: {
-          ...lead,
-          lead_status: newStatus
-        }
-      })).unwrap();
-
+      // If status is being changed to closed-won, show booking modal
       if (newStatus === "closed-won") {
         setSelectedLead(lead);
         setShowBookingModal(true);
+        return; // Don't update status yet
       }
+
+      // For other status changes, proceed as normal
+      await dispatch(
+        updateLead_Action({
+          leadNumber: lead.lead_number,
+          data: {
+            ...lead,
+            lead_status: newStatus,
+          },
+        })
+      ).unwrap();
 
       toast({
         title: "Success",
@@ -139,8 +156,6 @@ export default function LeadsTable({ leads, locationId }) {
   // Handle booking creation
   const handleCreateBooking = async () => {
     try {
-      const token = localStorage.getItem("access-token");
-      const URL = process.env.NEXT_PUBLIC_URL;
       const requestBody = {
         lead: selectedLead.lead_number,
         occasion: parseInt(bookingData.occasion),
@@ -148,18 +163,19 @@ export default function LeadsTable({ leads, locationId }) {
         location: locationId,
         sales_person: selectedLead.sales_person,
         event_date: format(new Date(bookingData.event_date), "yyyy-MM-dd"),
-        slot: bookingData.slot
+        slot: bookingData.slot,
       };
-      console.log(requestBody)
-      const response = await axios.post(
-        `${URL}/bookings-management/bookings/create/`,
-        requestBody,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+
+      await dispatch(create_Booking_Action({ formData: requestBody })).unwrap();
+      console.log("no error till here");
+      // Update lead status to closed-won after booking creation
+      // await dispatch(updateLead_Action({
+      //   leadNumber: selectedLead.lead_number,
+      //   data: {
+      //     ...selectedLead,
+      //     lead_status: "closed-won"
+      //   }
+      // })).unwrap();
 
       setShowBookingModal(false);
       toast({
@@ -167,7 +183,6 @@ export default function LeadsTable({ leads, locationId }) {
         description: "Booking created successfully",
       });
     } catch (error) {
-      console.error("Error creating booking:", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -181,11 +196,15 @@ export default function LeadsTable({ leads, locationId }) {
     <td className="p-3">
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2">
-          <span className={`px-2 py-1 rounded-full text-xs ${
-            lead.lead_status === 'untouched' ? 'bg-red-100 text-red-800' :
-            lead.lead_status === 'closed-won' ? 'bg-green-100 text-green-800' :
-            'bg-yellow-100 text-yellow-800'
-          }`}>
+          <span
+            className={`px-2 py-1 rounded-full text-xs ${
+              lead.lead_status === "untouched"
+                ? "bg-red-100 text-red-800"
+                : lead.lead_status === "closed-won"
+                ? "bg-green-100 text-green-800"
+                : "bg-yellow-100 text-yellow-800"
+            }`}
+          >
             {lead.lead_status}
           </span>
           <ChevronDown className="h-4 w-4" />
@@ -203,6 +222,27 @@ export default function LeadsTable({ leads, locationId }) {
       </DropdownMenu>
     </td>
   );
+
+  const handleDeleteLead = async (leadNumber) => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this lead?"
+    );
+    if (!confirmDelete) return;
+
+    try {
+      await dispatch(deleteLead_Action(leadNumber)).unwrap();
+      toast({
+        title: "Success",
+        description: "Lead deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to delete lead",
+      });
+    }
+  };
 
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
@@ -222,19 +262,34 @@ export default function LeadsTable({ leads, locationId }) {
         <table className="w-full border-collapse">
           <thead className="bg-gray-100">
             <tr>
-              <th onClick={() => handleSort('lead_number')} className="p-3 text-left cursor-pointer">
+              <th
+                onClick={() => handleSort("lead_number")}
+                className="p-3 text-left cursor-pointer"
+              >
                 Lead #
               </th>
-              <th onClick={() => handleSort('hostname')} className="p-3 text-left cursor-pointer">
+              <th
+                onClick={() => handleSort("hostname")}
+                className="p-3 text-left cursor-pointer"
+              >
                 Host Name
               </th>
-              <th onClick={() => handleSort('mobile')} className="p-3 text-left cursor-pointer">
+              <th
+                onClick={() => handleSort("mobile")}
+                className="p-3 text-left cursor-pointer"
+              >
                 Mobile
               </th>
-              <th onClick={() => handleSort('email')} className="p-3 text-left cursor-pointer">
+              <th
+                onClick={() => handleSort("email")}
+                className="p-3 text-left cursor-pointer"
+              >
                 Email
               </th>
-              <th onClick={() => handleSort('lead_status')} className="p-3 text-left cursor-pointer">
+              <th
+                onClick={() => handleSort("lead_status")}
+                className="p-3 text-left cursor-pointer"
+              >
                 Status
               </th>
               <th className="p-3 text-left">Actions</th>
@@ -247,9 +302,7 @@ export default function LeadsTable({ leads, locationId }) {
                 <td className="p-3">{lead.hostname}</td>
                 <td className="p-3">{lead.mobile}</td>
                 <td className="p-3">{lead.email}</td>
-                <td className="p-3">
-                  {renderStatusCell(lead)}
-                </td>
+                <td className="p-3">{renderStatusCell(lead)}</td>
                 <td className="p-3">
                   <div className="flex gap-2">
                     <Button
@@ -264,6 +317,17 @@ export default function LeadsTable({ leads, locationId }) {
                     </Button>
                   </div>
                 </td>
+                <td className="p-4">
+                  {user?.role !== "sales-person" && (
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => handleDeleteLead(lead.lead_number)}
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -273,19 +337,23 @@ export default function LeadsTable({ leads, locationId }) {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedLeads?.length || 0)} of {sortedLeads?.length || 0} entries
+          Showing {indexOfFirstItem + 1} to{" "}
+          {Math.min(indexOfLastItem, sortedLeads?.length || 0)} of{" "}
+          {sortedLeads?.length || 0} entries
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Next
@@ -302,13 +370,13 @@ export default function LeadsTable({ leads, locationId }) {
               Fill in the booking details for this lead
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>Slot</Label>
               <Select
                 value={bookingData.slot}
-                onValueChange={(value) => 
+                onValueChange={(value) =>
                   setBookingData((prev) => ({ ...prev, slot: value }))
                 }
               >
@@ -326,7 +394,7 @@ export default function LeadsTable({ leads, locationId }) {
               <Label>Venue</Label>
               <Select
                 value={bookingData.venue_id}
-                onValueChange={(value) => 
+                onValueChange={(value) =>
                   setBookingData((prev) => ({ ...prev, venue_id: value }))
                 }
               >
@@ -347,7 +415,7 @@ export default function LeadsTable({ leads, locationId }) {
               <Label>Occasion</Label>
               <Select
                 value={bookingData.occasion}
-                onValueChange={(value) => 
+                onValueChange={(value) =>
                   setBookingData((prev) => ({ ...prev, occasion: value }))
                 }
               >
@@ -356,7 +424,10 @@ export default function LeadsTable({ leads, locationId }) {
                 </SelectTrigger>
                 <SelectContent>
                   {selectedLead?.occasions?.map((occasion) => (
-                    <SelectItem key={occasion.id} value={occasion.id.toString()}>
+                    <SelectItem
+                      key={occasion.id}
+                      value={occasion.id.toString()}
+                    >
                       {occasion.occasion_type}
                     </SelectItem>
                   ))}
@@ -366,11 +437,14 @@ export default function LeadsTable({ leads, locationId }) {
 
             <div className="grid gap-2">
               <Label>Event Date</Label>
-              <Input 
-                type="date" 
+              <Input
+                type="date"
                 value={bookingData.event_date}
-                onChange={(e) => 
-                  setBookingData((prev) => ({ ...prev, event_date: e.target.value }))
+                onChange={(e) =>
+                  setBookingData((prev) => ({
+                    ...prev,
+                    event_date: e.target.value,
+                  }))
                 }
                 className="w-full"
               />
@@ -378,12 +452,20 @@ export default function LeadsTable({ leads, locationId }) {
           </div>
 
           <DialogFooter>
-            <Button onClick={() => setShowBookingModal(false)} variant="outline">
+            <Button
+              onClick={() => setShowBookingModal(false)}
+              variant="outline"
+            >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleCreateBooking}
-              disabled={!bookingData.slot || !bookingData.venue_id || !bookingData.occasion || !bookingData.event_date}
+              disabled={
+                !bookingData.slot ||
+                !bookingData.venue_id ||
+                !bookingData.occasion ||
+                !bookingData.event_date
+              }
             >
               Create Booking
             </Button>
@@ -391,7 +473,7 @@ export default function LeadsTable({ leads, locationId }) {
         </DialogContent>
       </Dialog>
 
-      <Lead_Detail 
+      <Lead_Detail
         leadNumber={selectedLeadNumber}
         open={detailOpen}
         setOpen={setDetailOpen}

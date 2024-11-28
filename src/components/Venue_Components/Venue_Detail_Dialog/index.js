@@ -30,6 +30,7 @@ import Delete_Dialog from "../Venue_Delete_Dialog";
 import { FaBuilding } from "react-icons/fa6";
 
 import "../../../app/globals.css";
+import axiosInstance from "@/utils/axiosInstance";
 
 export default function Venue_Detail({ location_Id, venue }) {
   const dispatch = useDispatch();
@@ -52,7 +53,7 @@ export default function Venue_Detail({ location_Id, venue }) {
 
       const URL = process.env.NEXT_PUBLIC_URL;
 
-      const response = await axios.get(
+      const response = await axiosInstance.get(
         `${URL}/venue-management/venues/detail/${venue?.venue_id}/?year=${currentYear}&month=${currentMonth}`,
         {
           headers: {

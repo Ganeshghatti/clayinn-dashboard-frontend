@@ -14,63 +14,60 @@ import {
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import axios from "axios";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { deleteBooking_Action, fetchBookings_Action } from "@/app/redux/booking_Slice/index";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 
 export default function Booking_Delete({ booking }) {
+  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
   const { toast } = useToast();
+  console.log(booking)
 
   const handleDelete = async () => {
     try {
-      const token = localStorage.getItem("access-token");
-      await axios.delete(
-        `https://clayinn-dashboard-backend.onrender.com/bookings-management/bookings/delete/${booking.booking_number}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      await dispatch(deleteBooking_Action(booking.booking_number)).unwrap();
+      setOpen(false);
       toast({
         title: "Success",
-        description: "Booking deleted successfully",
+        description: "Booking deleted successfully"
       });
+      await dispatch(fetchBookings_Action())
     } catch (error) {
-      console.error("Error deleting booking:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to delete booking",
+        description: error.message || "Failed to delete booking"
       });
     }
   };
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" className="text-red-700 hover:text-red-900">
-          Delete
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-red-600">
-            Are you absolutely sure?
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-red-600">
-            This action cannot be undone. This will permanently delete the
-            booking and remove the data from our servers.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-red-600 hover:bg-red-500"
-            onClick={handleDelete}
-          >
-            Delete
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="destructive" size="sm">Delete</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Are you sure?</DialogTitle>
+          <DialogDescription>
+            This action cannot be undone.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="destructive" onClick={handleDelete}>Delete</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

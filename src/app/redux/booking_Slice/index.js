@@ -1,170 +1,102 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from "@/utils/axiosInstance";
 
-const initialState = {
-  bookings: [],
-  loading: false,
-  error: null,
-  booking_By_Id: {},
-};
-
-const url = process.env.NEXT_PUBLIC_URL;
-
-// Helper function for token
-const getToken = () => {
-  const token = localStorage.getItem("access-token");
-  if (!token) throw new Error("No token found. Please login again.");
-  return token;
-};
-
-// Create Booking Action
+// Create Booking
 export const create_Booking_Action = createAsyncThunk(
   "bookings/create",
   async ({ formData }, { rejectWithValue }) => {
     try {
-      const token = getToken();
-      const response = await axios.post(
-        `${url}/bookings-management/bookings/create/`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      console.log("Creating booking with data:", formData);
+      const response = await axiosInstance.post(
+        `/bookings-management/bookings/create/`,
+        formData
       );
+      console.log("Booking created successfully:", response.data);
       return response.data;
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.post(
-            `${url}/bookings-management/bookings/create/`,
-            formData,
-            {
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
-          );
-
-          return newResponse.data;
-        } catch (error) {
-          return rejectWithValue(error.response.data);
-        }
-      }
-      return rejectWithValue(error.response.data || "Failed to create the Booking");
+      console.error("Error creating booking:", error);
+      return rejectWithValue(error.response?.data || "Failed to create booking");
     }
   }
 );
 
 // Fetch Bookings
 export const fetchBookings_Action = createAsyncThunk(
-  "bookings/fetchBookings",
+  "bookings/fetch",
   async (locationId, { rejectWithValue }) => {
     try {
-      const token = getToken();
-      const response = await axios.get(
-        `${url}/bookings-management/bookings/get/${locationId}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      console.log("Fetching bookings for location:", locationId);
+      const response = await axiosInstance.get(
+        `/bookings-management/bookings/get/${locationId}/`
       );
-      
-      // Add debug logs
-      console.log("API Response:", response);
-      console.log("Response Data:", response.data);
-      
-      // Check if response.data exists and has the expected structure
-      if (!response.data) {
-        return rejectWithValue("No data received from the API");
-      }
-
-      // Return the results array directly (not nested under results)
+      console.log("Bookings fetched successfully:", response.data);
       return response.data;
-
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        console.log("Refreshing the Token");
-        const refresh_token = localStorage.getItem("refresh-token");
-
-        try {
-          const response = await axios.post(
-            "https://clayinn-dashboard-backend.onrender.com/user-management/token/refresh/",
-            {
-              refresh: refresh_token,
-            }
-          );
-          localStorage.setItem("access-token", response.data.access);
-
-          const newResponse = await axios.get(
-            `${url}/bookings-management/bookings/get/${locationId}/`,
-            {
-              headers: {
-                Authorization: `Bearer ${response.data.access}`, // Use the new token
-              },
-            }
-          );
-
-          // Add debug logs for refresh token case
-          console.log("Refreshed API Response:", newResponse);
-          console.log("Refreshed Response Data:", newResponse.data);
-
-          if (!newResponse.data) {
-            return rejectWithValue("No data received after token refresh");
-          }
-
-          return newResponse.data;
-        } catch (error) {
-          console.error("Token refresh error:", error);
-          return rejectWithValue(error.response?.data || "Token refresh failed");
-        }
-      }
-
-      console.error("API error:", error);
-      return rejectWithValue(error.response?.data || "Failed to fetch Bookings");
+      console.error("Error fetching bookings:", error);
+      return rejectWithValue(error.response?.data || "Failed to fetch bookings");
     }
   }
 );
 
 // Delete Booking
-export const delete_Booking_Action = createAsyncThunk(
-  "booking/delete",
-  async (booking_number, { rejectWithValue }) => {
+export const deleteBooking_Action = createAsyncThunk(
+  "bookings/delete",
+  async (bookingId, { rejectWithValue }) => {
     try {
-      const token = getToken();
-      const response = await axios.delete(
-        `${url}/bookings-management/bookings/delete/${booking_number}/`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      console.log("Deleting booking:", bookingId);
+      await axiosInstance.delete(`/bookings-management/bookings/delete/${bookingId}/`);
+      console.log("Booking deleted successfully");
+      return bookingId;
+    } catch (error) {
+      console.error("Error deleting booking:", error);
+      return rejectWithValue(error.response?.data || "Failed to delete booking");
+    }
+  }
+);
+
+// Get Booking Details
+export const fetchBookingDetails_Action = createAsyncThunk(
+  "bookings/details",
+  async (bookingId, { rejectWithValue }) => {
+    try {
+      console.log("Fetching booking details for:", bookingId);
+      const response = await axiosInstance.get(
+        `/bookings-management/bookings/detail/${bookingId}/`
       );
+      console.log("Booking details fetched successfully:", response.data);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data || "Failed to delete the Booking");
+      console.error("Error fetching booking details:", error);
+      return rejectWithValue(error.response?.data || "Failed to fetch booking details");
     }
   }
 );
 
 const bookingSlice = createSlice({
   name: "bookings",
-  initialState,
+  initialState: {
+    bookings: [],
+    selectedBooking: null,
+    loading: false,
+    error: null
+  },
   reducers: {},
   extraReducers: (builder) => {
     builder
+      // Create Booking
+      .addCase(create_Booking_Action.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(create_Booking_Action.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bookings.push(action.payload);
+      })
+      .addCase(create_Booking_Action.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Fetch Bookings
       .addCase(fetchBookings_Action.pending, (state) => {
         state.loading = true;
         state.error = null;
@@ -172,12 +104,38 @@ const bookingSlice = createSlice({
       .addCase(fetchBookings_Action.fulfilled, (state, action) => {
         state.loading = false;
         state.bookings = action.payload;
-        console.log("State updated with bookings:", state.bookings); // Debug log
       })
       .addCase(fetchBookings_Action.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        console.error("Fetch bookings rejected:", action.payload); // Debug log
+      })
+      // Delete Booking
+      .addCase(deleteBooking_Action.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteBooking_Action.fulfilled, (state, action) => {
+        state.loading = false;
+        state.bookings = state.bookings.filter(
+          (booking) => booking.id !== action.payload
+        );
+      })
+      .addCase(deleteBooking_Action.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      // Booking Details
+      .addCase(fetchBookingDetails_Action.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchBookingDetails_Action.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedBooking = action.payload;
+      })
+      .addCase(fetchBookingDetails_Action.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

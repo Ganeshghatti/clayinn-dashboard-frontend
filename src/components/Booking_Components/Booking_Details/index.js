@@ -1,160 +1,118 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useToast } from "@/hooks/use-toast";
+import { fetchBookingDetails_Action, deleteBooking_Action } from "@/app/redux/booking_Slice";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { useState } from "react";
-import { FiCalendar, FiPhone, FiMail, FiMapPin, FiClock } from "react-icons/fi";
+import { FiPhone, FiMail, FiMapPin, FiCalendar, FiClock } from "react-icons/fi";
+import { format } from "date-fns";
 
 export default function BookingDetails({ booking }) {
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+  const { selectedBooking, loading, error } = useSelector((state) => state.bookings);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (booking?.id && open) {
+      dispatch(fetchBookingDetails_Action(booking.id));
+    }
+  }, [booking?.id, open, dispatch]);
+
+  const handleDeleteBooking = async () => {
+    try {
+      await dispatch(deleteBooking_Action(booking.id)).unwrap();
+      setOpen(false);
+      toast({
+        title: "Success",
+        description: "Booking deleted successfully"
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to delete booking"
+      });
+    }
+  };
 
   return (
-    <div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button 
-            variant="ghost" 
-            className="text-blue-700 font-medium hover:text-blue-900"
-          >
-            Details
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="max-md:max-w-[90%] md:max-w-[85%] h-[90vh] mx-auto p-6 bg-white rounded-lg shadow-lg overflow-auto">
-          <DialogHeader>
-            <DialogTitle className="text-3xl font-bold text-blue-700 text-center mb-6">
-              Booking Information
-            </DialogTitle>
-          </DialogHeader>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Booking Details</DialogTitle>
+        </DialogHeader>
 
-          <div className="space-y-8">
-            {/* Basic Booking Information */}
-            <section className="p-5 bg-blue-50 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold text-blue-700">
-                Basic Details
-              </h2>
-              <Separator className="my-3" />
-              <table className="w-full text-gray-700 text-sm">
-                <tbody>
-                  <tr>
-                    <td className="font-semibold">Booking Number:</td>
-                    <td>{booking?.booking_number || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="font-semibold">Event Date:</td>
-                    <td>{booking?.event_date || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="font-semibold">Slot:</td>
-                    <td className="capitalize">{booking?.slot || "N/A"}</td>
-                  </tr>
-                  <tr>
-                    <td className="font-semibold">Venue:</td>
-                    <td>{booking?.venue?.name || "N/A"}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </section>
-
-            {/* Lead Information */}
-            <section className="p-5 bg-green-50 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold text-green-700">
-                Lead Information
-              </h2>
-              <Separator className="my-3" />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">Host Name:</span>
-                    <span>{booking?.lead?.hostname || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiPhone className="text-green-600" />
-                    <span>{booking?.lead?.mobile || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiMail className="text-green-600" />
-                    <span>{booking?.lead?.email || "N/A"}</span>
-                  </div>
+        {loading && <div>Loading...</div>}
+        {error && <div className="text-red-600">Error: {error}</div>}
+        
+        {!loading && selectedBooking && (
+          <div className="space-y-6">
+            {/* Basic Booking Info */}
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Booking Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Booking Number</p>
+                  <p>{selectedBooking.booking_number}</p>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <FiMapPin className="text-green-600" />
-                    <span>{booking?.location || "N/A"}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <FiCalendar className="text-green-600" />
-                    <span>Lead Entry: {new Date(booking?.lead?.lead_entry_date).toLocaleDateString()}</span>
-                  </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Event Date</p>
+                  <p>{selectedBooking.event_date}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Slot</p>
+                  <p className="capitalize">{selectedBooking.slot}</p>
                 </div>
               </div>
-            </section>
+            </div>
 
-            {/* Occasion Details */}
-            <section className="p-5 bg-orange-50 rounded-lg shadow-md">
-              <h2 className="text-lg font-semibold text-orange-700">
-                Occasion Details
-              </h2>
-              <Separator className="my-3" />
-              <div className="space-y-4">
-                <div className="p-4 border border-orange-200 rounded-md bg-white shadow-sm">
-                  <h3 className="text-md font-semibold text-orange-600 capitalize">
-                    {booking?.occasion?.occasion_type || "N/A"}
-                  </h3>
-                  <Separator className="my-2" />
-                  <table className="w-full text-gray-600 text-sm">
-                    <tbody>
-                      {booking?.occasion?.occasion_type === "wedding" ? (
-                        <>
-                          <tr>
-                            <td className="font-semibold">Date of Function:</td>
-                            <td>{booking?.occasion?.date_of_function || "N/A"}</td>
-                          </tr>
-                          <tr>
-                            <td className="font-semibold">Total Pax:</td>
-                            <td>
-                              {(
-                                (booking?.occasion?.lunch_pax || 0) +
-                                (booking?.occasion?.hi_tea_pax || 0) +
-                                (booking?.occasion?.dinner_pax || 0)
-                              ) || "N/A"}
-                            </td>
-                          </tr>
-                          <tr>
-                            <td className="font-semibold">Total Value:</td>
-                            <td>{booking?.occasion?.total || "N/A"}</td>
-                          </tr>
-                        </>
-                      ) : (
-                        <>
-                          <tr>
-                            <td className="font-semibold">Number of Pax:</td>
-                            <td>{booking?.occasion?.number_of_pax || "N/A"}</td>
-                          </tr>
-                          <tr>
-                            <td className="font-semibold">Number of Rooms:</td>
-                            <td>{booking?.occasion?.number_of_rooms || "N/A"}</td>
-                          </tr>
-                          <tr>
-                            <td className="font-semibold">Total:</td>
-                            <td>{booking?.occasion?.total || "N/A"}</td>
-                          </tr>
-                        </>
-                      )}
-                    </tbody>
-                  </table>
+            {/* Lead Info */}
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Lead Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Host Name</p>
+                  <p>{selectedBooking.lead?.hostname || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Mobile</p>
+                  <p>{selectedBooking.lead?.mobile || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Location</p>
+                  <p>{selectedBooking.location?.name || 'N/A'}</p>
                 </div>
               </div>
-            </section>
+            </div>
+
+            {/* Venue Info */}
+            <div className="bg-muted/50 rounded-lg p-4">
+              <h3 className="font-semibold mb-3">Venue Information</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Venue Name</p>
+                  <p>{selectedBooking.venue?.name || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">Venue Type</p>
+                  <p className="capitalize">{selectedBooking.venue?.venue_type || 'N/A'}</p>
+                </div>
+              </div>
+            </div>
           </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 }
