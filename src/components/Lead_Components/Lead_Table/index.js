@@ -39,6 +39,7 @@ import Lead_Detail from "../Lead_Detail";
 import axiosInstance from "@/utils/axiosInstance";
 import { create_Booking_Action } from "@/app/redux/booking_Slice";
 import { deleteLead_Action } from "@/app/redux/lead_Slice";
+import { CSVLink } from "react-csv";
 
 export default function LeadsTable({ leads, locationId }) {
   const { toast } = useToast();
@@ -62,11 +63,31 @@ export default function LeadsTable({ leads, locationId }) {
   const [selectedLeadNumber, setSelectedLeadNumber] = useState(null);
 
   const leadStatuses = [
-    "untouched",
-    "in-progress",
-    "closed-won",
-    "closed-lost",
-    "not-interested",
+    {
+      label: "untouched",
+      bgColor: "#fecaca",
+    },
+    {
+      label: "in-progress",
+      bgColor: "#fed7aa",
+    },
+    {
+      label: "closed-won",
+      bgColor: "#bbf7d0",
+    },
+    {
+      label: "closed-lost",
+      bgColor: "#fca5a5",
+    },
+    {
+      label: "not-interested",
+      bgColor: "#d9f99d",
+    },
+    // "untouched",
+    // "in-progress",
+    // "closed-won",
+    // "closed-lost",
+    // "not-interested",
   ];
 
   useEffect(() => {
@@ -212,10 +233,26 @@ export default function LeadsTable({ leads, locationId }) {
         <DropdownMenuContent>
           {leadStatuses.map((status) => (
             <DropdownMenuItem
-              key={status}
-              onClick={() => handleStatusChange(lead, status)}
+              key={status.label}
+              // changes the style on hover
+
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = status.bgColor;
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = "";
+              }}
+              className={`
+                cursor-pointer 
+                transition-all 
+                hover:bg-opacity-20
+                hover:!bg-[${status.bgColor}]
+                !text-[${status.bgColor}]
+                hover:text-black
+              `}
+              onClick={() => handleStatusChange(lead, status.label)}
             >
-              {status}
+              {status.label}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -244,10 +281,18 @@ export default function LeadsTable({ leads, locationId }) {
     }
   };
 
+  const csvHeaders = [
+    { label: "Lead Number", key: "lead_number" },
+    { label: "Host Name", key: "hostname" },
+    { label: "Mobile", key: "mobile" },
+    { label: "Email", key: "email" },
+    { label: "Status", key: "lead_status" },
+  ];
+
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search and Filters */}
-      <div className="mb-4">
+      <div className="mb-4 flex justify-between items-center">
         <Input
           type="text"
           placeholder="Search by name, lead number, or mobile..."
@@ -255,6 +300,17 @@ export default function LeadsTable({ leads, locationId }) {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
+        <CSVLink headers={csvHeaders} data={filteredLeads} filename="leads.csv" className="h-fit w-fit overflow-hidden">
+          <Button
+            color="#082f49"
+            variant="outline"
+            rounded="md"
+            className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
+          >
+            {" "}
+            Export CSV
+          </Button>
+        </CSVLink>
       </div>
 
       {/* Table */}

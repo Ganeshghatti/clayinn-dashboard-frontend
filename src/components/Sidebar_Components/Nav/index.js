@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function Nav({ locationId, pathname }) {
   return (
-    <div className="space-y-8 mt-12">
+    <div className="space-y-8 h-full mt-12">
       {navLinks.map((eachLink) => {
         return (
           <Link

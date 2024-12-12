@@ -22,7 +22,7 @@ export default function Team() {
   }, [dispatch, locationId]);
 
   return (
-    <div className="space-y-10 flex flex-col h-[90vh]">
+    <div className="space-y-10 flex flex-col h-screen">
       <div>
         <div>
           <Header content={`${locationName}`} />
@@ -33,7 +33,7 @@ export default function Team() {
         </div>
       </div>
 
-      <div className="flex-1 h-screen">
+      <div className="w-full h-full">
         <TeamTable members={members} locationId={locationId} />
       </div>
       <div>
