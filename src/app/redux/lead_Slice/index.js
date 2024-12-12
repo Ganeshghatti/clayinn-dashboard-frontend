@@ -88,6 +88,23 @@ export const updateLead_Action = createAsyncThunk(
   }
 );
 
+//Update lead Status 
+export const updateLead_Status = createAsyncThunk(
+  "leads/updateStatus",
+  async ({ leadNumber, formData }, {
+    rejectWithValue }) => {
+    try {
+      const response = await axiosInstance.patch(
+        `/leads-management/leads/detail/${leadNumber}/`,
+        formData
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to update lead status");
+    }
+  }
+)
+
 const leadSlice = createSlice({
   name: "leads",
   initialState,
@@ -165,6 +182,25 @@ const leadSlice = createSlice({
         }
       })
       .addCase(updateLead_Action.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })  // update lead status
+      .addCase(updateLead_Status.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(updateLead_Status.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.lead_By_Id = action.payload;
+        // Update the lead in the leads array if it exists
+        const index = state.leads.findIndex(
+          (lead) => lead.lead_number === action.payload.lead_number
+        );
+        if (index !== -1) {
+          state.leads[index] = action.payload;
+        }
+      })
+      .addCase(updateLead_Status.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

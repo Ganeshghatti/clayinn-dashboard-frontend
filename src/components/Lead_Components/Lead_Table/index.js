@@ -39,6 +39,7 @@ import Lead_Detail from "../Lead_Detail";
 import axiosInstance from "@/utils/axiosInstance";
 import { create_Booking_Action } from "@/app/redux/booking_Slice";
 import { deleteLead_Action } from "@/app/redux/lead_Slice";
+import { updateLead_Status } from "@/app/redux/lead_Slice";
 import { CSVLink } from "react-csv";
 
 export default function LeadsTable({ leads, locationId }) {
@@ -64,30 +65,59 @@ export default function LeadsTable({ leads, locationId }) {
 
   const leadStatuses = [
     {
-      label: "untouched",
-      bgColor: "#fecaca",
+      label: "Untouched",
+      value: "untouched",
+      bgColor: "#fee2e2",
+      color: "#dc2626",
     },
     {
-      label: "in-progress",
-      bgColor: "#fed7aa",
+      label: "Proposal Sent",
+      value: "proposal_sent",
+      bgColor: "#fef9c3",
+      color: "#ca8a04",
     },
     {
-      label: "closed-won",
+      label: "Visit Scheduled",
+      value: "visit_scheduled",
+      bgColor: "#ccfbf1",
+      color: "#0d9488",
+    },
+    {
+      label: "Visit Done",
+      value: "visit_done",
       bgColor: "#bbf7d0",
+      color: "#16a34a",
     },
     {
-      label: "closed-lost",
-      bgColor: "#fca5a5",
+      label: "Final Negotiation",
+      value: "final_negotiation",
+      bgColor: "#dbeafe",
+      color: "#2563eb",
     },
     {
-      label: "not-interested",
-      bgColor: "#d9f99d",
+      label: "Postponed",
+      value: "postponed",
+      bgColor: "#ffedd5",
+      color: "#ea580c",
     },
-    // "untouched",
-    // "in-progress",
-    // "closed-won",
-    // "closed-lost",
-    // "not-interested",
+    {
+      label: "Confirmation Awaited",
+      value: "confirmation_awaited",
+      bgColor: "#fef3c7",
+      color: "#d97706",
+    },
+    {
+      label: "Closed Won",
+      value: "closed_won",
+      bgColor: "#d1fae5",
+      color: "#059669",
+    },
+    {
+      label: "Closed Lost",
+      value: "closed_lost",
+      bgColor: "#fee2e2",
+      color: "#dc2626",
+    },
   ];
 
   useEffect(() => {
@@ -144,9 +174,6 @@ export default function LeadsTable({ leads, locationId }) {
   const handleStatusChange = async (lead, newStatus) => {
     try {
       // If status is being changed to closed-won, show booking modal
-
-      console.log("lead", lead)
-      console.log("status change", newStatus)
       if (newStatus === "closed-won") {
         setSelectedLead(lead);
         setShowBookingModal(true);
@@ -155,16 +182,15 @@ export default function LeadsTable({ leads, locationId }) {
 
       // For other status changes, proceed as normal
       await dispatch(
-        updateLead_Action({
+        updateLead_Status({
           leadNumber: lead.lead_number,
-          data: {
-            ...lead,
+          formData: {
             lead_status: newStatus,
+            location_id: lead.location_id,
+            sales_person: lead.sales_person,
           },
         })
       ).unwrap();
-
-      console.log("Lead status updated successfully", leads);
 
       toast({
         title: "Success",
@@ -219,53 +245,38 @@ export default function LeadsTable({ leads, locationId }) {
 
   // In your table cell render
   const renderStatusCell = (lead) => {
-    console.log("the leads in the dropdown", leads)
+    const currentStatus = leadStatuses.find(
+      (status) => status.value === lead.lead_status
+    );
     return (
       <td className="p-3">
-      <DropdownMenu>
-        <DropdownMenuTrigger className="flex items-center gap-2">
-          <span
-            className={`px-2 py-1 rounded-full text-xs ${
-              lead.lead_status === "untouched"
-                ? "bg-red-100 text-red-800"
-                : lead.lead_status === "closed-won"
-                ? "bg-green-100 text-green-800"
-                : "bg-yellow-100 text-yellow-800"
-            }`}
-          >
-            {lead.lead_status}
-          </span>
-          <ChevronDown className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent>
-          {leadStatuses.map((status) => (
-            <DropdownMenuItem
-              key={status.label}
-              // changes the style on hover
-
-              onMouseOver={(e) => {
-                e.currentTarget.style.backgroundColor = status.bgColor;
+        <DropdownMenu className="border-none ring-0">
+          <DropdownMenuTrigger className="flex items-center gap-2 border-none ring-0">
+            <span
+              style={{
+                backgroundColor: currentStatus?.bgColor,
+                color: currentStatus?.color,
               }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.backgroundColor = "";
-              }}
-              className={`
-                cursor-pointer 
-                transition-all 
-                hover:bg-opacity-20
-                hover:!bg-[${status.bgColor}]
-                !text-[${status.bgColor}]
-                hover:text-black
-              `}
-              onClick={() => handleStatusChange(lead, status.label)}
+              className={`px-2 py-1 rounded-full text-xs bg-[${currentStatus?.bgColor}]`}
             >
-              {status.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </td>
-    )
+              {/* {lead.lead_status} */}
+              {currentStatus.label}
+            </span>
+            <ChevronDown className="h-4 w-4" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            {leadStatuses.map((status) => (
+              <DropdownMenuItem
+                key={status.label}
+                onClick={() => handleStatusChange(lead, status.value)}
+              >
+                {status.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </td>
+    );
   };
 
   const handleDeleteLead = async (leadNumber) => {
@@ -308,7 +319,12 @@ export default function LeadsTable({ leads, locationId }) {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <CSVLink headers={csvHeaders} data={filteredLeads} filename="leads.csv" className="h-fit w-fit overflow-hidden">
+        <CSVLink
+          headers={csvHeaders}
+          data={filteredLeads}
+          filename="leads.csv"
+          className="h-fit w-fit overflow-hidden"
+        >
           <Button
             color="#082f49"
             variant="outline"
