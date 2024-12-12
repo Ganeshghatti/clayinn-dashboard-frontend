@@ -167,7 +167,7 @@ export default function TeamTable({ locationId, members = [] }) {
   });
 
   return (
-    <div className="w-[80vw] m-auto  mt-10 ">
+    <div className="w-full m-auto  mt-10 ">
       <div className="flex items-center justify-between py-4 gap-4 my-14">
         <Input
           placeholder="Filter by email..."
