@@ -144,6 +144,9 @@ export default function LeadsTable({ leads, locationId }) {
   const handleStatusChange = async (lead, newStatus) => {
     try {
       // If status is being changed to closed-won, show booking modal
+
+      console.log("lead", lead)
+      console.log("status change", newStatus)
       if (newStatus === "closed-won") {
         setSelectedLead(lead);
         setShowBookingModal(true);
@@ -160,6 +163,8 @@ export default function LeadsTable({ leads, locationId }) {
           },
         })
       ).unwrap();
+
+      console.log("Lead status updated successfully", leads);
 
       toast({
         title: "Success",
@@ -213,8 +218,10 @@ export default function LeadsTable({ leads, locationId }) {
   };
 
   // In your table cell render
-  const renderStatusCell = (lead) => (
-    <td className="p-3">
+  const renderStatusCell = (lead) => {
+    console.log("the leads in the dropdown", leads)
+    return (
+      <td className="p-3">
       <DropdownMenu>
         <DropdownMenuTrigger className="flex items-center gap-2">
           <span
@@ -258,7 +265,8 @@ export default function LeadsTable({ leads, locationId }) {
         </DropdownMenuContent>
       </DropdownMenu>
     </td>
-  );
+    )
+  };
 
   const handleDeleteLead = async (leadNumber) => {
     const confirmDelete = window.confirm(
