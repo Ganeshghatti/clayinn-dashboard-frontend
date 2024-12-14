@@ -400,7 +400,8 @@ export default function LeadsTable({ leads, locationId }) {
                 </td>
                 <td className="p-4">
                   {user?.role !== "sales-person" && (
-                    <div>
+                    <div className="flex gap-2">
+                      <Lead_Edit_Dialog leadData={lead} />
                       <Button
                         variant="destructive"
                         size="sm"
@@ -408,7 +409,7 @@ export default function LeadsTable({ leads, locationId }) {
                       >
                         Delete
                       </Button>
-                      <Lead_Edit_Dialog leadData={lead} />
+                      
                     </div>
                   )}
                 </td>

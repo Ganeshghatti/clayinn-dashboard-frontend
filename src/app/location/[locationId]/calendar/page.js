@@ -2,7 +2,6 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCalendarData_Action } from "@/app/redux/calendar_Slice";
-
 import {
   Dialog,
   DialogContent,
@@ -11,7 +10,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
 import {
   Accordion,
   AccordionContent,
@@ -34,6 +32,7 @@ import Header from "@/components/Header";
 
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Footer_Component from "@/components/Footer";
 
 export default function CalendarPage() {
   const dispatch = useDispatch();
@@ -46,23 +45,26 @@ export default function CalendarPage() {
   const handleDateClick = async (info) => {
     const selectedDate = info.dateStr;
     try {
-      await dispatch(fetchCalendarData_Action({
-        locationId,
-        date: selectedDate
-      })).unwrap();
+      await dispatch(
+        fetchCalendarData_Action({
+          locationId,
+          date: selectedDate,
+        })
+      ).unwrap();
       setIsDialogOpen(true);
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to fetch calendar data"
+        description: error.message || "Failed to fetch calendar data",
       });
     }
   };
 
   return (
-    <div className="flex flex-col gap-5 min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col justify-between gap-5 min-h-screen bg-gray-100 p-4">
+      <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-4">
         <div>
           <Header content={`${locationName}`} />
@@ -135,6 +137,10 @@ export default function CalendarPage() {
             )}
           </DialogContent>
         </Dialog>
+      </div>
+      </div>
+      <div className="mt-5">
+        <Footer_Component content={locationId} />
       </div>
     </div>
   );
