@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { fetchDashboardData } from "@/app/redux/dashboard_Slice";
 import { Loading } from "@/components/Loading";
 import { FaUserPlus, FaCalendarCheck, FaChartLine } from 'react-icons/fa';
+import Footer_Component from "@/components/Footer";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -25,8 +26,10 @@ export default function Dashboard() {
   if (!dashboardData) return <div>No data available</div>;
 
   return (
-    <div className="p-6">
+    <div className="p-6 flex flex-col justify-between min-h-screen">
+      <div>
       {/* Location Header */}
+
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-800">
           {dashboardData.location.name} Dashboard
@@ -156,6 +159,12 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
+      </div>
+
+      <div className="mt-10">
+      <Footer_Component content={locationId}/>
+      </div>
+
     </div>
   );
 }
