@@ -41,6 +41,7 @@ import { create_Booking_Action } from "@/app/redux/booking_Slice";
 import { deleteLead_Action } from "@/app/redux/lead_Slice";
 import { updateLead_Status } from "@/app/redux/lead_Slice";
 import { CSVLink } from "react-csv";
+import Lead_Edit_Dialog from "../Lead_Edit_Dialog";
 
 export default function LeadsTable({ leads, locationId }) {
   const { toast } = useToast();
@@ -174,7 +175,7 @@ export default function LeadsTable({ leads, locationId }) {
   const handleStatusChange = async (lead, newStatus) => {
     try {
       // If status is being changed to closed-won, show booking modal
-      if (newStatus === "closed-won") {
+      if (newStatus === "closed_won") {
         setSelectedLead(lead);
         setShowBookingModal(true);
         return; // Don't update status yet
@@ -399,13 +400,16 @@ export default function LeadsTable({ leads, locationId }) {
                 </td>
                 <td className="p-4">
                   {user?.role !== "sales-person" && (
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => handleDeleteLead(lead.lead_number)}
-                    >
-                      Delete
-                    </Button>
+                    <div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => handleDeleteLead(lead.lead_number)}
+                      >
+                        Delete
+                      </Button>
+                      <Lead_Edit_Dialog leadData={lead} />
+                    </div>
                   )}
                 </td>
               </tr>

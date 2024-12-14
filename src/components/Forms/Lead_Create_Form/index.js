@@ -271,6 +271,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
                                   <Input
                                     type={param.type}
                                     {...paramField}
+                                    className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                     disabled={isSubmitting}
                                     onChange={(e) => {
                                       const value =
@@ -294,7 +295,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
           </div>
         </div>
 
-        <div className="sticky bottom-0 bg-white pt-4 border-t">
+        <div className="bottom-0 bg-white pt-4 border-t">
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? "Creating Lead..." : "Create Lead"}
           </Button>
