@@ -11,12 +11,32 @@ const initialState = {
 // Fetch all leads
 export const fetchLeads_Action = createAsyncThunk(
   "leads/fetchAll",
-  async (locationId, { rejectWithValue }) => {
+  async ({ locationId, status=null, lead_number=null }, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get(
-        `/leads-management/leads/get/${locationId}/`
-      );
-      console.log(response.data);
+
+      // Base URL with location ID
+      let url = '';
+
+      // Array to store query parameters
+      const queryParams = [];
+
+      // Add status filter if provided
+      if (status) {
+        queryParams.push(`status=${encodeURIComponent(status)}`);
+      }
+
+      // Add lead number filter if provided
+      if (lead_number) {
+        queryParams.push(`lead_number=${encodeURIComponent(lead_number)}`);
+      }
+
+      // Add query parameters only if there are any
+      if (queryParams.length > 0) {
+        url += `?${queryParams.join('&')}`;
+      
+      }
+
+      const response = await axiosInstance.get(`/leads-management/leads/get/${locationId}/`+url);
       return response.data?.results || response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch leads");

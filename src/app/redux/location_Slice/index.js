@@ -32,6 +32,7 @@ export const create_New_Location_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
+      console.log("error on creating on location", error);
       return rejectWithValue(error.response?.data || "Failed to create location");
     }
   }

@@ -32,7 +32,7 @@ console.log(location)
             <Edit className="mr-2 h-4 w-4" />
             Update Location
           </DropdownMenuItem>
-          {location.location_admin.email ? (
+          {location?.location_admin?.email ? (
             <DropdownMenuItem 
               onClick={() => {
                 setAdminAction('delete');

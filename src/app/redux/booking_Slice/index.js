@@ -23,11 +23,35 @@ export const create_Booking_Action = createAsyncThunk(
 // Fetch Bookings
 export const fetchBookings_Action = createAsyncThunk(
   "bookings/fetch",
-  async (locationId, { rejectWithValue }) => {
+  async ({ locationId, start_date, end_date, venue, booking_number }, { rejectWithValue }) => {
     try {
-      console.log("Fetching bookings for location:", locationId);
+      let url = '';
+
+      const queryParams = [];
+
+      if (start_date) {
+        queryParams.push(`start_date=${encodeURIComponent(start_date)}`);
+      }
+
+      if (end_date) {
+        queryParams.push(`end_date=${encodeURIComponent(end_date)}`);
+      }
+
+      if(venue){
+        queryParams.push(`venue=${encodeURIComponent(venue)}`);
+      }
+
+      if(booking_number){
+        queryParams.push(`booking_number=${encodeURIComponent(booking_number)}`);
+      }
+
+      if (queryParams.length > 0) {
+        url += `?${queryParams.join('&')}`;
+      
+      }
+    
       const response = await axiosInstance.get(
-        `/bookings-management/bookings/get/${locationId}/`
+        `/bookings-management/bookings/get/${locationId}/${url}`
       );
       console.log("Bookings fetched successfully:", response.data);
       return response.data;

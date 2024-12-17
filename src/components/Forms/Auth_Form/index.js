@@ -28,6 +28,8 @@ import logo_Black from "/public/logo_black.png";
 import { useToast } from "@/hooks/use-toast";
 import { setTokens } from '@/utils/auth';
 import axiosInstance from '@/utils/axiosInstance';
+import { usePathname } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
 
 const formSchema = z.object({
   email: z
@@ -51,6 +53,7 @@ const URL = process.env.NEXT_PUBLIC_URL;
 export default function Login_Form() {
   const router = useRouter();
   const { toast } = useToast();
+  const pathname = usePathname();
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -60,11 +63,20 @@ export default function Login_Form() {
     },
   });
 
+
   async function onSubmit(values) {
     try {
       const response = await axiosInstance.post('/user-management/login/', values);
       setTokens(response.data.access, response.data.refresh);
-      router.push('/super_admin');
+
+      const decodedToken = jwtDecode(response?.data?.access);
+
+      if(decodedToken.role == 'super-admin'){
+        router.push('/super_admin');
+        } else {
+          router.push(`/location/${decodedToken.loc_id}/dashboard`);
+        }
+
       toast({
         title: "Login Successful",
         description: "You have successfully logged in.",

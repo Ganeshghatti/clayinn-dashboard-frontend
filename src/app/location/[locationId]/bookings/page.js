@@ -7,20 +7,24 @@ import { fetchBookings_Action } from "@/app/redux/booking_Slice";
 import Header from "@/components/Header";
 import Footer_Component from "@/components/Footer";
 import BookingsTable from "@/components/Booking_Components/Booking_Table";
+import { useSearchParams } from "next/navigation";
 
 export default function Bookings() {
   const { locationId } = useParams();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
   const { bookings, loading, error } = useSelector((state) => state.bookings);
 
-  useEffect(() => {
-    dispatch(fetchBookings_Action(locationId));
-  }, [dispatch, locationId]);
+  const venue = searchParams.get("venue") || '';
+  const start_date = searchParams.get("start_date") || '';
+  const end_date = searchParams.get("end_date") || '';
+  const booking_number = searchParams.get("booking_number") || '';
 
-  // Debug logs
-  console.log("Bookings from state:", bookings);
-  console.log("Loading state:", loading);
-  console.log("Error state:", error);
+
+  useEffect(() => {
+    dispatch(fetchBookings_Action({locationId, venue, start_date, end_date, booking_number}));
+  }, [dispatch, locationId, venue, start_date, end_date, booking_number]);
+
 
   return (
     <div className="space-y-14 flex flex-col justify-between min-h-screen">
@@ -29,15 +33,7 @@ export default function Bookings() {
       </div>
 
       <div className="flex-1">
-        {loading ? (
-          <div className="text-center">Loading bookings...</div>
-        ) : error ? (
-          <div className="text-center text-red-600">Error: {error}</div>
-        ) : bookings?.length === 0 ? (
-          <div className="text-center">No bookings found</div>
-        ) : (
-          <BookingsTable bookings={bookings} locationId={locationId} />
-        )}
+         <BookingsTable bookings={bookings} locationId={locationId} />
       </div>
 
       <Footer_Component content={locationId} />
