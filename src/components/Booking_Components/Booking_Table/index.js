@@ -31,7 +31,7 @@ export default function BookingsTable({ bookings, locationId }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const { all_venues } = useSelector((state) => state.venues);
-  const bookingState = useSelector((state) => state.bookings);
+  const { loading, error } = useSelector((state) => state?.bookings);
   const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
@@ -40,7 +40,7 @@ export default function BookingsTable({ bookings, locationId }) {
   // Search filter
   const filteredBookings = bookings?.results?.filter(
     (booking) =>
-      booking.lead?.hostname
+      booking?.lead?.hostname
         ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
       booking.booking_number?.toString().includes(searchTerm) ||
@@ -48,7 +48,7 @@ export default function BookingsTable({ bookings, locationId }) {
   );
 
   // Sorting
-  const sortedBookings = [...(filteredBookings || [])].sort((a, b) => {
+  const sortedBookings = [...(filteredBookings || [])]?.sort((a, b) => {
     if (!sortConfig.key) return 0;
 
     const getValue = (obj, key) => {
@@ -148,15 +148,15 @@ export default function BookingsTable({ bookings, locationId }) {
         </div>
       </div>
 
-      {bookingState.loading ? (
+      {loading ? (
         <div className="flex justify-center items-center">
           <Loader2 className="animate-spin h-10 w-10" />
         </div>
-      ) : bookingState.error ? (
+      ) : error ? (
         <div className="text-center text-red-600">
-          Error: {bookingState.error}
+          Error: {error}
         </div>
-      ) : bookingState.bookings?.length === 0 ? (
+      ) : bookings.results?.length === 0 ? (
         <div className="text-center">No bookings found</div>
       ) : (
         <div className="overflow-x-auto">

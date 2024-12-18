@@ -53,8 +53,10 @@ export const fetchBookings_Action = createAsyncThunk(
       const response = await axiosInstance.get(
         `/bookings-management/bookings/get/${locationId}/${url}`
       );
-      console.log("Bookings fetched successfully:", response.data);
-      return response.data;
+      console.log("Bookings fetched successfully: the response of ", response.data);
+ 
+        return response.data;
+    
     } catch (error) {
       console.error("Error fetching bookings:", error);
       return rejectWithValue(error.response?.data || "Failed to fetch bookings");
@@ -114,7 +116,11 @@ const bookingSlice = createSlice({
       })
       .addCase(create_Booking_Action.fulfilled, (state, action) => {
         state.loading = false;
-        state.bookings.push(action.payload);
+        if (state.bookings.results) {
+          state.bookings.results.push(action.payload);
+        } else {
+          state.bookings = { results: [action.payload], ...state.bookings };
+        }
       })
       .addCase(create_Booking_Action.rejected, (state, action) => {
         state.loading = false;
@@ -140,7 +146,7 @@ const bookingSlice = createSlice({
       })
       .addCase(deleteBooking_Action.fulfilled, (state, action) => {
         state.loading = false;
-        state.bookings = state.bookings.filter(
+        state.bookings = state.bookings.results.filter(
           (booking) => booking.id !== action.payload
         );
       })

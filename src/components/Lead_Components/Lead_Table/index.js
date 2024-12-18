@@ -248,6 +248,7 @@ export default function LeadsTable({ leads, locationId }) {
         description: "Booking created successfully",
       });
     } catch (error) {
+      console.log("error during booking creation", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -306,6 +307,7 @@ export default function LeadsTable({ leads, locationId }) {
         description: "Lead deleted successfully",
       });
     } catch (error) {
+      console.log("error on deleting ", error)
       toast({
         variant: "destructive",
         title: "Error",
@@ -473,7 +475,7 @@ export default function LeadsTable({ leads, locationId }) {
                         <Button
                           variant="destructive"
                           size="sm"
-                          onClick={() => handleDeleteLead(lead.lead_number)}
+                          onClick={() => handleDeleteLead(lead?.lead_number)}
                         >
                           Delete
                         </Button>
