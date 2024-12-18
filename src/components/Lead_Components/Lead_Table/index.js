@@ -332,22 +332,27 @@ export default function LeadsTable({ leads, locationId }) {
     [searchParams]
   );
 
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Update URL with search parameter
+    router.push(pathname + '?' + createQueryString('lead_number', value));
+  };
+
 
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search and Filters */}
       <div className="mb-4 flex justify-between items-center">
-        <form>
           <Input
-            type="number"
-            onWheel={(e) => e.target.blur()}
-             className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
-            placeholder="Search lead no."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-           
-          />
-        </form>
+          type="number"
+          onWheel={(e) => e.target.blur()}
+          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
+          placeholder="Search by Lead Number"
+          value={searchTerm}
+          onChange={(e) => handleSearchChange(e)}
+        />
         <div className="flex items-center gap-4">
           <CSVLink
             headers={csvHeaders}

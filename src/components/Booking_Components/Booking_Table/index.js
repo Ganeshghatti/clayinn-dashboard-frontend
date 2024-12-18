@@ -35,7 +35,7 @@ export default function BookingsTable({ bookings, locationId }) {
   const [searchTerm, setSearchTerm] = useState("");
   const dispatch = useDispatch();
   const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const itemsPerPage = 10;
+  const itemsPerPage = 100;
 
   // Search filter
   const filteredBookings = bookings?.results?.filter(
@@ -79,22 +79,6 @@ export default function BookingsTable({ bookings, locationId }) {
     } else {
       return slot;
     }
-  };
-
-  const handleDateChange = ({ startDate, endDate }) => {
-    let url = [];
-
-    if (startDate) {
-      url.push(`start_date=${encodeURIComponent(startDate)}`);
-    } else if (endDate) {
-      url.push(`end_date=${encodeURIComponent(endDate)}`);
-    }
-
-    if (url.length > 0) {
-      url += `?${url.join("&")}`;
-    }
-
-    router.push(pathname + url);
   };
 
   const createQueryString = useCallback(

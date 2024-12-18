@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { format, startOfMonth, endOfMonth } from "date-fns"
+import { format } from "date-fns"
 import { Calendar as CalendarIcon } from "lucide-react"
 import { useSearchParams, useRouter, usePathname } from "next/navigation"
 
@@ -21,27 +21,21 @@ export function DatePickerWithRange({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Initialize dates from URL or use current month's start and end
-  const [date, setDate] = React.useState(() => {
-    const urlStartDate = searchParams.get('start_date');
-    const urlEndDate = searchParams.get('end_date');
-
-    if (urlStartDate && urlEndDate) {
-      return {
-        from: new Date(urlStartDate),
-        to: new Date(urlEndDate)
-      };
-    }
-
-    // Default to current month's start and end dates
-    const start = startOfMonth(new Date());
-    const end = endOfMonth(new Date());
-    return { from: start, to: end };
-  });
+  // Initialize with undefined to ensure no default selection
+  const [date, setDate] = React.useState(undefined);
 
   // Effect to update URL when dates change
   React.useEffect(() => {
-    if (!date.from || !date.to) return;
+    if (!date?.from || !date?.to) {
+      // Remove date parameters from URL if no date is selected
+      const params = new URLSearchParams(searchParams);
+      params.delete('start_date');
+      params.delete('end_date');
+
+      // Update URL without triggering a full page reload
+      router.push(`${pathname}${params.toString() ? `?${params.toString()}` : ''}`, { scroll: false });
+      return;
+    }
 
     const formattedStartDate = format(date.from, 'yyyy-MM-dd');
     const formattedEndDate = format(date.to, 'yyyy-MM-dd');
@@ -84,9 +78,7 @@ export function DatePickerWithRange({
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
           <Calendar
-            initialFocus
             mode="range"
-            defaultMonth={date?.from}
             selected={date}
             onSelect={setDate}
             numberOfMonths={1}
