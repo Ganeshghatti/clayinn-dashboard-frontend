@@ -9,15 +9,27 @@ const initialState = {
   error: null,
   nextPage: null,
   previousPage: null,
-  count: null
+  count: null,
 };
+
+// when we are on second page at that moments next are null and previous contains link to first page
+// so that why conditions are not working
+// from frontend we need to send the next with added url
 
 // Fetch all leads
 export const fetchLeads_Action = createAsyncThunk(
   "leads/fetchAll",
-  async ({ locationId, status=null, lead_number=null, next=null, previous=null }, { rejectWithValue }) => {
+  async (
+    {
+      locationId,
+      status = null,
+      lead_number = null,
+      next = null,
+      previous = null,
+    },
+    { rejectWithValue }
+  ) => {
     try {
-
       // Base URL with location ID
       let url = '';
 
@@ -36,25 +48,27 @@ export const fetchLeads_Action = createAsyncThunk(
 
       // Add query parameters only if there are any
       if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`;
-      
+        url += `?${queryParams.join("&")}`;
       }
 
-      if(next){
-        const response = await axios.get(`${next}`+url);
+      if (next) {
+        const response = await axiosInstance.get(`${next}`);
 
-        return response.data
+        return response.data;
       }
 
-      if(previous){
-        const response = await axios.get(`${previous}`+url);
+      console.log("url prev", url)
 
-        return response.data
+      if (previous) {
+        const response = await axiosInstance.get(`${previous}`);
+
+        return response.data;
       }
 
-      const response = await axiosInstance.get(`/leads-management/leads/get/${locationId}/`+url);
 
-     
+      const response = await axiosInstance.get(
+        `/leads-management/leads/get/${locationId}/` + url
+      );
 
       return response.data;
     } catch (error) {
@@ -72,7 +86,7 @@ export const createLead_Action = createAsyncThunk(
         `/leads-management/leads/create/`,
         {
           ...formData,
-          location_id: locationId
+          location_id: locationId,
         }
       );
       return response.data;
@@ -87,7 +101,9 @@ export const deleteLead_Action = createAsyncThunk(
   "leads/delete",
   async (leadNumber, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/leads-management/leads/detail/${leadNumber}/`);
+      await axiosInstance.delete(
+        `/leads-management/leads/detail/${leadNumber}/`
+      );
       return leadNumber;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to delete lead");
@@ -106,7 +122,9 @@ export const fetch_Lead_By_ID = createAsyncThunk(
       console.log(response.data);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch lead details");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch lead details"
+      );
     }
   }
 );
@@ -127,11 +145,10 @@ export const updateLead_Action = createAsyncThunk(
   }
 );
 
-//Update lead Status 
+//Update lead Status
 export const updateLead_Status = createAsyncThunk(
   "leads/updateStatus",
-  async ({ leadNumber, formData }, {
-    rejectWithValue }) => {
+  async ({ leadNumber, formData }, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.patch(
         `/leads-management/leads/detail/${leadNumber}/`,
@@ -139,10 +156,12 @@ export const updateLead_Status = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to update lead status");
+      return rejectWithValue(
+        error.response?.data || "Failed to update lead status"
+      );
     }
   }
-)
+);
 
 const leadSlice = createSlice({
   name: "leads",
@@ -187,13 +206,13 @@ const leadSlice = createSlice({
       .addCase(deleteLead_Action.fulfilled, (state, action) => {
         state.isLoading = false;
         state.leads = state.leads.filter(
-          lead => lead.lead_number !== action.payload
+          (lead) => lead.lead_number !== action.payload
         );
       })
       .addCase(deleteLead_Action.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      }) 
+      })
       // Fetch Lead Detail cases
       .addCase(fetch_Lead_By_ID.pending, (state) => {
         state.isLoading = true;
@@ -226,7 +245,7 @@ const leadSlice = createSlice({
       .addCase(updateLead_Action.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
-      })  // update lead status
+      }) // update lead status
       .addCase(updateLead_Status.pending, (state) => {
         state.isLoading = true;
         state.error = null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookings_Action } from "@/app/redux/booking_Slice";
@@ -19,7 +19,6 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
-import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
 export default function BookingsTable({ locationId }) {
@@ -28,9 +27,8 @@ export default function BookingsTable({ locationId }) {
     start_date: null,
     end_date: null,
     booking_number: null,
-    nextPage: null,
-    previousPage: null,
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const { all_venues } = useSelector((state) => state.venues);
   const { loading, error, bookings } = useSelector((state) => state?.bookings);
   const dispatch = useDispatch();
@@ -46,18 +44,16 @@ export default function BookingsTable({ locationId }) {
   };
 
   const handleFilterChange = (name, value) => {
-    setFilterState((prevState) => ({
-      ...prevState,
-      [name]: value,
+    setFilterState(prev => ({
+      ...prev,
+      [name]: value
     }));
   };
 
-  const fetchData = async () => {
+  const fetchData = async (page = null) => {
     try {
       const {
         booking_number,
-        nextPage,
-        previousPage,
         venue,
         start_date,
         end_date,
@@ -69,12 +65,16 @@ export default function BookingsTable({ locationId }) {
         booking_number: booking_number || null,
         start_date: start_date || null,
         end_date: end_date || null,
-        next: nextPage || null,
-        previous: previousPage || null,
       };
 
+      // If page is provided, add pagination parameters
+      if (page === 'next' && bookings.next) {
+        query.next = bookings.next;
+      } else if (page === 'previous' && bookings.previous) {
+        query.previous = bookings.previous;
+      }
+
       await dispatch(fetchBookings_Action(query));
-      console.log("booking fetched:", bookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
     }
@@ -89,6 +89,7 @@ export default function BookingsTable({ locationId }) {
     filterState.end_date,
     filterState.venue,
     filterState.booking_number,
+    locationId
   ]);
 
   useEffect(() => {
@@ -97,15 +98,19 @@ export default function BookingsTable({ locationId }) {
     }
   }, [locationId]);
 
-  useEffect(() => {
-    if (bookings.next || bookings.previous) {
-      setFilterState((prevState) => ({
-        ...prevState,
-        nextPage: bookings.next,
-        previousPage: bookings.previous,
-      }));
+  const handleNextPage = () => {
+    if (bookings.next) {
+      setCurrentPage(prev => prev + 1);
+      fetchData('next');
     }
-  }, [bookings.next, bookings.previous]);
+  };
+
+  const handlePreviousPage = () => {
+    if (bookings.previous) {
+      setCurrentPage(prev => prev - 1);
+      fetchData('previous');
+    }
+  };
 
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
@@ -197,26 +202,26 @@ export default function BookingsTable({ locationId }) {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {bookings?.results?.length || 0} of {bookings?.count || 0}{" "}
-          entries
+          Showing {bookings?.results?.length || 0} of {bookings?.count || 0} entries
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => fetchData()}
-            disabled={filterState.previousPage == null ? true : false}
+            onClick={handlePreviousPage}
+            disabled={!bookings.previous || loading}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() => fetchData()}
-            disabled={filterState.nextPage == null ? true : false}
+            disabled={!bookings.next || loading}
+            onClick={handleNextPage}
           >
             Next
           </Button>
         </div>
       </div>
+      
     </div>
   );
 }
