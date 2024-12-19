@@ -67,8 +67,8 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  console.log("update leads", leadData)
 
-  console.log("lead data", leadData)
 
   const form = useForm({
     resolver: zodResolver(formSchema),

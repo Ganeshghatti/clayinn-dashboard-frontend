@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import Lead_Delete from "../Leads_Delete";
+import { Loader2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,15 +11,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 import { format } from "date-fns";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -30,29 +31,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { updateLead_Action } from "@/app/redux/lead_Slice";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import Lead_Detail from "../Lead_Detail";
-import axiosInstance from "@/utils/axiosInstance";
 import { create_Booking_Action } from "@/app/redux/booking_Slice";
 import { deleteLead_Action } from "@/app/redux/lead_Slice";
 import { updateLead_Status } from "@/app/redux/lead_Slice";
 import { CSVLink } from "react-csv";
 import Lead_Edit_Dialog from "../Lead_Edit_Dialog";
 
-export default function LeadsTable({ leads, locationId }) {
+export default function LeadsTable({ locationId }) {
   const { toast } = useToast();
   const dispatch = useDispatch();
+  const [filterState, setFilterState] = useState({
+    status: "All",
+    lead_number: "",
+    nextPage: null,
+    previousPage: null,
+  });
+  const { isLoading, isError, leads, nextPage, previousPage, count } =
+    useSelector((state) => state.leads);
   const { all_venues: venues } = useSelector((state) => state.venues);
   const auth = useSelector((state) => state.auth);
   const user = auth?.user;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const itemsPerPage = 10;
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [bookingData, setBookingData] = useState({
@@ -125,52 +127,8 @@ export default function LeadsTable({ leads, locationId }) {
     if (locationId) {
       dispatch(fetchVenues_Actions(locationId));
     }
-  }, [dispatch, locationId]);
+  }, [dispatch]);
 
-  // Search filter
-  const filteredLeads =
-    leads?.length > 0
-      ? leads?.filter(
-          (lead) =>
-            lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.lead_number.toString().includes(searchTerm) ||
-            lead.mobile.includes(searchTerm)
-        )
-      : [];
-
-  // Sorting
-  const sortedLeads = useMemo(() => {
-    if (!filteredLeads) return [];
-    let sortableLeads = [...filteredLeads];
-    if (sortConfig.key) {
-      sortableLeads.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableLeads;
-  }, [filteredLeads, sortConfig]);
-
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedLeads?.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil((sortedLeads?.length || 0) / itemsPerPage);
-
-  const handleSort = (key) => {
-    setSortConfig({
-      key,
-      direction:
-        sortConfig.key === key && sortConfig.direction === "asc"
-          ? "desc"
-          : "asc",
-    });
-  };
   // Handle status change
   const handleStatusChange = async (lead, newStatus) => {
     try {
@@ -221,21 +179,13 @@ export default function LeadsTable({ leads, locationId }) {
 
       await dispatch(create_Booking_Action({ formData: requestBody })).unwrap();
       console.log("no error till here");
-      // Update lead status to closed-won after booking creation
-      // await dispatch(updateLead_Action({
-      //   leadNumber: selectedLead.lead_number,
-      //   data: {
-      //     ...selectedLead,
-      //     lead_status: "closed-won"
-      //   }
-      // })).unwrap();
-
       setShowBookingModal(false);
       toast({
         title: "Success",
         description: "Booking created successfully",
       });
     } catch (error) {
+      console.log("error during booking creation", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -247,8 +197,9 @@ export default function LeadsTable({ leads, locationId }) {
   // In your table cell render
   const renderStatusCell = (lead) => {
     const currentStatus = leadStatuses.find(
-      (status) => status.value === lead.lead_status
+      (status) => status?.value === lead?.lead_status
     );
+
     return (
       <td className="p-3">
         <DropdownMenu className="border-none ring-0">
@@ -261,12 +212,12 @@ export default function LeadsTable({ leads, locationId }) {
               className={`px-2 py-1 rounded-full text-xs bg-[${currentStatus?.bgColor}]`}
             >
               {/* {lead.lead_status} */}
-              {currentStatus.label}
+              {currentStatus?.label}
             </span>
             <ChevronDown className="h-4 w-4" />
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {leadStatuses.map((status) => (
+            {leadStatuses?.map((status) => (
               <DropdownMenuItem
                 key={status.label}
                 onClick={() => handleStatusChange(lead, status.value)}
@@ -279,6 +230,50 @@ export default function LeadsTable({ leads, locationId }) {
       </td>
     );
   };
+
+  const handleFilterChange = (name, value) => {
+    setFilterState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const fetchData = async () => {
+    try {
+      const { lead_number, status, nextPage, previousPage } = filterState;
+
+      const query = {
+        locationId,
+        status: status !== "All" ? status : null,
+        lead_number: lead_number || null,
+        next: nextPage || null,
+        previous: previousPage || null,
+      };
+
+      await dispatch(fetchLeads_Action(query));
+      console.log("Leads fetched:", leads);
+
+      // Update pagination state after fetching
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (locationId) {
+      fetchData();
+    }
+  }, [filterState.status, filterState.lead_number, locationId]);
+
+  useEffect(() => {
+    if (nextPage || previousPage) {
+      setFilterState((prevState) => ({
+        ...prevState,
+        nextPage,
+        previousPage,
+      }));
+    }
+  }, [nextPage, previousPage]);
 
   const handleDeleteLead = async (leadNumber) => {
     const confirmDelete = window.confirm(
@@ -293,6 +288,7 @@ export default function LeadsTable({ leads, locationId }) {
         description: "Lead deleted successfully",
       });
     } catch (error) {
+      console.log("error on deleting ", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -314,132 +310,137 @@ export default function LeadsTable({ leads, locationId }) {
       {/* Search and Filters */}
       <div className="mb-4 flex justify-between items-center">
         <Input
-          type="text"
-          placeholder="Search by name, lead number, or mobile..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-sm"
+          type="number"
+          onWheel={(e) => e.target.blur()}
+          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
+          placeholder="Search by Lead Number"
+          value={filterState.lead_number}
+          onChange={(e) => handleFilterChange("lead_number", e.target.value)}
         />
-        <CSVLink
-          headers={csvHeaders}
-          data={filteredLeads}
-          filename="leads.csv"
-          className="h-fit w-fit overflow-hidden"
-        >
-          <Button
-            color="#082f49"
-            variant="outline"
-            rounded="md"
-            className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
+        <div className="flex items-center gap-4">
+          <CSVLink
+            headers={csvHeaders}
+            data={leads}
+            filename="leads.csv"
+            className="h-fit w-fit overflow-hidden"
           >
-            {" "}
-            Export CSV
-          </Button>
-        </CSVLink>
+            <Button
+              color="#082f49"
+              variant="outline"
+              rounded="md"
+              className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
+            >
+              {" "}
+              Export CSV
+            </Button>
+          </CSVLink>
+          <Select
+            className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0"
+            onValueChange={(value) => handleFilterChange("status", value)}
+            defaultValue={filterState.status || ""}
+          >
+            <SelectTrigger className="w-[180px] bg-black text-white">
+              <SelectValue placeholder="Filter by Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectLabel>Select a Status</SelectLabel>
+                <SelectItem value="All">All</SelectItem>
+                {leadStatuses?.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    {status.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full border-collapse">
-          <thead className="bg-gray-100">
-            <tr>
-              <th
-                onClick={() => handleSort("lead_number")}
-                className="p-3 text-left cursor-pointer"
-              >
-                Lead #
-              </th>
-              <th
-                onClick={() => handleSort("hostname")}
-                className="p-3 text-left cursor-pointer"
-              >
-                Host Name
-              </th>
-              <th
-                onClick={() => handleSort("mobile")}
-                className="p-3 text-left cursor-pointer"
-              >
-                Mobile
-              </th>
-              <th
-                onClick={() => handleSort("email")}
-                className="p-3 text-left cursor-pointer"
-              >
-                Email
-              </th>
-              <th
-                onClick={() => handleSort("lead_status")}
-                className="p-3 text-left cursor-pointer"
-              >
-                Status
-              </th>
-              <th className="p-3 text-left">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {currentItems?.map((lead) => (
-              <tr key={lead.lead_number} className="border-b hover:bg-gray-50">
-                <td className="p-3">{lead.lead_number}</td>
-                <td className="p-3">{lead.hostname}</td>
-                <td className="p-3">{lead.mobile}</td>
-                <td className="p-3">{lead.email}</td>
-                <td className="p-3">{renderStatusCell(lead)}</td>
-                <td className="p-3">
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedLeadNumber(lead.lead_number);
-                        setDetailOpen(true);
-                      }}
-                    >
-                      View Details
-                    </Button>
-                  </div>
-                </td>
-                <td className="p-4">
-                  {user?.role !== "sales-person" && (
-                    <div className="flex gap-2">
-                      <Lead_Edit_Dialog leadData={lead} />
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeleteLead(lead.lead_number)}
-                      >
-                        Delete
-                      </Button>
-                      
-                    </div>
-                  )}
-                </td>
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <Loader2 className="animate-spin h-10 w-10" />
+        </div>
+      ) : isError ? (
+        <div className="text-center text-red-600">Error: {isError}</div>
+      ) : leads?.length === 0 ? (
+        <div className="text-center">No leads found</div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="p-3 text-left cursor-pointer">Lead #</th>
+                <th className="p-3 text-left cursor-pointer">Host Name</th>
+                <th className="p-3 text-left cursor-pointer">Mobile</th>
+                <th className="p-3 text-left cursor-pointer">Email</th>
+                <th className="p-3 text-left cursor-pointer">Status</th>
+                <th className="p-3 text-left">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {leads?.map((lead) => (
+                <tr
+                  key={lead.lead_number}
+                  className="border-b hover:bg-gray-50"
+                >
+                  <td className="p-3">{lead.lead_number}</td>
+                  <td className="p-3">{lead.hostname}</td>
+                  <td className="p-3">{lead.mobile}</td>
+                  <td className="p-3">{lead.email}</td>
+                  <td className="p-3">{renderStatusCell(lead)}</td>
+                  <td className="p-3">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedLeadNumber(lead.lead_number);
+                          setDetailOpen(true);
+                        }}
+                      >
+                        View Details
+                      </Button>
+                    </div>
+                  </td>
+                  <td className="p-4">
+                    {user?.role !== "sales-person" && (
+                      <div className="flex gap-2">
+                        <Lead_Edit_Dialog leadData={lead} />
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteLead(lead?.lead_number)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {indexOfFirstItem + 1} to{" "}
-          {Math.min(indexOfLastItem, sortedLeads?.length || 0)} of{" "}
-          {sortedLeads?.length || 0} entries
+          Showing {leads?.length || 0} of {count || 0} entries
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+            onClick={() => fetchData()}
+            disabled={filterState.previousPage == null ? true : false}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
+            disabled={filterState.nextPage == null ? true : false}
+            onClick={() => fetchData()}
           >
             Next
           </Button>

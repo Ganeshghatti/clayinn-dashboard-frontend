@@ -8,17 +8,24 @@ import Header from "@/components/Header";
 import Footer_Component from "@/components/Footer";
 import Lead_Create_Dialog from "@/components/Lead_Components/Leads_Create_Dialog";
 import LeadsTable from "@/components/Lead_Components/Lead_Table";
+import { useSearchParams } from "next/navigation";
 
 export default function Leads() {
   const { locationId } = useParams();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
+
   const { leads, isLoading, error } = useSelector((state) => state.leads);
 
   useEffect(() => {
     if (locationId) {
-      dispatch(fetchLeads_Action(locationId));
+      dispatch(
+        fetchLeads_Action({
+          locationId,
+        })
+      );
     }
-  }, [dispatch, locationId]);
+  }, [dispatch]);
 
   return (
     <div className="space-y-14 flex flex-col justify-between min-h-screen">
@@ -28,17 +35,9 @@ export default function Leads() {
           <Lead_Create_Dialog action="create" locationId={locationId} />
         </div>
       </div>
-      
+
       <div className="flex-1">
-        {isLoading ? (
-          <div className="text-center">Loading leads...</div>
-        ) : error ? (
-          <div className="text-center text-red-600">Error: {error}</div>
-        ) : leads?.length === 0 ? (
-          <div className="text-center">No leads found</div>
-        ) : (
-          <LeadsTable leads={leads} locationId={locationId} />
-        )}
+        <LeadsTable leads={leads} locationId={locationId} />
       </div>
       <Footer_Component content={locationId} />
     </div>

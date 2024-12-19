@@ -77,11 +77,11 @@ export default function Super_Admin() {
           <div className="text-center text-red-600">
             Error: {isError}
           </div>
-        ) : !all_locations || all_locations.length === 0 ? (
+        ) : !all_locations || all_locations?.length === 0 ? (
           <div className="text-center">No locations found</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {all_locations.map((location) => (
+            {all_locations?.map((location) => (
               <div
                 key={location.loc_id}
                 className="bg-white rounded-lg shadow-md p-4 relative group"
