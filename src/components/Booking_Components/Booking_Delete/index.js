@@ -27,7 +27,7 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 
-export default function Booking_Delete({ booking }) {
+export default function Booking_Delete({ booking, locationId }) {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const { toast } = useToast();
@@ -41,7 +41,7 @@ export default function Booking_Delete({ booking }) {
         title: "Success",
         description: "Booking deleted successfully"
       });
-      await dispatch(fetchBookings_Action())
+      await dispatch(fetchBookings_Action({ locationId }));
     } catch (error) {
       toast({
         variant: "destructive",

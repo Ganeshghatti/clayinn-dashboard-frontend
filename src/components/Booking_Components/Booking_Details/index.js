@@ -20,7 +20,7 @@ import { format } from "date-fns";
 export default function BookingDetails({ booking }) {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
-  const { selectedBooking, loading, error } = useSelector((state) => state.bookings);
+  const { selectedBooking, loading, error } = useSelector((state) => state?.bookings);
   const { toast } = useToast();
 
   useEffect(() => {

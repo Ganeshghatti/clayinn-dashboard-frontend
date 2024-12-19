@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import Lead_Delete from "../Leads_Delete";
-import { useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import {
   DropdownMenu,
@@ -14,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
+import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 import { format } from "date-fns";
 import {
   Select,
@@ -24,7 +22,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import axios from "axios";
 import {
   Dialog,
   DialogContent,
@@ -34,34 +31,30 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { DatePicker } from "@/components/ui/date-picker";
 import { useToast } from "@/hooks/use-toast";
 import { useDispatch, useSelector } from "react-redux";
-import { updateLead_Action } from "@/app/redux/lead_Slice";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import Lead_Detail from "../Lead_Detail";
-import axiosInstance from "@/utils/axiosInstance";
 import { create_Booking_Action } from "@/app/redux/booking_Slice";
 import { deleteLead_Action } from "@/app/redux/lead_Slice";
 import { updateLead_Status } from "@/app/redux/lead_Slice";
 import { CSVLink } from "react-csv";
 import Lead_Edit_Dialog from "../Lead_Edit_Dialog";
-import { usePathname } from "next/navigation";
-import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 
-export default function LeadsTable({ leads, locationId }) {
+export default function LeadsTable({ locationId }) {
   const { toast } = useToast();
   const dispatch = useDispatch();
-  const { isLoading, isError } = useSelector((state) => state.leads);
+  const [filterState, setFilterState] = useState({
+    status: "All",
+    lead_number: "",
+    nextPage: null,
+    previousPage: null,
+  });
+  const { isLoading, isError, leads, nextPage, previousPage, count } =
+    useSelector((state) => state.leads);
   const { all_venues: venues } = useSelector((state) => state.venues);
   const auth = useSelector((state) => state.auth);
   const user = auth?.user;
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const itemsPerPage = 100;
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedLead, setSelectedLead] = useState(null);
   const [bookingData, setBookingData] = useState({
@@ -72,9 +65,6 @@ export default function LeadsTable({ leads, locationId }) {
   });
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedLeadNumber, setSelectedLeadNumber] = useState(null);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   const leadStatuses = [
     {
@@ -137,52 +127,8 @@ export default function LeadsTable({ leads, locationId }) {
     if (locationId) {
       dispatch(fetchVenues_Actions(locationId));
     }
-  }, [dispatch, locationId]);
+  }, [dispatch]);
 
-  // Search filter
-  const filteredLeads =
-    leads?.length > 0
-      ? leads?.filter(
-          (lead) =>
-            lead.hostname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.lead_number.toString().includes(searchTerm) ||
-            lead.mobile.includes(searchTerm)
-        )
-      : [];
-
-  // Sorting
-  const sortedLeads = useMemo(() => {
-    if (!filteredLeads) return [];
-    let sortableLeads = [...filteredLeads];
-    if (sortConfig.key) {
-      sortableLeads.sort((a, b) => {
-        if (a[sortConfig.key] < b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? -1 : 1;
-        }
-        if (a[sortConfig.key] > b[sortConfig.key]) {
-          return sortConfig.direction === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-    }
-    return sortableLeads;
-  }, [filteredLeads, sortConfig]);
-
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedLeads?.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil((sortedLeads?.length || 0) / itemsPerPage);
-
-  const handleSort = (key) => {
-    setSortConfig({
-      key,
-      direction:
-        sortConfig.key === key && sortConfig.direction === "asc"
-          ? "desc"
-          : "asc",
-    });
-  };
   // Handle status change
   const handleStatusChange = async (lead, newStatus) => {
     try {
@@ -233,15 +179,6 @@ export default function LeadsTable({ leads, locationId }) {
 
       await dispatch(create_Booking_Action({ formData: requestBody })).unwrap();
       console.log("no error till here");
-      // Update lead status to closed-won after booking creation
-      // await dispatch(updateLead_Action({
-      //   leadNumber: selectedLead.lead_number,
-      //   data: {
-      //     ...selectedLead,
-      //     lead_status: "closed-won"
-      //   }
-      // })).unwrap();
-
       setShowBookingModal(false);
       toast({
         title: "Success",
@@ -294,6 +231,50 @@ export default function LeadsTable({ leads, locationId }) {
     );
   };
 
+  const handleFilterChange = (name, value) => {
+    setFilterState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const fetchData = async () => {
+    try {
+      const { lead_number, status, nextPage, previousPage } = filterState;
+
+      const query = {
+        locationId,
+        status: status !== "All" ? status : null,
+        lead_number: lead_number || null,
+        next: nextPage || null,
+        previous: previousPage || null,
+      };
+
+      await dispatch(fetchLeads_Action(query));
+      console.log("Leads fetched:", leads);
+
+      // Update pagination state after fetching
+    } catch (error) {
+      console.error("Error fetching leads:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (locationId) {
+      fetchData();
+    }
+  }, [filterState.status, filterState.lead_number, locationId]);
+
+  useEffect(() => {
+    if (nextPage || previousPage) {
+      setFilterState((prevState) => ({
+        ...prevState,
+        nextPage,
+        previousPage,
+      }));
+    }
+  }, [nextPage, previousPage]);
+
   const handleDeleteLead = async (leadNumber) => {
     const confirmDelete = window.confirm(
       "Are you sure you want to delete this lead?"
@@ -307,7 +288,7 @@ export default function LeadsTable({ leads, locationId }) {
         description: "Lead deleted successfully",
       });
     } catch (error) {
-      console.log("error on deleting ", error)
+      console.log("error on deleting ", error);
       toast({
         variant: "destructive",
         title: "Error",
@@ -324,41 +305,22 @@ export default function LeadsTable({ leads, locationId }) {
     { label: "Status", key: "lead_status" },
   ];
 
-  const createQueryString = useCallback(
-    (name, value) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name, value);
-
-      return params.toString();
-    },
-    [searchParams]
-  );
-
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    // Update URL with search parameter
-    router.push(pathname + '?' + createQueryString('lead_number', value));
-  };
-
-
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search and Filters */}
       <div className="mb-4 flex justify-between items-center">
-          <Input
+        <Input
           type="number"
           onWheel={(e) => e.target.blur()}
           className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
           placeholder="Search by Lead Number"
-          value={searchTerm}
-          onChange={(e) => handleSearchChange(e)}
+          value={filterState.lead_number}
+          onChange={(e) => handleFilterChange("lead_number", e.target.value)}
         />
         <div className="flex items-center gap-4">
           <CSVLink
             headers={csvHeaders}
-            data={filteredLeads}
+            data={leads}
             filename="leads.csv"
             className="h-fit w-fit overflow-hidden"
           >
@@ -374,10 +336,8 @@ export default function LeadsTable({ leads, locationId }) {
           </CSVLink>
           <Select
             className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0"
-            onValueChange={(value) =>
-              router.push(pathname + "?" + createQueryString("status", value == "All" ? "" : value))
-            }
-            defaultValue={searchParams.get("status") || ""}
+            onValueChange={(value) => handleFilterChange("status", value)}
+            defaultValue={filterState.status || ""}
           >
             <SelectTrigger className="w-[180px] bg-black text-white">
               <SelectValue placeholder="Filter by Status" />
@@ -402,7 +362,7 @@ export default function LeadsTable({ leads, locationId }) {
           <Loader2 className="animate-spin h-10 w-10" />
         </div>
       ) : isError ? (
-        <div className="text-center text-red-600">Error: {error}</div>
+        <div className="text-center text-red-600">Error: {isError}</div>
       ) : leads?.length === 0 ? (
         <div className="text-center">No leads found</div>
       ) : (
@@ -410,41 +370,16 @@ export default function LeadsTable({ leads, locationId }) {
           <table className="w-full border-collapse">
             <thead className="bg-gray-100">
               <tr>
-                <th
-                  onClick={() => handleSort("lead_number")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Lead #
-                </th>
-                <th
-                  onClick={() => handleSort("hostname")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Host Name
-                </th>
-                <th
-                  onClick={() => handleSort("mobile")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Mobile
-                </th>
-                <th
-                  onClick={() => handleSort("email")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Email
-                </th>
-                <th
-                  onClick={() => handleSort("lead_status")}
-                  className="p-3 text-left cursor-pointer"
-                >
-                  Status
-                </th>
+                <th className="p-3 text-left cursor-pointer">Lead #</th>
+                <th className="p-3 text-left cursor-pointer">Host Name</th>
+                <th className="p-3 text-left cursor-pointer">Mobile</th>
+                <th className="p-3 text-left cursor-pointer">Email</th>
+                <th className="p-3 text-left cursor-pointer">Status</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {currentItems?.map((lead) => (
+              {leads?.map((lead) => (
                 <tr
                   key={lead.lead_number}
                   className="border-b hover:bg-gray-50"
@@ -492,24 +427,20 @@ export default function LeadsTable({ leads, locationId }) {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {indexOfFirstItem + 1} to{" "}
-          {Math.min(indexOfLastItem, sortedLeads?.length || 0)} of{" "}
-          {sortedLeads?.length || 0} entries
+          Showing {leads?.length || 0} of {count || 0} entries
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+            onClick={() => fetchData()}
+            disabled={filterState.previousPage == null ? true : false}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
+            disabled={filterState.nextPage == null ? true : false}
+            onClick={() => fetchData()}
           >
             Next
           </Button>

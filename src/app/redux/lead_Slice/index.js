@@ -1,17 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
+import axios from "axios";
 
 const initialState = {
   leads: [],
   currentLead: null,
   isLoading: false,
   error: null,
+  nextPage: null,
+  previousPage: null,
+  count: null
 };
 
 // Fetch all leads
 export const fetchLeads_Action = createAsyncThunk(
   "leads/fetchAll",
-  async ({ locationId, status=null, lead_number=null }, { rejectWithValue }) => {
+  async ({ locationId, status=null, lead_number=null, next=null, previous=null }, { rejectWithValue }) => {
     try {
 
       // Base URL with location ID
@@ -36,8 +40,23 @@ export const fetchLeads_Action = createAsyncThunk(
       
       }
 
+      if(next){
+        const response = await axios.get(`${next}`+url);
+
+        return response.data
+      }
+
+      if(previous){
+        const response = await axios.get(`${previous}`+url);
+
+        return response.data
+      }
+
       const response = await axiosInstance.get(`/leads-management/leads/get/${locationId}/`+url);
-      return response.data?.results || response.data;
+
+     
+
+      return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch leads");
     }
@@ -138,7 +157,10 @@ const leadSlice = createSlice({
       })
       .addCase(fetchLeads_Action.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.leads = action.payload;
+        state.nextPage = action.payload.next;
+        state.previousPage = action.payload.previous;
+        state.count = action.payload.count;
+        state.leads = action.payload.results;
       })
       .addCase(fetchLeads_Action.rejected, (state, action) => {
         state.isLoading = false;

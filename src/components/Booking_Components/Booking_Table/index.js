@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
+import { fetchBookings_Action } from "@/app/redux/booking_Slice";
 import BookingDetails from "../Booking_Details";
 import Booking_Delete from "../Booking_Delete";
 import DatePickerWithRange from "./date-filter";
@@ -19,57 +19,21 @@ import {
 import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
-import { usePathname } from "next/navigation";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/navigation";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 
-export default function BookingsTable({ bookings, locationId }) {
-  const [currentPage, setCurrentPage] = useState(1);
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const { all_venues } = useSelector((state) => state.venues);
-  const { loading, error } = useSelector((state) => state?.bookings);
-  const [searchTerm, setSearchTerm] = useState("");
-  const dispatch = useDispatch();
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: "asc" });
-  const itemsPerPage = 100;
-
-  // Search filter
-  const filteredBookings = bookings?.results?.filter(
-    (booking) =>
-      booking?.lead?.hostname
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      booking.booking_number?.toString().includes(searchTerm) ||
-      booking.lead?.mobile?.includes(searchTerm)
-  );
-
-  // Sorting
-  const sortedBookings = [...(filteredBookings || [])]?.sort((a, b) => {
-    if (!sortConfig.key) return 0;
-
-    const getValue = (obj, key) => {
-      if (key === "hostname") return obj.lead?.hostname;
-      if (key === "mobile") return obj.lead?.mobile;
-      return obj[key];
-    };
-
-    const aValue = getValue(a, sortConfig.key);
-    const bValue = getValue(b, sortConfig.key);
-
-    if (aValue < bValue) return sortConfig.direction === "asc" ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === "asc" ? 1 : -1;
-    return 0;
+export default function BookingsTable({ locationId }) {
+  const [filterState, setFilterState] = useState({
+    venue: "All",
+    start_date: null,
+    end_date: null,
+    booking_number: null,
+    nextPage: null,
+    previousPage: null,
   });
-
-  // Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = sortedBookings?.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil((sortedBookings?.length || 0) / itemsPerPage);
+  const { all_venues } = useSelector((state) => state.venues);
+  const { loading, error, bookings } = useSelector((state) => state?.bookings);
+  const dispatch = useDispatch();
 
   const getSlots = (slot) => {
     if (slot == "evening") {
@@ -81,29 +45,67 @@ export default function BookingsTable({ bookings, locationId }) {
     }
   };
 
-  const createQueryString = useCallback(
-    (name, value) => {
-      const params = new URLSearchParams(searchParams);
-      params.set(name, value);
+  const handleFilterChange = (name, value) => {
+    setFilterState((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
 
-      return params.toString();
-    },
-    [searchParams]
-  );
+  const fetchData = async () => {
+    try {
+      const {
+        booking_number,
+        nextPage,
+        previousPage,
+        venue,
+        start_date,
+        end_date,
+      } = filterState;
+
+      const query = {
+        locationId,
+        venue: venue !== "All" ? venue : null,
+        booking_number: booking_number || null,
+        start_date: start_date || null,
+        end_date: end_date || null,
+        next: nextPage || null,
+        previous: previousPage || null,
+      };
+
+      await dispatch(fetchBookings_Action(query));
+      console.log("booking fetched:", bookings);
+    } catch (error) {
+      console.error("Error fetching bookings:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (locationId) {
+      fetchData();
+    }
+  }, [
+    filterState.start_date,
+    filterState.end_date,
+    filterState.venue,
+    filterState.booking_number,
+  ]);
 
   useEffect(() => {
     if (locationId) {
       dispatch(fetchVenues_Actions(locationId));
     }
-  }, [dispatch, locationId]);
+  }, [locationId]);
 
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-
-    // Update URL with search parameter
-    router.push(pathname + '?' + createQueryString('booking_number', value));
-  };
+  useEffect(() => {
+    if (bookings.next || bookings.previous) {
+      setFilterState((prevState) => ({
+        ...prevState,
+        nextPage: bookings.next,
+        previousPage: bookings.previous,
+      }));
+    }
+  }, [bookings.next, bookings.previous]);
 
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
@@ -113,22 +115,16 @@ export default function BookingsTable({ bookings, locationId }) {
           type="number"
           onWheel={(e) => e.target.blur()}
           className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
-          placeholder="Search by name, booking number, or mobile..."
-          value={searchTerm}
-          onChange={(e) => handleSearchChange(e)}
+          placeholder="Search by booking number"
+          value={filterState.booking_number}
+          onChange={(e) => handleFilterChange("booking_number", e.target.value)}
         />
         <div className="flex gap-4 items-center">
-          <DatePickerWithRange />
+          <DatePickerWithRange handleFilterChange={handleFilterChange} />
           <Select
             className="ring-0 border-0 focus-visible:ring-offset-0 focus-visible:ring-0"
-            onValueChange={(value) =>
-              router.push(
-                pathname +
-                  "?" +
-                  createQueryString("venue", value == "All" ? "" : value)
-              )
-            }
-            defaultValue={searchParams.get("venue") || ""}
+            onValueChange={(value) => handleFilterChange("venue", value)}
+            defaultValue={filterState.venue || ""}
           >
             <SelectTrigger className="w-[180px] bg-black text-white">
               <SelectValue placeholder="Filter by Venue" />
@@ -153,9 +149,7 @@ export default function BookingsTable({ bookings, locationId }) {
           <Loader2 className="animate-spin h-10 w-10" />
         </div>
       ) : error ? (
-        <div className="text-center text-red-600">
-          Error: {error}
-        </div>
+        <div className="text-center text-red-600">Error: {error}</div>
       ) : bookings.results?.length === 0 ? (
         <div className="text-center">No bookings found</div>
       ) : (
@@ -173,7 +167,7 @@ export default function BookingsTable({ bookings, locationId }) {
               </tr>
             </thead>
             <tbody>
-              {currentItems?.map((booking) => (
+              {bookings.results?.map((booking) => (
                 <tr
                   key={booking.booking_number}
                   className="border-b hover:bg-gray-50"
@@ -187,7 +181,10 @@ export default function BookingsTable({ bookings, locationId }) {
                   <td className="p-3">
                     <div className="flex gap-2">
                       <BookingDetails booking={booking} />
-                      <Booking_Delete booking={booking} />
+                      <Booking_Delete
+                        booking={booking}
+                        locationId={locationId}
+                      />
                     </div>
                   </td>
                 </tr>
@@ -200,24 +197,21 @@ export default function BookingsTable({ bookings, locationId }) {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {indexOfFirstItem + 1} to{" "}
-          {Math.min(indexOfLastItem, sortedBookings?.length || 0)} of{" "}
-          {sortedBookings?.length || 0} entries
+          Showing {bookings?.results?.length || 0} of {bookings?.count || 0}{" "}
+          entries
         </div>
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            disabled={currentPage === 1}
+            onClick={() => fetchData()}
+            disabled={filterState.previousPage == null ? true : false}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            onClick={() =>
-              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-            }
-            disabled={currentPage === totalPages}
+            onClick={() => fetchData()}
+            disabled={filterState.nextPage == null ? true : false}
           >
             Next
           </Button>

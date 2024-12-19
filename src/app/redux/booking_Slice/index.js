@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
+import axios from "axios";
 
 // Create Booking
 export const create_Booking_Action = createAsyncThunk(
@@ -15,7 +16,9 @@ export const create_Booking_Action = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error("Error creating booking:", error);
-      return rejectWithValue(error.response?.data || "Failed to create booking");
+      return rejectWithValue(
+        error.response?.data || "Failed to create booking"
+      );
     }
   }
 );
@@ -23,9 +26,12 @@ export const create_Booking_Action = createAsyncThunk(
 // Fetch Bookings
 export const fetchBookings_Action = createAsyncThunk(
   "bookings/fetch",
-  async ({ locationId, start_date, end_date, venue, booking_number }, { rejectWithValue }) => {
+  async (
+    { locationId, venue=null, booking_number=null, start_date=null, end_date=null, next=null, previous=null },
+    { rejectWithValue }
+  ) => {
     try {
-      let url = '';
+      let url = "";
 
       const queryParams = [];
 
@@ -37,29 +43,40 @@ export const fetchBookings_Action = createAsyncThunk(
         queryParams.push(`end_date=${encodeURIComponent(end_date)}`);
       }
 
-      if(venue){
+      if (venue) {
         queryParams.push(`venue=${encodeURIComponent(venue)}`);
       }
 
-      if(booking_number){
-        queryParams.push(`booking_number=${encodeURIComponent(booking_number)}`);
+      if (booking_number) {
+        queryParams.push(
+          `booking_number=${encodeURIComponent(booking_number)}`
+        );
       }
 
       if (queryParams.length > 0) {
-        url += `?${queryParams.join('&')}`;
-      
+        url += `?${queryParams.join("&")}`;
       }
-    
+
+      if(next){
+        const response = await axios.get(`${next}`+url);
+        return response.data;
+      }
+
+      if(previous){
+        const response = await axios.get(`${previous}`+url);
+        return response.data;
+      }
+
       const response = await axiosInstance.get(
         `/bookings-management/bookings/get/${locationId}/${url}`
       );
-      console.log("Bookings fetched successfully: the response of ", response.data);
- 
-        return response.data;
-    
+
+      return response.data;
     } catch (error) {
       console.error("Error fetching bookings:", error);
-      return rejectWithValue(error.response?.data || "Failed to fetch bookings");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch bookings"
+      );
     }
   }
 );
@@ -70,12 +87,16 @@ export const deleteBooking_Action = createAsyncThunk(
   async (bookingId, { rejectWithValue }) => {
     try {
       console.log("Deleting booking:", bookingId);
-      await axiosInstance.delete(`/bookings-management/bookings/delete/${bookingId}/`);
+      await axiosInstance.delete(
+        `/bookings-management/bookings/delete/${bookingId}/`
+      );
       console.log("Booking deleted successfully");
       return bookingId;
     } catch (error) {
       console.error("Error deleting booking:", error);
-      return rejectWithValue(error.response?.data || "Failed to delete booking");
+      return rejectWithValue(
+        error.response?.data || "Failed to delete booking"
+      );
     }
   }
 );
@@ -93,7 +114,9 @@ export const fetchBookingDetails_Action = createAsyncThunk(
       return response.data;
     } catch (error) {
       console.error("Error fetching booking details:", error);
-      return rejectWithValue(error.response?.data || "Failed to fetch booking details");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch booking details"
+      );
     }
   }
 );
@@ -104,7 +127,7 @@ const bookingSlice = createSlice({
     bookings: [],
     selectedBooking: null,
     loading: false,
-    error: null
+    error: null,
   },
   reducers: {},
   extraReducers: (builder) => {
