@@ -15,17 +15,17 @@ export default function Leads() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
-  const { leads, isLoading, error } = useSelector((state) => state.leads);
+  // const { leads, isLoading, error } = useSelector((state) => state.leads);
 
-  useEffect(() => {
-    if (locationId) {
-      dispatch(
-        fetchLeads_Action({
-          locationId,
-        })
-      );
-    }
-  }, [dispatch]);
+  // useEffect(() => {
+  //   if (locationId) {
+  //     dispatch(
+  //       fetchLeads_Action({
+  //         locationId,
+  //       })
+  //     );
+  //   }
+  // }, [dispatch]);
 
   return (
     <div className="space-y-14 flex flex-col justify-between min-h-screen">
@@ -37,7 +37,7 @@ export default function Leads() {
       </div>
 
       <div className="flex-1">
-        <LeadsTable leads={leads} locationId={locationId} />
+        <LeadsTable locationId={locationId} />
       </div>
       <Footer_Component content={locationId} />
     </div>

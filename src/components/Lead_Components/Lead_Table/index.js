@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SearchInput from "@/components/Forms/search-input";
 import { ChevronDown } from "lucide-react";
 import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 import { format } from "date-fns";
@@ -47,9 +48,8 @@ export default function LeadsTable({ locationId }) {
   const [filterState, setFilterState] = useState({
     status: "All",
     lead_number: "",
-    nextPage: null,
-    previousPage: null,
   });
+  const [currentPage, setCurrentPage] = useState(1);
   const { isLoading, isError, leads, nextPage, previousPage, count } =
     useSelector((state) => state.leads);
   const { all_venues: venues } = useSelector((state) => state.venues);
@@ -238,17 +238,22 @@ export default function LeadsTable({ locationId }) {
     }));
   };
 
-  const fetchData = async () => {
+  const fetchData = async (page = null) => {
     try {
-      const { lead_number, status, nextPage, previousPage } = filterState;
+      const { lead_number, status } = filterState;
 
       const query = {
         locationId,
         status: status !== "All" ? status : null,
         lead_number: lead_number || null,
-        next: nextPage || null,
-        previous: previousPage || null,
       };
+
+      // If page is provided, add pagination parameters
+      if (page == "next" && nextPage) {
+        query.next = nextPage;
+      } else if (page == "previous" && previousPage) {
+        query.previous = previousPage;
+      }
 
       await dispatch(fetchLeads_Action(query));
       console.log("Leads fetched:", leads);
@@ -263,17 +268,7 @@ export default function LeadsTable({ locationId }) {
     if (locationId) {
       fetchData();
     }
-  }, [filterState.status, filterState.lead_number, locationId]);
-
-  useEffect(() => {
-    if (nextPage || previousPage) {
-      setFilterState((prevState) => ({
-        ...prevState,
-        nextPage,
-        previousPage,
-      }));
-    }
-  }, [nextPage, previousPage]);
+  }, [filterState.status, locationId]);
 
   const handleDeleteLead = async (leadNumber) => {
     const confirmDelete = window.confirm(
@@ -305,17 +300,41 @@ export default function LeadsTable({ locationId }) {
     { label: "Status", key: "lead_status" },
   ];
 
+  const handleNextPage = () => {
+    if (nextPage) {
+      setCurrentPage((prev) => prev + 1);
+      fetchData("next");
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (previousPage) {
+      setCurrentPage((prev) => prev - 1);
+      fetchData("previous");
+    }
+  };
+
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search and Filters */}
       <div className="mb-4 flex justify-between items-center">
-        <Input
+        <SearchInput
           type="number"
-          onWheel={(e) => e.target.blur()}
-          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
+          name="lead_number"
           placeholder="Search by Lead Number"
           value={filterState.lead_number}
-          onChange={(e) => handleFilterChange("lead_number", e.target.value)}
+          onChange={(e) => handleFilterChange("lead_number", e)}
+          onSearch={fetchData}
+          isLoading={isLoading}
+          debounceMs={500}
+          className="max-w-sm w-full"
+          error={isError ? "Error searching leads" : undefined}
+          validateInput={(value) => {
+            if (value && (value < 1 )) {
+              return "Please enter a valid lead number";
+            }
+            return "";
+          }}
         />
         <div className="flex items-center gap-4">
           <CSVLink
@@ -432,15 +451,15 @@ export default function LeadsTable({ locationId }) {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => fetchData()}
-            disabled={filterState.previousPage == null ? true : false}
+            onClick={handlePreviousPage}
+            disabled={!previousPage || isLoading}
           >
             Previous
           </Button>
           <Button
             variant="outline"
-            disabled={filterState.nextPage == null ? true : false}
-            onClick={() => fetchData()}
+            disabled={!nextPage || isLoading}
+            onClick={handleNextPage}
           >
             Next
           </Button>

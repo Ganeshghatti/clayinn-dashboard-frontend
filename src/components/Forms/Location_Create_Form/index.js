@@ -83,7 +83,7 @@ export default function Location_Create_Form({ setOpen, action = "create", locat
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Something went wrong. Please try again.",
+        description: error || "Something went wrong. Please try again.",
       });
     }
   }

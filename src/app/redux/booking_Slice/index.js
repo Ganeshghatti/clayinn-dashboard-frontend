@@ -58,12 +58,12 @@ export const fetchBookings_Action = createAsyncThunk(
       }
 
       if(next){
-        const response = await axios.get(`${next}`+url);
+        const response = await axios.get(`${next}`);
         return response.data;
       }
 
       if(previous){
-        const response = await axios.get(`${previous}`+url);
+        const response = await axios.get(`${previous}`);
         return response.data;
       }
 
