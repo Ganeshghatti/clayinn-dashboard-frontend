@@ -31,7 +31,7 @@ export const fetchLeads_Action = createAsyncThunk(
   ) => {
     try {
       // Base URL with location ID
-      let url = '';
+      let url = "";
 
       // Array to store query parameters
       const queryParams = [];
@@ -57,14 +57,11 @@ export const fetchLeads_Action = createAsyncThunk(
         return response.data;
       }
 
-      console.log("url prev", url)
-
       if (previous) {
         const response = await axiosInstance.get(`${previous}`);
 
         return response.data;
       }
-
 
       const response = await axiosInstance.get(
         `/leads-management/leads/get/${locationId}/` + url

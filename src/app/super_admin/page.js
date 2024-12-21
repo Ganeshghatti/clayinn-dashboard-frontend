@@ -33,20 +33,20 @@ export default function Super_Admin() {
       try {
         const token = getAccessToken();
         if (!token) {
-          router.push('/auth/login');
+          router.push('/');
           return;
         }
 
         const decoded = jwtDecode(token);
         if (decoded.role !== 'super-admin') {
-          router.push('/auth/login');
+          router.push('/');
           return;
         }
 
         dispatch(fetch_All_Location_Action());
       } catch (error) {
         console.error('Auth error:', error);
-        router.push('/auth/login');
+        router.push('/');
       }
     };
 
@@ -73,11 +73,12 @@ export default function Super_Admin() {
       <Separator />
 
       <div className="flex-1 p-4">
-        {isError ? (
+      {/* {isError &&
           <div className="text-center text-red-600">
             Error: {isError}
           </div>
-        ) : !all_locations || all_locations?.length === 0 ? (
+        } */}
+        {!all_locations || all_locations?.length === 0 ? (
           <div className="text-center">No locations found</div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

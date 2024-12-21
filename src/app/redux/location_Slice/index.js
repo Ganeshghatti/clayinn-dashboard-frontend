@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axiosInstance from '@/utils/axiosInstance';
+import axiosInstance from "@/utils/axiosInstance";
 
 const initialState = {
   all_locations: [],
@@ -13,10 +13,14 @@ export const fetch_All_Location_Action = createAsyncThunk(
   "location/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosInstance.get('/location-management/locations/');
+      const response = await axiosInstance.get(
+        "/location-management/locations/"
+      );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch locations");
+      return rejectWithValue(
+        error.response?.data || "Failed to fetch locations"
+      );
     }
   }
 );
@@ -27,13 +31,17 @@ export const create_New_Location_Action = createAsyncThunk(
   async (locationData, { rejectWithValue }) => {
     try {
       const response = await axiosInstance.post(
-        '/location-management/locations/',
+        "/location-management/locations/",
         locationData
       );
       return response.data;
     } catch (error) {
+      // we get error message if the with same email already location exist
+      // problem is even we get error message are still created the location
       console.log("error on creating on location", error);
-      return rejectWithValue(error.response?.data || "Failed to create location");
+      return rejectWithValue(
+        error?.response?.data?.error || "Failed to create location"
+      );
     }
   }
 );
@@ -48,7 +56,9 @@ export const get_Location_Details = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to fetch location details");
+      return rejectWithValue(
+        error?.response?.data?.error || "Failed to fetch location details"
+      );
     }
   }
 );
@@ -64,7 +74,9 @@ export const update_Location_Action = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to update location");
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to update location"
+      );
     }
   }
 );
@@ -74,10 +86,14 @@ export const delete_Location_Action = createAsyncThunk(
   "location/delete",
   async (locationId, { rejectWithValue }) => {
     try {
-      await axiosInstance.delete(`/location-management/locations/${locationId}/`);
+      await axiosInstance.delete(
+        `/location-management/locations/${locationId}/`
+      );
       return locationId;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to delete location");
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to delete location"
+      );
     }
   }
 );
@@ -92,7 +108,9 @@ export const delete_Location_Admin = createAsyncThunk(
       );
       return locationId;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to delete location admin");
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to delete location admin"
+      );
     }
   }
 );
@@ -108,7 +126,9 @@ export const create_Location_Admin = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Failed to create location admin");
+      return rejectWithValue(
+        error.response?.data?.error || "Failed to create location admin"
+      );
     }
   }
 );
@@ -171,7 +191,7 @@ const locationSlice = createSlice({
       })
       .addCase(update_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.all_locations = state.all_locations.map(location =>
+        state.all_locations = state.all_locations.map((location) =>
           location.loc_id === action.payload.id ? action.payload : location
         );
         state.current_location = action.payload;
@@ -188,7 +208,7 @@ const locationSlice = createSlice({
       .addCase(delete_Location_Action.fulfilled, (state, action) => {
         state.isLoading = false;
         state.all_locations = state.all_locations.filter(
-          location => location.loc_id !== action.payload
+          (location) => location.loc_id !== action.payload
         );
         state.isError = null;
       })
@@ -212,5 +232,6 @@ const locationSlice = createSlice({
   },
 });
 
-export const { clearLocationError, clearCurrentLocation } = locationSlice.actions;
+export const { clearLocationError, clearCurrentLocation } =
+  locationSlice.actions;
 export default locationSlice.reducer;

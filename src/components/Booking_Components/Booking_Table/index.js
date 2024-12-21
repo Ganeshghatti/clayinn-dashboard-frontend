@@ -20,6 +20,7 @@ import { Loader2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import { useDispatch } from "react-redux";
+import SearchInput from "@/components/Forms/search-input";
 
 export default function BookingsTable({ locationId }) {
   const [filterState, setFilterState] = useState({
@@ -44,20 +45,15 @@ export default function BookingsTable({ locationId }) {
   };
 
   const handleFilterChange = (name, value) => {
-    setFilterState(prev => ({
+    setFilterState((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const fetchData = async (page = null) => {
     try {
-      const {
-        booking_number,
-        venue,
-        start_date,
-        end_date,
-      } = filterState;
+      const { booking_number, venue, start_date, end_date } = filterState;
 
       const query = {
         locationId,
@@ -68,9 +64,9 @@ export default function BookingsTable({ locationId }) {
       };
 
       // If page is provided, add pagination parameters
-      if (page === 'next' && bookings.next) {
+      if (page === "next" && bookings.next) {
         query.next = bookings.next;
-      } else if (page === 'previous' && bookings.previous) {
+      } else if (page === "previous" && bookings.previous) {
         query.previous = bookings.previous;
       }
 
@@ -88,8 +84,7 @@ export default function BookingsTable({ locationId }) {
     filterState.start_date,
     filterState.end_date,
     filterState.venue,
-    filterState.booking_number,
-    locationId
+    locationId,
   ]);
 
   useEffect(() => {
@@ -100,15 +95,15 @@ export default function BookingsTable({ locationId }) {
 
   const handleNextPage = () => {
     if (bookings.next) {
-      setCurrentPage(prev => prev + 1);
-      fetchData('next');
+      setCurrentPage((prev) => prev + 1);
+      fetchData("next");
     }
   };
 
   const handlePreviousPage = () => {
     if (bookings.previous) {
-      setCurrentPage(prev => prev - 1);
-      fetchData('previous');
+      setCurrentPage((prev) => prev - 1);
+      fetchData("previous");
     }
   };
 
@@ -116,13 +111,23 @@ export default function BookingsTable({ locationId }) {
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search */}
       <div className="mb-4 flex justify-between">
-        <Input
+        <SearchInput
           type="number"
-          onWheel={(e) => e.target.blur()}
-          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
-          placeholder="Search by booking number"
+          name="booking_number"
+          placeholder="Search by Booking Number"
           value={filterState.booking_number}
-          onChange={(e) => handleFilterChange("booking_number", e.target.value)}
+          onChange={(e) => handleFilterChange("booking_number", e)}
+          onSearch={fetchData}
+          isLoading={loading}
+          debounceMs={500}
+          className="max-w-sm w-full"
+          error={error ? "Error searching bookings" : undefined}
+          validateInput={(value) => {
+            if (value && value < 1) {
+              return "Please enter a valid booking number";
+            }
+            return "";
+          }}
         />
         <div className="flex gap-4 items-center">
           <DatePickerWithRange handleFilterChange={handleFilterChange} />
@@ -202,7 +207,8 @@ export default function BookingsTable({ locationId }) {
       {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-gray-500">
-          Showing {bookings?.results?.length || 0} of {bookings?.count || 0} entries
+          Showing {bookings?.results?.length || 0} of {bookings?.count || 0}{" "}
+          entries
         </div>
         <div className="flex gap-2">
           <Button
@@ -221,7 +227,6 @@ export default function BookingsTable({ locationId }) {
           </Button>
         </div>
       </div>
-      
     </div>
   );
 }

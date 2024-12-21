@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SearchInput from "@/components/Forms/search-input";
 import { ChevronDown } from "lucide-react";
 import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 import { format } from "date-fns";
@@ -267,7 +268,7 @@ export default function LeadsTable({ locationId }) {
     if (locationId) {
       fetchData();
     }
-  }, [filterState.status, filterState.lead_number, locationId]);
+  }, [filterState.status, locationId]);
 
   const handleDeleteLead = async (leadNumber) => {
     const confirmDelete = window.confirm(
@@ -317,13 +318,23 @@ export default function LeadsTable({ locationId }) {
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
       {/* Search and Filters */}
       <div className="mb-4 flex justify-between items-center">
-        <Input
+        <SearchInput
           type="number"
-          onWheel={(e) => e.target.blur()}
-          className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none max-w-sm w-full"
+          name="lead_number"
           placeholder="Search by Lead Number"
           value={filterState.lead_number}
-          onChange={(e) => handleFilterChange("lead_number", e.target.value)}
+          onChange={(e) => handleFilterChange("lead_number", e)}
+          onSearch={fetchData}
+          isLoading={isLoading}
+          debounceMs={500}
+          className="max-w-sm w-full"
+          error={isError ? "Error searching leads" : undefined}
+          validateInput={(value) => {
+            if (value && (value < 1 )) {
+              return "Please enter a valid lead number";
+            }
+            return "";
+          }}
         />
         <div className="flex items-center gap-4">
           <CSVLink
