@@ -20,11 +20,22 @@ import { useParams, usePathname } from "next/navigation";
 import { useState } from "react";
 
 import { CgMenuGridR } from "react-icons/cg";
+import { getAccessToken } from "@/utils/auth";
+import { jwtDecode } from "jwt-decode";
+import { ShieldCheck } from "lucide-react";
 
 export default function Small_Devices() {
   const [open, setOpen] = useState(false);
   const { locationId } = useParams();
   const pathname = usePathname();
+
+  const isAdmin = () => {
+    const token = getAccessToken();
+    if (!token) return false;
+    const decoded = jwtDecode(token);
+    console.log(decoded);
+    return decoded.role == "super-admin" ? true : false;
+  };
   return (
     <div>
       <Sheet open={open} onOpenChange={setOpen}>
@@ -50,6 +61,17 @@ export default function Small_Devices() {
                 {eachLink?.title}
               </Link>
             ))}
+            {isAdmin() && (
+              <Link
+                href={`/super_admin`}
+                className={`flex items-start justify-center gap-2  transition-all duration-300 ease-linear text-xl font-semibold mt-10`}
+              >
+                <span>
+                  <ShieldCheck size={22} />
+                </span>
+                <span className="text-lg">Super Admin</span>
+              </Link>
+            )}
           </div>
           <div>
             <Logout />

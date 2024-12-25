@@ -29,7 +29,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         clearTokens();
-        window.location.href = '/auth/login';
+        window.location.href = '/';
         return Promise.reject(refreshError);
       }
     }
