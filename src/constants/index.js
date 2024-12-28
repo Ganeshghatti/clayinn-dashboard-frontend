@@ -7,6 +7,7 @@ import {
   MapPin,
   NotebookTabs,
   Users,
+  ShieldCheck 
 } from "lucide-react";
 
 // LOGIN FORM INPUT
@@ -109,7 +110,7 @@ const navLinks = [
     icon: <Users size={22} />,
     isAdmin: "false",
     active: false,
-  },
+  }
 ];
 
 // Create New Venue Form Action Inputs

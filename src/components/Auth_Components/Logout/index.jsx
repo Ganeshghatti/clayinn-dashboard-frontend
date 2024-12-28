@@ -12,7 +12,7 @@ export default function Logout({ className }) {
     localStorage.removeItem("access-token");
     localStorage.removeItem("refresh-token");
     router.refresh();
-    router.push("/auth/login");
+    router.push("/");
   };
 
   return (

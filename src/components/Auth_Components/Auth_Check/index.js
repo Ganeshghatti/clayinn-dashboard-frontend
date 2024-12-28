@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { getAccessToken, clearTokens } from '@/utils/auth';
 
-const PUBLIC_ROUTES = ['/auth/login', '/'];
+const PUBLIC_ROUTES = ['/', '/'];
 const SUPER_ADMIN_ROUTES = ['/super_admin'];
 
 export default function Auth_Check({ children }) {
@@ -42,7 +42,7 @@ export default function Auth_Check({ children }) {
         setIsAuthorized(true);
       } catch (error) {
         clearTokens();
-        router.push('/auth/login');
+        router.push('/');
       }
     };
 
