@@ -32,6 +32,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 
 // Zod schema for validation
 const formSchema = z.object({
@@ -165,6 +166,8 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
       };
 
       await dispatch(createLead_Action({ formData, locationId })).unwrap();
+
+      await dispatch(fetchLeads_Action({locationId}));
 
       toast({
         title: "Success",
