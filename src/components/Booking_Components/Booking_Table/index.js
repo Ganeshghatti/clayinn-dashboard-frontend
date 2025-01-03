@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { fetchBookings_Action } from "@/app/redux/booking_Slice";
-import BookingDetails from "../Booking_Details";
 import Booking_Delete from "../Booking_Delete";
 import DatePickerWithRange from "./date-filter";
 import {
@@ -21,6 +20,8 @@ import { useSelector } from "react-redux";
 import { fetchVenues_Actions } from "@/app/redux/venue_Slice";
 import { useDispatch } from "react-redux";
 import SearchInput from "@/components/Forms/search-input";
+import BookingDetails from "../Booking_Details";
+import { CSVLink } from "react-csv";
 
 export default function BookingsTable({ locationId }) {
   const [filterState, setFilterState] = useState({
@@ -79,6 +80,7 @@ export default function BookingsTable({ locationId }) {
   useEffect(() => {
     if (locationId) {
       fetchData();
+      console.log("Bookings fetched:", bookings);
     }
   }, [
     filterState.start_date,
@@ -106,6 +108,17 @@ export default function BookingsTable({ locationId }) {
       fetchData("previous");
     }
   };
+
+  const csvHeaders = [
+    { label: "Booking Number", key: "booking_number" },
+    { label: "Booking Date", key: "booking_date" },
+    { label: "Event Date", key: "event_date" },
+    { label: "Slot", key: "slot" },
+    { label: "venue name", key: "venue.name" },
+    { label: "lead number", key: "lead.lead_number" },
+    { label: "lead email", key: "lead.email" },
+    { label: "lead mobile no.", key: "lead.mobile" },
+  ];
 
   return (
     <div className="w-full p-4 bg-gray-50 rounded-lg shadow-md">
@@ -151,6 +164,23 @@ export default function BookingsTable({ locationId }) {
               </SelectGroup>
             </SelectContent>
           </Select>
+          <CSVLink
+          target="_blank"
+                      headers={csvHeaders}
+                      data={bookings?.results || []}
+                      filename="bookings.csv"
+                      className="h-fit w-fit overflow-hidden"
+                    >
+                      <Button
+                        color="#082f49"
+                        variant="outline"
+                        rounded="md"
+                        className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
+                      >
+                        {" "}
+                        Export CSV
+                      </Button>
+                    </CSVLink>
         </div>
       </div>
 
