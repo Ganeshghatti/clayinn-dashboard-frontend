@@ -33,6 +33,8 @@ import Header from "@/components/Header";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Footer_Component from "@/components/Footer";
+import { getAccessToken } from "@/utils/auth";
+import { jwtDecode } from "jwt-decode";
 
 export default function CalendarPage() {
   const dispatch = useDispatch();
@@ -61,6 +63,9 @@ export default function CalendarPage() {
       });
     }
   };
+
+  const token = getAccessToken();
+    const decodedToken = jwtDecode(token);
 
   return (
     <div className="flex flex-col justify-between gap-5 min-h-screen bg-gray-100 p-4">
@@ -140,7 +145,7 @@ export default function CalendarPage() {
       </div>
       </div>
       <div className="mt-5">
-        <Footer_Component content={locationId} />
+        <Footer_Component content={decodedToken?.loc_address || ""} />
       </div>
     </div>
   );

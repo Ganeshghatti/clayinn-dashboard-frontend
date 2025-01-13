@@ -7,6 +7,8 @@ import { fetchDashboardData } from "@/app/redux/dashboard_Slice";
 import { Loading } from "@/components/Loading";
 import { FaUserPlus, FaCalendarCheck, FaChartLine } from 'react-icons/fa';
 import Footer_Component from "@/components/Footer";
+import { getAccessToken } from "@/utils/auth";
+import { jwtDecode } from "jwt-decode";
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -14,6 +16,9 @@ export default function Dashboard() {
   const { dashboardData, isLoading, isError } = useSelector(
     (state) => state.dashboard
   );
+
+    const token = getAccessToken();
+      const decodedToken = jwtDecode(token);
 
   useEffect(() => {
     if (locationId) {
@@ -162,7 +167,7 @@ export default function Dashboard() {
       </div>
 
       <div className="mt-10">
-      <Footer_Component content={locationId}/>
+      <Footer_Component content={decodedToken?.loc_address || ""}/>
       </div>
 
     </div>

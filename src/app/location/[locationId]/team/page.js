@@ -8,6 +8,8 @@ import TeamTable from "@/components/Team_Components/Team_Table";
 import { useParams, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { jwtDecode } from "jwt-decode";
+import { getAccessToken } from "@/utils/auth";
 
 export default function Team() {
   const dispatch = useDispatch();
@@ -16,6 +18,9 @@ export default function Team() {
   const locationName = pathName.split("/")[3];
   const location_Name = pathName.split("/")[2];
   const { members } = useSelector((state) => state.members);
+
+  const token = getAccessToken();
+  const decodedToken = jwtDecode(token);
 
   useEffect(() => {
     dispatch(fetchAllMembers(locationId));
@@ -37,7 +42,7 @@ export default function Team() {
         <TeamTable members={members} locationId={locationId} />
       </div>
       <div>
-        <Footer_Component content={location_Name} />
+        <Footer_Component content={decodedToken?.loc_address || ""} />
       </div>
     </div>
   );
