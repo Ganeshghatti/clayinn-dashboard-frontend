@@ -154,7 +154,7 @@ const functionParameters = [
   { name: "liquor_value", label: "Liquor", type: "number" }
 ];
 
-// All occasion types including rooms
+// All occasion types including room
 const occasionTypes = [
   {
     id: "engagement",
@@ -198,10 +198,11 @@ const occasionTypes = [
     ]
   },
   {
-    id: "rooms",
-    label: "Rooms",
+    id: "room",
+    label: "room",
     parameters: [
-      { name: "date_of_booking", label: "Date of Booking", type: "date" },
+      // { name: "date_of_booking", label: "Date of Booking", type: "date" },
+      { name: "date_of_function", label: "Date of Function", type: "date" },
       { name: "day", label: "Day", type: "text" },
       { name: "number_of_pax", label: "Number of Pax (Min. Pax)", type: "number" },
       { name: "number_of_rooms", label: "Number of Rooms", type: "number" },
