@@ -112,7 +112,7 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                       {occasion.occasion_type}
                     </h4>
                     <div className="grid grid-cols-2 gap-4">
-                      {occasion.occasion_type === "rooms" ? (
+                      {occasion.occasion_type === "room" ? (
                         // Room specific fields
                         <>
                           <div>
@@ -124,7 +124,7 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                             <p>{occasion.number_of_pax}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Number of Rooms</p>
+                            <p className="text-sm font-medium text-muted-foreground">Number of room</p>
                             <p>{occasion.number_of_rooms}</p>
                           </div>
                           <div>

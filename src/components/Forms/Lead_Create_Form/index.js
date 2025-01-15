@@ -100,7 +100,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
   const calculateTotal = (values) => {
     if (!values) return 0;
 
-    if (values.occasion_type === "rooms") {
+    if (values.occasion_type === "room") {
       return (values.number_of_rooms || 0) * (values.number_of_pax || 0) * 3000;
     }
 
@@ -122,7 +122,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
       total: 0,
     };
 
-    if (occasionType === "rooms") {
+    if (occasionType === "room") {
       append({
         ...defaultValues,
         number_of_pax: 0,
