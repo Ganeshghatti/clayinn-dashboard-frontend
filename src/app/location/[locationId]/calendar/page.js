@@ -16,6 +16,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import axiosInstance from "@/utils/axiosInstance";
 
 // pages/calendar.js or a component file
 import FullCalendar from "@fullcalendar/react";
@@ -73,19 +74,29 @@ export default function CalendarPage() {
 
   const transformVenueData = (data, timeRanges) => {
     return data.flatMap(({ date, venues }) =>
-      Object.values(venues).flatMap((venue) =>
-        Object.entries(venue.slots)
-          .filter(([_, slot]) => slot !== null)
+      // Iterate through each venue in the venues object
+      Object.values(venues).flatMap((venue) => {
+        // Get the venue's background color
+        const venueColor = venue.bg_color;
+
+        // Process slots for this venue
+        return Object.entries(venue.slots)
+          .filter(([_, slot]) => slot !== null) // Filter out null slots
           .map(([timeOfDay, slot]) => ({
-            backgroundColor: venue.bg_color,
+            title: `${venue.venue_name}`,
             start: `${date}T${timeRanges[timeOfDay].start}`,
             end: `${date}T${timeRanges[timeOfDay].end}`,
-            // title: `${slot.lead_name}`,
+            backgroundColor: venueColor, // Apply the venue's background color
+            borderColor: venueColor, // Match border color with background
             extendedProps: {
               timeOfDay,
+              venueName: venue.venue_name,
+              bookingNumber: slot.booking_number,
+              occasion: slot.occasion,
+              mobile: slot.mobile,
             },
-          }))
-      )
+          }));
+      })
     );
   };
 
@@ -93,19 +104,10 @@ export default function CalendarPage() {
     const currentMonth = arg.start.getMonth() + 1; // Months are 0-indexed
     const currentYear = arg.start.getFullYear();
     try {
-      const token = await getAccessToken();
-
-      if (!token) {
-        throw new Error("No token found. Please login again.");
-      }
-      const response = await axios.get(
-        `https://clayinn-dashboard-backend.onrender.com/master-calender-management/locations/Delhi-e29bc/?year=${currentYear}&month=${currentMonth}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosInstance.get(
+        `/master-calender-management/locations/${locationId}/?year=${currentYear}&month=${currentMonth}`
       );
+
       const transformedData = transformVenueData(
         response.data.days,
         timeRanges
@@ -131,7 +133,7 @@ export default function CalendarPage() {
         </div>
         <div className="w-full max-w-7xl bg-white shadow-xl rounded-lg overflow-hidden p-6">
           <FullCalendar
-            eventClassNames="bg-blue-500 text-white rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
+            eventClassNames="text-white bg-blue-500 rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
             dayCellClassNames={"p-5"}
             plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
             initialView="dayGridMonth"
