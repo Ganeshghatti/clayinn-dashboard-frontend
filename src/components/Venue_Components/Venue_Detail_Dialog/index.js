@@ -62,8 +62,9 @@ export default function Venue_Detail({ location_Id, venue }) {
         }
       );
 
-      console.log(response.data);
+     
       setBookings(response.data.bookings);
+      console.log("the response of bookings", response.data.bookings);
     } catch (error) {
       console.log(error);
     }
@@ -77,6 +78,7 @@ export default function Venue_Detail({ location_Id, venue }) {
   useEffect(() => {
     const eventsArray = convertBookingsToEvents(bookings);
     setEvents(eventsArray); // Set the converted events in state
+    console.log("the converted date to render on the calendar", eventsArray);
   }, [bookings]);
 
   useEffect(() => {
