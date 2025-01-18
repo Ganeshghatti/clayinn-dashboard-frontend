@@ -1,5 +1,4 @@
 "use client";
-
 import { useDispatch, useSelector } from "react-redux";
 import { fetchCalendarData_Action } from "@/app/redux/calendar_Slice";
 import {
@@ -22,7 +21,6 @@ import axiosInstance from "@/utils/axiosInstance";
 import FullCalendar from "@fullcalendar/react";
 
 // Calendar Plugins
-
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
@@ -120,7 +118,6 @@ export default function CalendarPage() {
   };
 
   const token = getAccessToken();
-
   const decodedToken = jwtDecode(token);
 
   return (
@@ -133,8 +130,8 @@ export default function CalendarPage() {
         </div>
         <div className="w-full max-w-7xl bg-white shadow-xl rounded-lg overflow-hidden p-6">
           <FullCalendar
-            eventClassNames="text-white bg-blue-500 rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
-            dayCellClassNames={"p-5"}
+          eventClassNames="rounded-md py-1 px-2 shadow-sm"
+          dayCellClassNames={"p-5"}
             plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
             initialView="dayGridMonth"
             events={events}
@@ -144,8 +141,10 @@ export default function CalendarPage() {
               minute: "2-digit",
               hour12: false, // Use true for 12-hour format
             }}
+            eventTextColor="black"
             dateClick={handleDateClick}
             showNonCurrentDates={false}
+            eventDisplay="block"
           />
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild></DialogTrigger>
