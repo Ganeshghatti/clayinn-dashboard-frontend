@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import getRandomLightColor from "@/constants/random_Color";
 import Venue_Detail from "@/components/Venue_Components/Venue_Detail_Dialog";
 import Footer_Component from "@/components/Footer";
+import { getAccessToken } from "@/utils/auth";
+import { jwtDecode } from "jwt-decode";
 
 export default function Venues() {
   const pathname = usePathname();
@@ -18,6 +20,9 @@ export default function Venues() {
 
   const location_Id = pathname.split("/")[2];
   const locationName = pathname.split("/")[3];
+
+  const token = getAccessToken();
+  const decodedToken = jwtDecode(token);
 
   useEffect(() => {
     dispatch(fetchVenues_Actions(location_Id));
@@ -56,7 +61,7 @@ export default function Venues() {
         )}
       </div>
       <div>
-        <Footer_Component content={location_Id} />
+        <Footer_Component content={decodedToken?.loc_address || ""} />
       </div>
     </div>
   );

@@ -9,11 +9,15 @@ import Footer_Component from "@/components/Footer";
 import Lead_Create_Dialog from "@/components/Lead_Components/Leads_Create_Dialog";
 import LeadsTable from "@/components/Lead_Components/Lead_Table";
 import { useSearchParams } from "next/navigation";
+import { getAccessToken } from "@/utils/auth";
+import { jwtDecode } from "jwt-decode";
 
 export default function Leads() {
   const { locationId } = useParams();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
+  const token = getAccessToken();
+  const decodedToken = jwtDecode(token);
 
   // const { leads, isLoading, error } = useSelector((state) => state.leads);
 
@@ -39,7 +43,7 @@ export default function Leads() {
       <div className="flex-1">
         <LeadsTable locationId={locationId} />
       </div>
-      <Footer_Component content={locationId} />
+      <Footer_Component content={decodedToken?.loc_address || ""} />
     </div>
   );
 }
