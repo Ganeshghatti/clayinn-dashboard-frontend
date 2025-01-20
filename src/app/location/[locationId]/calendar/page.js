@@ -28,14 +28,14 @@ import interactionPlugin from "@fullcalendar/interaction";
 import Header from "@/components/Header";
 
 import { usePathname } from "next/navigation";
-import { useState, useEffect, use } from "react";
+import { useState } from "react";
 import Footer_Component from "@/components/Footer";
 import { getAccessToken } from "@/utils/auth";
 import { jwtDecode } from "jwt-decode";
 
 export default function CalendarPage() {
   const dispatch = useDispatch();
-  const { calendarData, isLoading } = useSelector((state) => state.calendar);
+  const { isLoading } = useSelector((state) => state.calendar);
   const pathName = usePathname();
   const locationId = pathName.split("/")[2];
   const locationName = pathName.split("/")[3];
@@ -116,10 +116,6 @@ export default function CalendarPage() {
       console.log("the error on fetching calendar data", error);
     }
   };
-
-  useEffect(() => {
-    console.log("clicked date data", clickedDateData);
-  }, [clickedDateData]);
 
   const token = getAccessToken();
   const decodedToken = jwtDecode(token);
