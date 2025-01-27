@@ -134,6 +134,7 @@ export default function CalendarPage() {
             dayCellClassNames={"p-5"}
             plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
             initialView="dayGridMonth"
+            datesSet={fetchCalendarData}
             events={events}
             eventTimeFormat={{
               hour: "2-digit",
