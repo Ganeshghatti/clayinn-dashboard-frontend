@@ -130,12 +130,12 @@ export default function CalendarPage() {
         </div>
         <div className="w-full max-w-7xl bg-white shadow-xl rounded-lg overflow-hidden p-6">
           <FullCalendar
-            eventClassNames="rounded-md py-1 px-2 shadow-sm"
+            eventClassNames="rounded-md py-1 px-2 -z-10  shadow-sm"
             dayCellClassNames={"p-5"}
             plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
             initialView="dayGridMonth"
-            events={events}
             datesSet={fetchCalendarData}
+            events={events}
             eventTimeFormat={{
               hour: "2-digit",
               minute: "2-digit",
@@ -158,19 +158,19 @@ export default function CalendarPage() {
               {isLoading ? (
                 <div>Loading...</div>
               ) : (
-                <Accordion type="single" collapsible className="w-full">
+                <div className="w-full overflow-y-auto h-[400px] flex flex-col gap-4">
                   {clickedDateData &&
                     clickedDateData[0]?.venues?.map((venue, index) => (
-                      <AccordionItem value={index + 1} key={index}>
-                        <AccordionTrigger>{venue.venue_name}</AccordionTrigger>
-                        <AccordionContent>
+                      <div value={index + 1} key={index} className="px-2 py-4 rounded-xl border-2 shadow-md">
+                        <div className="text-lg font-bold">{venue.venue_name}</div>
+                        <div>
                           {Object.entries(venue.slots).map(
                             ([slotName, slotDetails]) => (
                               <div
                                 key={slotName}
                                 className="p-4 bg-blue-200 border rounded-lg space-y-2 mt-3"
                               >
-                                <h3 className="text-lg font-bold">
+                                <h3 className="text-lg font-medium">
                                   {slotName.charAt(0).toUpperCase() +
                                     slotName.slice(1)}{" "}
                                   Slot
@@ -195,10 +195,10 @@ export default function CalendarPage() {
                               </div>
                             )
                           )}
-                        </AccordionContent>
-                      </AccordionItem>
+                        </div>
+                      </div>
                     ))}
-                </Accordion>
+                </div>
               )}
             </DialogContent>
           </Dialog>
