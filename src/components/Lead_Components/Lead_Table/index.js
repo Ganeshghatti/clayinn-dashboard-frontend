@@ -256,7 +256,6 @@ export default function LeadsTable({ locationId }) {
       }
 
       await dispatch(fetchLeads_Action(query));
-      console.log("Leads fetched:", leads);
 
       // Update pagination state after fetching
     } catch (error) {
@@ -297,6 +296,8 @@ export default function LeadsTable({ locationId }) {
     { label: "Host Name", key: "hostname" },
     { label: "Mobile", key: "mobile" },
     { label: "Email", key: "email" },
+    { label: "Sales Person Name", key: "sales_person_details.name" },
+    { label: "Sales Person Email", key: "sales_person_details.email" },
     { label: "Status", key: "lead_status" },
   ];
 
@@ -393,6 +394,7 @@ export default function LeadsTable({ locationId }) {
                 <th className="p-3 text-left cursor-pointer">Host Name</th>
                 <th className="p-3 text-left cursor-pointer">Mobile</th>
                 <th className="p-3 text-left cursor-pointer">Email</th>
+                <th className="p-3 text-left cursor-pointer">Sales Person Detail</th>
                 <th className="p-3 text-left cursor-pointer">Status</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
@@ -407,6 +409,7 @@ export default function LeadsTable({ locationId }) {
                   <td className="p-3">{lead.hostname}</td>
                   <td className="p-3">{lead.mobile}</td>
                   <td className="p-3">{lead.email}</td>
+                  <td className="p-3">{lead.sales_person_details.name}, {lead.sales_person_details.email}</td>
                   <td className="p-3">{renderStatusCell(lead)}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
@@ -517,6 +520,7 @@ export default function LeadsTable({ locationId }) {
             </div>
 
             <div className="grid gap-2">
+
               <Label>Occasion</Label>
               <Select
                 value={bookingData.occasion}

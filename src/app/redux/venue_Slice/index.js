@@ -16,6 +16,7 @@ export const fetchVenues_Actions = createAsyncThunk(
       const response = await axiosInstance.get(
         `/venue-management/locations/${location_Id}/venues/`
       );
+      console.log("all bookings", response.data);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data || "Failed to fetch venues");

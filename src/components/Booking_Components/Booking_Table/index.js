@@ -118,6 +118,8 @@ export default function BookingsTable({ locationId }) {
     { label: "lead number", key: "lead.lead_number" },
     { label: "lead email", key: "lead.email" },
     { label: "lead mobile no.", key: "lead.mobile" },
+    { label: "Sales Person Name", key: "sales_person.name" },
+    { label: "Sales Person Email", key: "sales_person.email" },
   ];
 
   return (
@@ -203,6 +205,7 @@ export default function BookingsTable({ locationId }) {
                 <th className="p-3 text-left">Event Date</th>
                 <th className="p-3 text-left">Slot</th>
                 <th className="p-3 text-left">Venue</th>
+                <th className="p-3 text-left">Sale Person Detail</th>
                 <th className="p-3 text-left">Actions</th>
               </tr>
             </thead>
@@ -218,6 +221,7 @@ export default function BookingsTable({ locationId }) {
                   <td className="p-3">{booking.event_date}</td>
                   <td className="p-3">{getSlots(booking.slot)}</td>
                   <td className="p-3">{booking.venue?.name}</td>
+                  <td className="p-3">{booking.sales_person.name}, {booking.sales_person.email}</td>
                   <td className="p-3">
                     <div className="flex gap-2">
                       <BookingDetails booking={booking} />
