@@ -1,5 +1,5 @@
-import axios from 'axios';
-import { getAccessToken, refreshAccessToken, clearTokens } from './auth';
+import axios from "axios";
+import { getAccessToken, refreshAccessToken, clearTokens } from "./auth";
 
 const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_URL,
@@ -29,7 +29,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         clearTokens();
-        window.location.href = '/';
+        window.location.href = "/";
         return Promise.reject(refreshError);
       }
     }
@@ -37,4 +37,4 @@ axiosInstance.interceptors.response.use(
   }
 );
 
-export default axiosInstance; 
+export default axiosInstance;

@@ -23,6 +23,8 @@ import SearchInput from "@/components/Forms/search-input";
 import BookingDetails from "../Booking_Details";
 import { CSVLink } from "react-csv";
 
+import { DecodedToken } from "@/function/jwt";
+
 export default function BookingsTable({ locationId }) {
   const [filterState, setFilterState] = useState({
     venue: "All",
@@ -44,6 +46,13 @@ export default function BookingsTable({ locationId }) {
       return slot;
     }
   };
+
+  const [decodedToken, setDecodedToken] = useState(null);
+
+  useEffect(() => {
+    const decoded = DecodedToken();
+    setDecodedToken(decoded);
+  }, []);
 
   const handleFilterChange = (name, value) => {
     setFilterState((prev) => ({
@@ -165,22 +174,22 @@ export default function BookingsTable({ locationId }) {
             </SelectContent>
           </Select>
           <CSVLink
-          target="_blank"
-                      headers={csvHeaders}
-                      data={bookings?.results || []}
-                      filename="bookings.csv"
-                      className="h-fit w-fit overflow-hidden"
-                    >
-                      <Button
-                        color="#082f49"
-                        variant="outline"
-                        rounded="md"
-                        className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
-                      >
-                        {" "}
-                        Export CSV
-                      </Button>
-                    </CSVLink>
+            target="_blank"
+            headers={csvHeaders}
+            data={bookings?.results || []}
+            filename="bookings.csv"
+            className="h-fit w-fit overflow-hidden"
+          >
+            <Button
+              color="#082f49"
+              variant="outline"
+              rounded="md"
+              className="bg-transparent border-slate-200 transition-all border-2 hover:border-[#0ea5e9] hover:bg-[#e0f2fe] "
+            >
+              {" "}
+              Export CSV
+            </Button>
+          </CSVLink>
         </div>
       </div>
 
@@ -221,10 +230,12 @@ export default function BookingsTable({ locationId }) {
                   <td className="p-3">
                     <div className="flex gap-2">
                       <BookingDetails booking={booking} />
-                      <Booking_Delete
-                        booking={booking}
-                        locationId={locationId}
-                      />
+                      {decodedToken?.role !== "sales-person" && (
+                        <Booking_Delete
+                          booking={booking}
+                          locationId={locationId}
+                        />
+                      )}
                     </div>
                   </td>
                 </tr>

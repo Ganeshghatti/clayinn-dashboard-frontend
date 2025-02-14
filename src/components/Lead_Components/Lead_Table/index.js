@@ -42,6 +42,8 @@ import { updateLead_Status } from "@/app/redux/lead_Slice";
 import { CSVLink } from "react-csv";
 import Lead_Edit_Dialog from "../Lead_Edit_Dialog";
 
+import { DecodedToken } from "@/function/jwt";
+
 export default function LeadsTable({ locationId }) {
   const { toast } = useToast();
   const dispatch = useDispatch();
@@ -163,6 +165,13 @@ export default function LeadsTable({ locationId }) {
       });
     }
   };
+
+  const [decodedToken, setDecodedToken] = useState(null);
+
+  useEffect(() => {
+    const decoded = DecodedToken();
+    setDecodedToken(decoded);
+  }, []);
 
   // Handle booking creation
   const handleCreateBooking = async () => {
@@ -330,7 +339,7 @@ export default function LeadsTable({ locationId }) {
           className="max-w-sm w-full"
           error={isError ? "Error searching leads" : undefined}
           validateInput={(value) => {
-            if (value && (value < 1 )) {
+            if (value && value < 1) {
               return "Please enter a valid lead number";
             }
             return "";
@@ -394,7 +403,9 @@ export default function LeadsTable({ locationId }) {
                 <th className="p-3 text-left cursor-pointer">Mobile</th>
                 <th className="p-3 text-left cursor-pointer">Email</th>
                 <th className="p-3 text-left cursor-pointer">Status</th>
-                <th className="p-3 text-left">Actions</th>
+                <th className="p-3 text-left cursor-pointer">Sales Man</th>
+                <th className="p-3 text-left cursor-pointer">Remarks</th>
+                <th className="p-3 text-left cursor-pointer">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -408,7 +419,9 @@ export default function LeadsTable({ locationId }) {
                   <td className="p-3">{lead.mobile}</td>
                   <td className="p-3">{lead.email}</td>
                   <td className="p-3">{renderStatusCell(lead)}</td>
-                  <td className="p-3">
+                  <td className="p-3">{lead.sales_person_details.name}</td>
+                  <td className="p-3">{lead.remark}</td>
+                  <td className="p-3 flex gap-2">
                     <div className="flex gap-2">
                       <Button
                         variant="ghost"
@@ -421,11 +434,9 @@ export default function LeadsTable({ locationId }) {
                         View Details
                       </Button>
                     </div>
-                  </td>
-                  <td className="p-4">
-                    {user?.role !== "sales-person" && (
-                      <div className="flex gap-2">
-                        <Lead_Edit_Dialog leadData={lead} />
+                    <div className="flex gap-2">
+                      <Lead_Edit_Dialog leadData={lead} />
+                      {decodedToken?.role !== "sales-person" && (
                         <Button
                           variant="destructive"
                           size="sm"
@@ -433,8 +444,8 @@ export default function LeadsTable({ locationId }) {
                         >
                           Delete
                         </Button>
-                      </div>
-                    )}
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
