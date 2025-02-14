@@ -8,6 +8,7 @@ import {
   NotebookTabs,
   Users,
   ShieldCheck,
+  User,
 } from "lucide-react";
 
 // LOGIN FORM INPUT
@@ -108,6 +109,14 @@ const navLinks = [
     title: "Team",
     link: "team",
     icon: <Users size={22} />,
+    isAdmin: "false",
+    active: false,
+  },
+  {
+    id: 6,
+    title: "Profile",
+    link: "profile",
+    icon: <User size={22} />,
     isAdmin: "false",
     active: false,
   },

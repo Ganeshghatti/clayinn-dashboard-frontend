@@ -54,18 +54,7 @@ export default function Large_Devices() {
         <div className="h-full overflow-y-scroll no-scrollbar">
           <Nav locationId={locationId} pathname={pathname} />
         </div>
-        <Link href={`/location/${locationId}/profile`}>
-          <div className="bg-white py-5 flex items-center flex-col gap-2 justify-center cursor-pointer">
-            <h3 className="capitalize flex items-center justify-center gap-2">
-              <User size={20} />
-              Profile
-            </h3>
-            <p className="text-xs">
-              {decodedToken?.email} |{" "}
-              <span className="capitalize">{decodedToken?.role}</span>
-            </p>
-          </div>
-        </Link>
+
         <div>
           <Logout className="rounded-b-2xl" />
         </div>

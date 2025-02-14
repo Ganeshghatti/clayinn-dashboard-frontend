@@ -74,6 +74,15 @@ const ProfilePage = () => {
 
   const onChangePassword = (e) => {
     e.preventDefault();
+    if (passwordData.new_password !== passwordData.confirmPassword) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "New password and confirm password do not match.",
+      });
+      return;
+    }
+
     const { confirmPassword, ...passwordDataToSend } = passwordData;
     dispatch(changePassword_Action(passwordDataToSend));
     setIsChangingPassword(false);
