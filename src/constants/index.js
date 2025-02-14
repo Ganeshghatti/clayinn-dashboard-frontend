@@ -7,7 +7,7 @@ import {
   MapPin,
   NotebookTabs,
   Users,
-  ShieldCheck 
+  ShieldCheck,
 } from "lucide-react";
 
 // LOGIN FORM INPUT
@@ -110,7 +110,7 @@ const navLinks = [
     icon: <Users size={22} />,
     isAdmin: "false",
     active: false,
-  }
+  },
 ];
 
 // Create New Venue Form Action Inputs
@@ -151,7 +151,7 @@ const functionParameters = [
   { name: "dinner_pax", label: "Dinner (Min. Pax)", type: "number" },
   { name: "dj_value", label: "DJ", type: "number" },
   { name: "decor_value", label: "Decor", type: "number" },
-  { name: "liquor_value", label: "Liquor", type: "number" }
+  { name: "liquor_value", label: "Liquor", type: "number" },
 ];
 
 // All occasion types including room
@@ -159,43 +159,43 @@ const occasionTypes = [
   {
     id: "engagement",
     label: "Engagement",
-    parameters: functionParameters
+    parameters: functionParameters,
   },
   {
     id: "sagan",
     label: "Sagan",
-    parameters: functionParameters
+    parameters: functionParameters,
   },
   {
     id: "roka",
     label: "Roka",
-    parameters: functionParameters
+    parameters: functionParameters,
   },
   {
     id: "haldi",
     label: "Haldi",
-    parameters: functionParameters
+    parameters: functionParameters,
   },
   {
     id: "mehndi",
     label: "Mehndi",
-    parameters: functionParameters
+    parameters: functionParameters,
   },
   {
     id: "wedding",
     label: "Wedding",
     parameters: [
       ...functionParameters,
-      { name: "vedi_value", label: "Vedi", type: "number" }
-    ]
+      { name: "vedi_value", label: "Vedi", type: "number" },
+    ],
   },
   {
     id: "reception",
     label: "Reception",
     parameters: [
       ...functionParameters,
-      { name: "vedi_value", label: "Vedi", type: "number" }
-    ]
+      { name: "vedi_value", label: "Vedi", type: "number" },
+    ],
   },
   {
     id: "room",
@@ -204,11 +204,15 @@ const occasionTypes = [
       // { name: "date_of_booking", label: "Date of Booking", type: "date" },
       { name: "date_of_function", label: "Date of Function", type: "date" },
       { name: "day", label: "Day", type: "text" },
-      { name: "number_of_pax", label: "Number of Pax (Min. Pax)", type: "number" },
+      {
+        name: "number_of_pax",
+        label: "Number of Pax (Min. Pax)",
+        type: "number",
+      },
       { name: "number_of_rooms", label: "Number of Rooms", type: "number" },
-      { name: "plan", label: "Plan", type: "text" }
-    ]
-  }
+      { name: "plan", label: "Plan", type: "text" },
+    ],
+  },
 ];
 
 const createLeadForm_Inputs = [
@@ -216,32 +220,32 @@ const createLeadForm_Inputs = [
     name: "hostname",
     label: "Host Name",
     placeholder: "Enter host name",
-    type: "text"
+    type: "text",
   },
   {
     name: "mobile",
     label: "Mobile Number",
     placeholder: "Enter mobile number",
-    type: "text"
+    type: "text",
   },
   {
     name: "email",
     label: "Email",
     placeholder: "Enter email address",
-    type: "email"
+    type: "email",
   },
   {
     name: "followup",
     label: "Follow Up Date",
     placeholder: "Select follow up date",
-    type: "date"
+    type: "date",
   },
   {
     name: "occasions",
     label: "Occasions",
     type: "occasions",
-    options: occasionTypes
-  }
+    options: occasionTypes,
+  },
 ];
 
 export {
@@ -252,5 +256,5 @@ export {
   createNew_Team_Form_Inputs,
   createLeadForm_Inputs,
   occasionTypes,
-  functionParameters
+  functionParameters,
 };

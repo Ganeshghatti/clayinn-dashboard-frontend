@@ -27,7 +27,15 @@ export const create_Booking_Action = createAsyncThunk(
 export const fetchBookings_Action = createAsyncThunk(
   "bookings/fetch",
   async (
-    { locationId, venue=null, booking_number=null, start_date=null, end_date=null, next=null, previous=null },
+    {
+      locationId,
+      venue = null,
+      booking_number = null,
+      start_date = null,
+      end_date = null,
+      next = null,
+      previous = null,
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -57,12 +65,12 @@ export const fetchBookings_Action = createAsyncThunk(
         url += `?${queryParams.join("&")}`;
       }
 
-      if(next){
+      if (next) {
         const response = await axios.get(`${next}`);
         return response.data;
       }
 
-      if(previous){
+      if (previous) {
         const response = await axios.get(`${previous}`);
         return response.data;
       }

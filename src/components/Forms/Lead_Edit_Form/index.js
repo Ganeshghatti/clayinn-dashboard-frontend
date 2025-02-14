@@ -40,6 +40,7 @@ const formSchema = z.object({
     .max(10, "Mobile number must be 10 digits"),
   email: z.string().email("Valid email required"),
   followup: z.string().min(1, "Follow up date is required"),
+  remark: z.string().optional(),
   occasions: z
     .array(
       z.object({
@@ -67,8 +68,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  console.log("update leads", leadData)
-
+  console.log("update leads", leadData);
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -77,6 +77,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
       mobile: leadData.mobile || "",
       email: leadData.email || "",
       followup: leadData.followup || new Date().toISOString().split("T")[0],
+      remark: "",
       occasions: leadData.occasions || [],
       location_id: leadData.location_id || "",
       sales_person: leadData.sales_person || "",
@@ -215,6 +216,24 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
                   )}
                 />
               ))}
+            <FormField
+              control={form.control}
+              name="remark"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Remark</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter remark"
+                      {...field}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           {/* Occasions Section */}

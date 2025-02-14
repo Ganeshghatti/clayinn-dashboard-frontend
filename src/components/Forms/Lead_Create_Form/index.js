@@ -43,6 +43,7 @@ const formSchema = z.object({
     .max(10, "Mobile number must be 10 digits"),
   email: z.string().email("Valid email required"),
   followup: z.string().min(1, "Follow up date is required"),
+  remark: z.string().optional(),
   occasions: z
     .array(
       z.object({
@@ -80,6 +81,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
       mobile: "",
       email: "",
       followup: new Date().toISOString().split("T")[0],
+      remark: "",
       occasions: [],
     },
   });
@@ -167,7 +169,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
 
       await dispatch(createLead_Action({ formData, locationId })).unwrap();
 
-      await dispatch(fetchLeads_Action({locationId}));
+      await dispatch(fetchLeads_Action({ locationId }));
 
       toast({
         title: "Success",
@@ -216,6 +218,24 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
                   )}
                 />
               ))}
+            <FormField
+              control={form.control}
+              name="remark"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Remark</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter remark"
+                      {...field}
+                      disabled={isSubmitting}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
           {/* Occasions Section */}

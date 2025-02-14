@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import Logout from "@/components/Auth_Components/Logout";
 import Link from "next/link";
 import { jwtDecode } from "jwt-decode";
-import { getAccessToken } from '@/utils/auth';
+import { getAccessToken } from "@/utils/auth";
 
 // REACT ICONS
 import { FaLocationArrow } from "react-icons/fa";
@@ -33,20 +33,20 @@ export default function Super_Admin() {
       try {
         const token = getAccessToken();
         if (!token) {
-          router.push('/');
+          router.push("/");
           return;
         }
 
         const decoded = jwtDecode(token);
-        if (decoded.role !== 'super-admin') {
-          router.push('/');
+        if (decoded.role !== "super-admin") {
+          router.push("/");
           return;
         }
 
         dispatch(fetch_All_Location_Action());
       } catch (error) {
-        console.error('Auth error:', error);
-        router.push('/');
+        console.error("Auth error:", error);
+        router.push("/");
       }
     };
 
@@ -73,7 +73,7 @@ export default function Super_Admin() {
       <Separator />
 
       <div className="flex-1 p-4">
-      {/* {isError &&
+        {/* {isError &&
           <div className="text-center text-red-600">
             Error: {isError}
           </div>

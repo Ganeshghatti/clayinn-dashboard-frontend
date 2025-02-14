@@ -404,6 +404,7 @@ export default function LeadsTable({ locationId }) {
                 <th className="p-3 text-left cursor-pointer">Email</th>
                 <th className="p-3 text-left cursor-pointer">Status</th>
                 <th className="p-3 text-left cursor-pointer">Sales Man</th>
+                <th className="p-3 text-left cursor-pointer">Remarks</th>
                 <th className="p-3 text-left cursor-pointer">Actions</th>
               </tr>
             </thead>
@@ -419,6 +420,7 @@ export default function LeadsTable({ locationId }) {
                   <td className="p-3">{lead.email}</td>
                   <td className="p-3">{renderStatusCell(lead)}</td>
                   <td className="p-3">{lead.sales_person_details.name}</td>
+                  <td className="p-3">{lead.remark}</td>
                   <td className="p-3 flex gap-2">
                     <div className="flex gap-2">
                       <Button

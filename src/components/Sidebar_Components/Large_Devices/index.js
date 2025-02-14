@@ -6,6 +6,8 @@ import { useParams, usePathname } from "next/navigation";
 import Nav from "../Nav";
 import Logout from "@/components/Auth_Components/Logout";
 
+import Link from "next/link";
+
 import { getAccessToken } from "@/utils/auth";
 import { jwtDecode } from "jwt-decode";
 
@@ -52,16 +54,18 @@ export default function Large_Devices() {
         <div className="h-full overflow-y-scroll no-scrollbar">
           <Nav locationId={locationId} pathname={pathname} />
         </div>
-        <div className="bg-white py-5 flex items-center flex-col gap-2 justify-center">
-          <h3 className="capitalize flex items-center justify-center gap-2">
-            <User size={20} />
-            {decodedToken?.name}
-          </h3>
-          <p className="text-xs">
-            {decodedToken?.email} |{" "}
-            <span className="capitalize">{decodedToken?.role}</span>
-          </p>
-        </div>
+        <Link href={`/location/${locationId}/profile`}>
+          <div className="bg-white py-5 flex items-center flex-col gap-2 justify-center cursor-pointer">
+            <h3 className="capitalize flex items-center justify-center gap-2">
+              <User size={20} />
+              Profile
+            </h3>
+            <p className="text-xs">
+              {decodedToken?.email} |{" "}
+              <span className="capitalize">{decodedToken?.role}</span>
+            </p>
+          </div>
+        </Link>
         <div>
           <Logout className="rounded-b-2xl" />
         </div>
