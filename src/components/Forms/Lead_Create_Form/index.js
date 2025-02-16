@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -71,6 +71,8 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [openAccordions, setOpenAccordions] = useState([]);
+
   const token = localStorage.getItem("access-token");
   const decodedToken = token ? jwt.decode(token) : null;
 
@@ -89,6 +91,11 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
     control: form.control,
     name: "occasions",
   });
+
+  useEffect(() => {
+    // Update open accordions whenever fields change
+    setOpenAccordions(fields.map((_, index) => `occasion-${index}`));
+  }, [fields]);
 
   if (!decodedToken) {
     toast({
@@ -256,7 +263,12 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
               </Select>
             </div>
 
-            <Accordion type="multiple" className="w-full">
+            <Accordion
+              type="multiple"
+              className="w-full"
+              value={openAccordions}
+              onValueChange={setOpenAccordions}
+            >
               {fields.map((field, index) => (
                 <AccordionItem key={field.id} value={`occasion-${index}`}>
                   <AccordionTrigger className="hover:no-underline">
