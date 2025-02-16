@@ -152,7 +152,11 @@ export default function CalendarPage() {
               <DialogHeader>
                 <DialogTitle>Events and Bookings</DialogTitle>
                 <DialogDescription>
-                  Date: {clickedDateData && clickedDateData[0]?.date}
+                  Date:{" "}
+                  {clickedDateData &&
+                    new Date(clickedDateData[0]?.date).toLocaleDateString(
+                      "en-GB"
+                    )}
                 </DialogDescription>
               </DialogHeader>
               {isLoading ? (
@@ -161,8 +165,14 @@ export default function CalendarPage() {
                 <div className="w-full overflow-y-auto h-[400px] flex flex-col gap-4">
                   {clickedDateData &&
                     clickedDateData[0]?.venues?.map((venue, index) => (
-                      <div value={index + 1} key={index} className="px-2 py-4 rounded-xl border-2 shadow-md">
-                        <div className="text-lg font-bold">{venue.venue_name}</div>
+                      <div
+                        value={index + 1}
+                        key={index}
+                        className="px-2 py-4 rounded-xl border-2 shadow-md"
+                      >
+                        <div className="text-lg font-bold">
+                          {venue.venue_name}
+                        </div>
                         <div>
                           {Object.entries(venue.slots).map(
                             ([slotName, slotDetails]) => (
@@ -171,8 +181,12 @@ export default function CalendarPage() {
                                 className="p-4 bg-blue-200 border rounded-lg space-y-2 mt-3"
                               >
                                 <h3 className="text-lg font-medium">
-                                  {slotName.charAt(0).toUpperCase() +
-                                    slotName.slice(1)}{" "}
+                                  {slotName === "afternoon"
+                                    ? "Lunch"
+                                    : slotName === "evening"
+                                    ? "Dinner"
+                                    : slotName.charAt(0).toUpperCase() +
+                                      slotName.slice(1)}{" "}
                                   Slot
                                 </h3>
                                 {slotDetails ? (

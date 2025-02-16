@@ -17,12 +17,14 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
   useEffect(() => {
     const fetchLeadDetail = async () => {
       if (!open || !leadNumber) return;
-      
+
       setIsLoading(true);
       setError(null);
-      
+
       try {
-        const response = await axiosInstance.get(`/leads-management/leads/detail/${leadNumber}/`);
+        const response = await axiosInstance.get(
+          `/leads-management/leads/detail/${leadNumber}/`
+        );
         setLead_By_Id(response.data);
       } catch (err) {
         setError(err.response?.data || "Failed to fetch lead details");
@@ -48,7 +50,11 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
     };
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(status)}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
+          status
+        )}`}
+      >
         {status}
       </span>
     );
@@ -60,15 +66,19 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between">
             Lead Details
-            {lead_By_Id?.lead_status && (
+            {/* {lead_By_Id?.lead_status && (
               <StatusBadge status={lead_By_Id.lead_status} />
-            )}
+            )} */}
           </DialogTitle>
         </DialogHeader>
 
-        {isLoading && <div className="text-center py-4">Loading lead details...</div>}
-        {error && <div className="text-center text-red-600 py-4">Error: {error}</div>}
-        
+        {isLoading && (
+          <div className="text-center py-4">Loading lead details...</div>
+        )}
+        {error && (
+          <div className="text-center text-red-600 py-4">Error: {error}</div>
+        )}
+
         {!isLoading && lead_By_Id && (
           <div className="space-y-6">
             {/* Basic Lead Information */}
@@ -76,28 +86,40 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
               <h3 className="font-semibold mb-3">Lead Information</h3>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Lead Number</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Lead Number
+                  </p>
                   <p>{lead_By_Id.lead_number}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Host Name</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Host Name
+                  </p>
                   <p>{lead_By_Id.hostname}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Mobile</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Mobile
+                  </p>
                   <p>{lead_By_Id.mobile}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Email</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Email
+                  </p>
                   <p>{lead_By_Id.email}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Follow Up Date</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Follow Up Date
+                  </p>
                   <p>{lead_By_Id.followup}</p>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Call Status</p>
-                  <p className="capitalize">{lead_By_Id.call_status?.replace(/_/g, " ")}</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Lead Status
+                  </p>
+                  <p className="capitalize">{lead_By_Id.lead_status}</p>
                 </div>
               </div>
             </div>
@@ -116,19 +138,27 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                         // Room specific fields
                         <>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Date of Booking</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Date of Booking
+                            </p>
                             <p>{occasion.date_of_function}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Number of Pax</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Number of Pax
+                            </p>
                             <p>{occasion.number_of_pax}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Number of room</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Number of room
+                            </p>
                             <p>{occasion.number_of_rooms}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Plan</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Plan
+                            </p>
                             <p>{occasion.plan}</p>
                           </div>
                         </>
@@ -136,47 +166,68 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                         // Function specific fields
                         <>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Date of Function</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Date of Function
+                            </p>
                             <p>{occasion.date_of_function}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Day</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Day
+                            </p>
                             <p>{occasion.day}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Lunch Pax</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Lunch Pax
+                            </p>
                             <p>{occasion.lunch_pax || "N/A"}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Hi Tea Pax</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Hi Tea Pax
+                            </p>
                             <p>{occasion.hi_tea_pax || "N/A"}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Dinner Pax</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Dinner Pax
+                            </p>
                             <p>{occasion.dinner_pax || "N/A"}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">DJ Value</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              DJ Value
+                            </p>
                             <p>₹{occasion.dj_value || 0}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Decor Value</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Decor Value
+                            </p>
                             <p>₹{occasion.decor_value || 0}</p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Liquor Value</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Liquor Value
+                            </p>
                             <p>₹{occasion.liquor_value || 0}</p>
                           </div>
-                          {(occasion.occasion_type === "wedding" || occasion.occasion_type === "reception") && (
+                          {(occasion.occasion_type === "wedding" ||
+                            occasion.occasion_type === "reception") && (
                             <div>
-                              <p className="text-sm font-medium text-muted-foreground">Vedi Value</p>
+                              <p className="text-sm font-medium text-muted-foreground">
+                                Vedi Value
+                              </p>
                               <p>₹{occasion.vedi_value || 0}</p>
                             </div>
                           )}
                         </>
                       )}
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Total</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Total
+                        </p>
                         <p className="font-semibold">₹{occasion.total || 0}</p>
                       </div>
                     </div>

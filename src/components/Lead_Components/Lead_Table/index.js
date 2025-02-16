@@ -129,6 +129,7 @@ export default function LeadsTable({ locationId }) {
     if (locationId) {
       dispatch(fetchVenues_Actions(locationId));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   // Handle status change
@@ -277,6 +278,7 @@ export default function LeadsTable({ locationId }) {
     if (locationId) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterState.status, locationId]);
 
   const handleDeleteLead = async (leadNumber) => {
@@ -409,12 +411,12 @@ export default function LeadsTable({ locationId }) {
               </tr>
             </thead>
             <tbody>
-              {leads?.map((lead) => (
+              {leads?.map((lead, index) => (
                 <tr
                   key={lead.lead_number}
                   className="border-b hover:bg-gray-50"
                 >
-                  <td className="p-3">{lead.lead_number}</td>
+                  <td className="p-3">{index + 1}</td>
                   <td className="p-3">{lead.hostname}</td>
                   <td className="p-3">{lead.mobile}</td>
                   <td className="p-3">{lead.email}</td>

@@ -63,7 +63,6 @@ export default function Venue_Detail({ location_Id, venue }) {
         }
       );
 
-     
       setBookings(response.data.bookings);
       console.log("the response of bookings", response.data.bookings);
     } catch (error) {
@@ -84,11 +83,13 @@ export default function Venue_Detail({ location_Id, venue }) {
 
   useEffect(() => {
     if (venue?.venue_id) {
-      dispatch(fetchVenueDetails_Action({
-        venue_id: venue.venue_id,
-        year: currentDate.getFullYear(),
-        month: currentDate.getMonth() + 1 // Adding 1 because getMonth() returns 0-11
-      }));
+      dispatch(
+        fetchVenueDetails_Action({
+          venue_id: venue.venue_id,
+          year: currentDate.getFullYear(),
+          month: currentDate.getMonth() + 1, // Adding 1 because getMonth() returns 0-11
+        })
+      );
     }
   }, [dispatch, venue?.venue_id, currentDate]);
 
@@ -112,21 +113,21 @@ export default function Venue_Detail({ location_Id, venue }) {
               <span>{venue?.name}</span>
               {/* Calendar Implementation */}
               <div className="venue-calendar w-full max-w-6xl mx-auto">
-                  <FullCalendar
-                    eventClassNames="bg-blue-500 text-white rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
-                    dayCellClassNames={"p-5"}
-                    plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
-                    initialView="dayGridMonth"
-                    events={events}
-                    datesSet={handleEventsSet}
-                    showNonCurrentDates={false}
-                    eventClick={handleEventClick}
-                    eventTimeFormat={{
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false, // Use true for 12-hour format
-                    }}
-                  />
+                <FullCalendar
+                  eventClassNames="bg-blue-500 text-white rounded-md py-1 px-2 shadow-sm hover:bg-blue-600"
+                  dayCellClassNames={"p-5"}
+                  plugins={[dayGridPlugin, interactionPlugin, timeGridPlugin]}
+                  initialView="dayGridMonth"
+                  events={events}
+                  datesSet={handleEventsSet}
+                  showNonCurrentDates={false}
+                  eventClick={handleEventClick}
+                  eventTimeFormat={{
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hour12: false, // Use true for 12-hour format
+                  }}
+                />
 
                 {selectedEvent && (
                   <Dialog
@@ -142,10 +143,11 @@ export default function Venue_Detail({ location_Id, venue }) {
 
                       <p>
                         Start Time:{" "}
-                        {new Date(selectedEvent.start).toLocaleString()}
+                        {new Date(selectedEvent.start).toLocaleString("en-GB")}
                       </p>
                       <p>
-                        End Time: {new Date(selectedEvent.end).toLocaleString()}
+                        End Time:{" "}
+                        {new Date(selectedEvent.end).toLocaleString("en-GB")}
                       </p>
                       <DialogClose className="mt-4 px-4 py-2 bg-gray-900 text-white rounded">
                         Close
