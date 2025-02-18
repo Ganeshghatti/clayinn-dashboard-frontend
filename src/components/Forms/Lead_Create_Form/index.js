@@ -34,6 +34,8 @@ import {
 } from "@/components/ui/accordion";
 import { fetchLeads_Action } from "@/app/redux/lead_Slice";
 
+import { LEAD_SOURCE_CHOICES } from "@/constants";
+
 // Zod schema for validation
 const formSchema = z.object({
   hostname: z.string().min(1, "Host name is required"),
@@ -44,6 +46,7 @@ const formSchema = z.object({
   email: z.string().email("Valid email required"),
   followup: z.string().min(1, "Follow up date is required"),
   remark: z.string().optional(),
+  lead_source: z.string().min(1, "Lead source is required"),
   occasions: z
     .array(
       z.object({
@@ -82,6 +85,7 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
       hostname: "",
       mobile: "",
       email: "",
+      lead_source: "",
       followup: new Date().toISOString().split("T")[0],
       remark: "",
       occasions: [],
@@ -203,7 +207,10 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
           {/* Basic Lead Information */}
           <div className="space-y-4 mb-6">
             {createLeadForm_Inputs
-              .filter((input) => input.name !== "occasions")
+              .filter(
+                (input) =>
+                  input.name !== "occasions" && input.name !== "lead_source"
+              )
               .map((input, index) => (
                 <FormField
                   key={index}
@@ -225,6 +232,34 @@ export default function Lead_Create_Form({ setOpen, locationId }) {
                   )}
                 />
               ))}
+            <FormField
+              control={form.control}
+              name="lead_source"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Lead Source</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={isSubmitting}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Lead Source" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LEAD_SOURCE_CHOICES.map((choice) => (
+                          <SelectItem key={choice.value} value={choice.value}>
+                            {choice.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="remark"

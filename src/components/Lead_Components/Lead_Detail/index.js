@@ -105,25 +105,49 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
+                    Sales Man
+                  </p>
+                  <p>{lead_By_Id.sales_person_details.name}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
                     Email
                   </p>
                   <p>{lead_By_Id.email}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
+                    Lead Creation Date
+                  </p>
+                  <p>
+                    {new Date(lead_By_Id.lead_entry_date).toLocaleDateString(
+                      "en-GB"
+                    )}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
                     Follow Up Date
                   </p>
-                  <p>{lead_By_Id.followup}</p>
+                  <p>
+                    {new Date(lead_By_Id.followup).toLocaleDateString("en-GB")}
+                  </p>
                 </div>
+
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
                     Lead Status
                   </p>
                   <p className="capitalize">{lead_By_Id.lead_status}</p>
                 </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Lead Source
+                  </p>
+                  <p className="capitalize">{lead_By_Id.lead_source}</p>
+                </div>
               </div>
             </div>
-
             {/* Occasions */}
             <div>
               <h3 className="font-semibold mb-3">Occasions</h3>

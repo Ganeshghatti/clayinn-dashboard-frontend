@@ -7,6 +7,9 @@ import { useDispatch } from "react-redux";
 import { updateLead_Action } from "@/app/redux/lead_Slice";
 import { occasionTypes, createLeadForm_Inputs } from "@/constants";
 import { Button } from "@/components/ui/button";
+
+import { LEAD_SOURCE_CHOICES } from "@/constants";
+
 import {
   Form,
   FormControl,
@@ -41,6 +44,7 @@ const formSchema = z.object({
   email: z.string().email("Valid email required"),
   followup: z.string().min(1, "Follow up date is required"),
   remark: z.string().optional(),
+  lead_source: z.string().min(1, "Lead source is required"),
   occasions: z
     .array(
       z.object({
@@ -78,6 +82,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
       email: leadData.email || "",
       followup: leadData.followup || new Date().toISOString().split("T")[0],
       remark: "",
+      lead_source: "",
       occasions: leadData.occasions || [],
       location_id: leadData.location_id || "",
       sales_person: leadData.sales_person || "",
@@ -235,9 +240,36 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
               )}
             />
           </div>
-
+          <FormField
+            control={form.control}
+            name="lead_source"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Lead Source</FormLabel>
+                <FormControl>
+                  <Select
+                    onValueChange={field.onChange}
+                    value={field.value}
+                    disabled={isSubmitting}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Lead Source" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LEAD_SOURCE_CHOICES.map((choice) => (
+                        <SelectItem key={choice.value} value={choice.value}>
+                          {choice.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
           {/* Occasions Section */}
-          <div className="space-y-4">
+          <div className="space-y-4 mt-5">
             <div className="flex justify-between items-center">
               <FormLabel>Occasions</FormLabel>
               <Select onValueChange={addOccasion} disabled={isSubmitting}>
