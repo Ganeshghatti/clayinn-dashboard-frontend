@@ -221,6 +221,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
                   )}
                 />
               ))}
+
             <FormField
               control={form.control}
               name="remark"
@@ -232,6 +233,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
                       type="text"
                       placeholder="Enter remark"
                       {...field}
+                      value={field.value || leadData.remark}
                       disabled={isSubmitting}
                     />
                   </FormControl>
@@ -249,7 +251,7 @@ export default function Lead_Edit_Form({ setOpen, leadData }) {
                 <FormControl>
                   <Select
                     onValueChange={field.onChange}
-                    value={field.value}
+                    value={field.value || leadData.lead_source}
                     disabled={isSubmitting}
                   >
                     <SelectTrigger className="w-full">
