@@ -249,6 +249,7 @@ const createLeadForm_Inputs = [
     placeholder: "Select follow up date",
     type: "date",
   },
+
   {
     name: "occasions",
     label: "Occasions",
