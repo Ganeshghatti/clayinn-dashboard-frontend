@@ -267,3 +267,16 @@ export {
   occasionTypes,
   functionParameters,
 };
+
+export const LEAD_SOURCE_CHOICES = [
+  { value: "walk_in", label: "Walk In" },
+  { value: "social_media", label: "Social Media" },
+  { value: "google", label: "Google" },
+  { value: "referral", label: "Referral" },
+  { value: "wedding_wire", label: "Wedding Wire" },
+  { value: "wed_me_good", label: "Wed Me Good" },
+  { value: "venue_look", label: "Venue Look" },
+  { value: "venue_monk", label: "Venue Monk" },
+  { value: "sloshout", label: "Sloshout" },
+  { value: "others", label: "Others" },
+];

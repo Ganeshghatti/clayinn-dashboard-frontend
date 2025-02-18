@@ -121,6 +121,12 @@ export default function Lead_Detail({ leadNumber, open, setOpen }) {
                   </p>
                   <p className="capitalize">{lead_By_Id.lead_status}</p>
                 </div>
+                <div>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Lead Source
+                  </p>
+                  <p className="capitalize">{lead_By_Id.lead_source}</p>
+                </div>
               </div>
             </div>
 

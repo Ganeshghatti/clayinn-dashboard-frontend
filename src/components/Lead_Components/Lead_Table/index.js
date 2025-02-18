@@ -386,7 +386,6 @@ export default function LeadsTable({ locationId }) {
           </Select>
         </div>
       </div>
-
       {isLoading ? (
         <div className="flex justify-center items-center">
           <Loader2 className="animate-spin h-10 w-10" />
@@ -407,6 +406,7 @@ export default function LeadsTable({ locationId }) {
                 <th className="p-3 text-left cursor-pointer">Status</th>
                 <th className="p-3 text-left cursor-pointer">Sales Man</th>
                 <th className="p-3 text-left cursor-pointer">Remarks</th>
+                <th className="p-3 text-left cursor-pointer">Entry Date</th>
                 <th className="p-3 text-left cursor-pointer">Actions</th>
               </tr>
             </thead>
@@ -423,6 +423,9 @@ export default function LeadsTable({ locationId }) {
                   <td className="p-3">{renderStatusCell(lead)}</td>
                   <td className="p-3">{lead.sales_person_details.name}</td>
                   <td className="p-3">{lead.remark}</td>
+                  <td className="p-3">
+                    {format(new Date(lead.lead_entry_date), "dd/MM/yyyy")}
+                  </td>
                   <td className="p-3 flex gap-2">
                     <div className="flex gap-2">
                       <Button
@@ -478,7 +481,6 @@ export default function LeadsTable({ locationId }) {
           </Button>
         </div>
       </div>
-
       {/* Updated Booking Modal */}
       <Dialog open={showBookingModal} onOpenChange={setShowBookingModal}>
         <DialogContent className="sm:max-w-[425px]">
@@ -590,7 +592,6 @@ export default function LeadsTable({ locationId }) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
       <Lead_Detail
         leadNumber={selectedLeadNumber}
         open={detailOpen}
