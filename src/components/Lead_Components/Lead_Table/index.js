@@ -402,7 +402,7 @@ export default function LeadsTable({ locationId }) {
                 <th className="p-3 text-left cursor-pointer">Lead #</th>
                 <th className="p-3 text-left cursor-pointer">Host Name</th>
                 <th className="p-3 text-left cursor-pointer">Mobile</th>
-                <th className="p-3 text-left cursor-pointer">Email</th>
+
                 <th className="p-3 text-left cursor-pointer">Status</th>
                 <th className="p-3 text-left cursor-pointer">Sales Man</th>
                 <th className="p-3 text-left cursor-pointer">Remarks</th>
@@ -419,7 +419,7 @@ export default function LeadsTable({ locationId }) {
                   <td className="p-3">{index + 1}</td>
                   <td className="p-3">{lead.hostname}</td>
                   <td className="p-3">{lead.mobile}</td>
-                  <td className="p-3">{lead.email}</td>
+
                   <td className="p-3">{renderStatusCell(lead)}</td>
                   <td className="p-3">{lead.sales_person_details.name}</td>
                   <td className="p-3">{lead.remark}</td>
